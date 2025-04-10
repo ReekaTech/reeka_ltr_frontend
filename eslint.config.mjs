@@ -1,20 +1,23 @@
 import { FlatCompat } from '@eslint/eslintrc';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url';
 import importPlugin from 'eslint-plugin-import';
+import path from 'node:path';
 import playwright from 'eslint-plugin-playwright';
 import prettier from 'eslint-plugin-prettier';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import unicorn from 'eslint-plugin-unicorn';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
 const eslintConfig = [
+  {
+    ignores: ['src/components/ui/**/*'],
+  },
   {
     plugins: {
       unicorn,
