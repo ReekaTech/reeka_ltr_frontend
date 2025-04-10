@@ -16,7 +16,14 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   {
-    ignores: ['src/components/ui/**/*'],
+    files: ['src/components/ui/**/*'],
+    rules: {
+      'unicorn/no-array-callback-reference': 'off',
+      'unicorn/no-array-for-each': 'off',
+      'unicorn/no-array-reduce': 'off',
+      'unicorn/prevent-abbreviations': 'off',
+      'import/no-unresolved': 'off',
+    },
   },
   {
     plugins: {
