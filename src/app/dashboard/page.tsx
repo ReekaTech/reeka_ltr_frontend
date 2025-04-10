@@ -119,7 +119,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-3">
               <div className="h-8 w-8 rounded-full bg-[#e36b37]"></div>
               <span className="text-sm font-medium text-[#4b5563]">
-                {session?.user?.name}
+                {session?.user?.firstName}
               </span>
             </div>
           </div>

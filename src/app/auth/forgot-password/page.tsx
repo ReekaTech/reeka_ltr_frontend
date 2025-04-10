@@ -1,18 +1,21 @@
 'use client';
 
-import type { FormEvent } from 'react';
+import * as Yup from 'yup';
+
+import { Field, Form, Formik } from 'formik';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useForgotPassword } from '@/services/queries/useAuth';
 import { useRouter } from 'next/navigation';
+
+const validationSchema = Yup.object().shape({
+  email: Yup.string().email('Invalid email').required('Email is required'),
+});
 
 export default function ForgotPassword() {
   const router = useRouter();
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    // In a real app, you would send a password reset email
-    router.push('/reset-password-sent');
-  };
+  const { mutate: forgotPassword, isPending } = useForgotPassword();
 
   return (
     <div className="flex min-h-screen flex-col bg-transparent lg:flex-row">
@@ -39,40 +42,62 @@ export default function ForgotPassword() {
               Enter your email to reset your password
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-[15px] text-[#3a3a3a]"
-                >
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="w-full rounded-md border border-[#d0d5dd] bg-white px-4 py-3 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
+            <Formik
+              initialValues={{ email: '' }}
+              validationSchema={validationSchema}
+              onSubmit={values => {
+                forgotPassword(
+                  { email: values.email },
+                  {
+                    onSuccess: () => {
+                      router.push('/auth/reset-password-sent');
+                    },
+                  },
+                );
+              }}
+            >
+              {({ errors, touched }) => (
+                <Form className="space-y-5">
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="mb-2 block text-[15px] text-[#3a3a3a]"
+                    >
+                      Email Address
+                    </label>
+                    <Field
+                      type="email"
+                      name="email"
+                      className="w-full rounded-md border border-[#d0d5dd] bg-white px-4 py-3 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                      placeholder="Enter your email"
+                    />
+                    {errors.email && touched.email && (
+                      <div className="mt-1 text-sm text-red-500">
+                        {errors.email}
+                      </div>
+                    )}
+                  </div>
 
-              {/* Submit button */}
-              <div className="pt-5">
-                <button
-                  type="submit"
-                  className="hover:bg-opacity-90 w-full rounded-md bg-[#e36b37] py-3 text-white transition-all"
-                >
-                  Send Reset Link
-                </button>
-              </div>
+                  {/* Submit button */}
+                  <div className="pt-5">
+                    <button
+                      type="submit"
+                      disabled={isPending}
+                      className="hover:bg-opacity-90 w-full cursor-pointer rounded-md bg-[#e36b37] py-3 text-white transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isPending ? 'Sending...' : 'Send Reset Link'}
+                    </button>
+                  </div>
 
-              <p className="pt-2 text-center text-sm text-[#475467]">
-                Remember your password?{' '}
-                <Link href="/auth/signin" className="text-[#e36b37]">
-                  Sign In
-                </Link>
-              </p>
-            </form>
+                  <p className="pt-2 text-center text-sm text-[#475467]">
+                    Remember your password?{' '}
+                    <Link href="/auth/signin" className="text-[#e36b37]">
+                      Sign In
+                    </Link>
+                  </p>
+                </Form>
+              )}
+            </Formik>
           </div>
         </div>
       </div>

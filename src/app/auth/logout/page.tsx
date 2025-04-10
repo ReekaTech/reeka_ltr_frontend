@@ -1,6 +1,38 @@
+'use client';
+
+import { signOut, useSession } from 'next-auth/react';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useLogout } from '@/services/queries/useAuth';
+import { useRouter } from 'next/navigation';
+
 export default function Logout() {
+  const router = useRouter();
+  const { status } = useSession();
+  const { mutate: logout, isPending } = useLogout();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      logout(undefined, {
+        onSuccess: () => {
+          signOut({ redirect: false }).then(() => {
+            router.push('/auth/signin');
+          });
+        },
+        onError: () => {
+          // Even if the API call fails, we still want to sign out locally
+          signOut({ redirect: false }).then(() => {
+            router.push('/auth/signin');
+          });
+        },
+      });
+    } else {
+      router.push('/auth/signin');
+    }
+  }, [status, router, logout]);
+
   return (
     <div className="flex min-h-screen flex-col bg-transparent lg:flex-row">
       {/* Left side - Logout */}
@@ -36,20 +68,11 @@ export default function Logout() {
             </div>
 
             <h2 className="mb-2 text-[28px] font-semibold lg:text-[32px]">
-              Logged Out
+              Logging Out
             </h2>
             <p className="mb-6 text-sm text-[#808080]">
-              You have been successfully logged out of your account. Thank you
-              for using Reeka.
+              Please wait while we log you out...
             </p>
-
-            <div className="space-y-5">
-              <Link href="/">
-                <button className="hover:bg-opacity-90 w-full rounded-md bg-[#e36b37] py-3 text-white transition-all">
-                  Sign In Again
-                </button>
-              </Link>
-            </div>
           </div>
         </div>
       </div>

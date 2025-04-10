@@ -52,7 +52,10 @@ export default function VerificationSent() {
 
               <p className="pt-2 text-center text-sm text-[#475467]">
                 Didn't receive the email?{' '}
-                <Link href="/auth/signin" className="text-[#e36b37]">
+                <Link
+                  href="/auth/resend-verification"
+                  className="text-[#e36b37]"
+                >
                   Resend Verification
                 </Link>
               </p>

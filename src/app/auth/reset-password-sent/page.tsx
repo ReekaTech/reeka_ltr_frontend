@@ -53,7 +53,7 @@ export default function ResetPasswordSent() {
 
               <p className="pt-2 text-center text-sm text-[#475467]">
                 Didn't receive the email?{' '}
-                <Link href="/auth/signin" className="text-[#e36b37]">
+                <Link href="/auth/forgot-password" className="text-[#e36b37]">
                   Resend Link
                 </Link>
               </p>

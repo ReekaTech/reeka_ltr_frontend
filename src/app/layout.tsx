@@ -1,9 +1,12 @@
 import './globals.css';
+import 'react-toastify/dist/ReactToastify.css';
 
+import { Bounce, ToastContainer } from 'react-toastify';
 import { Inter, Modak, Nunito } from 'next/font/google';
 
 import type { Metadata } from 'next';
 import { Providers } from '@/components/providers';
+import { QueryProvider } from '@/components/providers/query-provider';
 
 const nunito = Nunito({
   subsets: ['latin'],
@@ -60,7 +63,22 @@ export default function RootLayout({
       <body
         className={`${nunito.variable} ${inter.variable} ${modak.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <QueryProvider>
+          <Providers>{children}</Providers>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            transition={Bounce}
+          />
+        </QueryProvider>
       </body>
     </html>
   );

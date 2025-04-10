@@ -1,22 +1,26 @@
 'use client';
 
+import * as Yup from 'yup';
+
+import { Field, Form, Formik } from 'formik';
+
 import type { FormEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useResendVerification } from '@/services/queries/useAuth';
 import { useRouter } from 'next/navigation';
+
+const validationSchema = Yup.object().shape({
+  email: Yup.string().email('Invalid email').required('Email is required'),
+});
 
 export default function ResendVerification() {
   const router = useRouter();
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    // In a real app, you would resend the verification email
-    router.push('/verification-sent');
-  };
+  const { mutate: resendVerification, isPending } = useResendVerification();
 
   return (
     <div className="flex min-h-screen flex-col bg-transparent lg:flex-row">
-      {/* Left side - Resend Verification */}
+      {/* Left side - Forgot Password */}
       <div className="relative w-full bg-transparent lg:w-1/2">
         {/* Fixed header with logo */}
         <div className="fixed top-0 right-0 left-0 z-20 flex h-24 items-center bg-transparent md:h-32 lg:absolute lg:right-auto lg:left-auto">
@@ -36,43 +40,65 @@ export default function ResendVerification() {
               Resend Verification
             </h2>
             <p className="mb-6 text-sm text-[#808080]">
-              Enter your email to receive a new verification link
+              Enter your email to resend your verification email
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-[15px] text-[#3a3a3a]"
-                >
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="w-full rounded-md border border-[#d0d5dd] bg-white px-4 py-3 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
+            <Formik
+              initialValues={{ email: '' }}
+              validationSchema={validationSchema}
+              onSubmit={values => {
+                resendVerification(
+                  { email: values.email },
+                  {
+                    onSuccess: () => {
+                      router.push('/auth/verification-sent');
+                    },
+                  },
+                );
+              }}
+            >
+              {({ errors, touched }) => (
+                <Form className="space-y-5">
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="mb-2 block text-[15px] text-[#3a3a3a]"
+                    >
+                      Email Address
+                    </label>
+                    <Field
+                      type="email"
+                      name="email"
+                      className="w-full rounded-md border border-[#d0d5dd] bg-white px-4 py-3 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                      placeholder="Enter your email"
+                    />
+                    {errors.email && touched.email && (
+                      <div className="mt-1 text-sm text-red-500">
+                        {errors.email}
+                      </div>
+                    )}
+                  </div>
 
-              {/* Submit button */}
-              <div className="pt-5">
-                <button
-                  type="submit"
-                  className="hover:bg-opacity-90 w-full rounded-md bg-[#e36b37] py-3 text-white transition-all"
-                >
-                  Resend Verification
-                </button>
-              </div>
+                  {/* Submit button */}
+                  <div className="pt-5">
+                    <button
+                      type="submit"
+                      disabled={isPending}
+                      className="hover:bg-opacity-90 w-full cursor-pointer rounded-md bg-[#e36b37] py-3 text-white transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isPending ? 'Sending...' : 'Send Reset Link'}
+                    </button>
+                  </div>
 
-              <p className="pt-2 text-center text-sm text-[#475467]">
-                Already verified?{' '}
-                <Link href="/" className="text-[#e36b37]">
-                  Sign In
-                </Link>
-              </p>
-            </form>
+                  <p className="pt-2 text-center text-sm text-[#475467]">
+                    Remember your password?{' '}
+                    <Link href="/auth/signin" className="text-[#e36b37]">
+                      Sign In
+                    </Link>
+                  </p>
+                </Form>
+              )}
+            </Formik>
           </div>
         </div>
       </div>
