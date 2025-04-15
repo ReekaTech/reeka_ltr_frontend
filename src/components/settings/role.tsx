@@ -1,16 +1,18 @@
 'use client';
 
 import { MoreVertical, Search } from 'lucide-react';
+import { Pagination, PromptModal } from '@/components/ui';
 import {
   useDebounce,
+  useRemoveUser,
   useRetryInvite,
   useUsers,
 } from '@/services/queries/hooks';
 import { useEffect, useRef, useState } from 'react';
 
 import { AddStaffForm } from './add-staff-form';
-import { Pagination } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
+import { toast } from 'react-toastify';
 
 export function RolesForm() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,6 +24,17 @@ export function RolesForm() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { mutate: retryInvitation, isPending: isRetrying } = useRetryInvite();
+  const { mutate: removeUser, isPending: isRemoving } = useRemoveUser();
+
+  // State for prompt modal
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [promptData, setPromptData] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    userId: string;
+    userName: string;
+  } | null>(null);
 
   // Debounce search to avoid too many API calls
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -174,24 +187,24 @@ export function RolesForm() {
                       <StatusBadge status={user.invitationStatus || 'OWNER'} />
                     </td>
                     <td className="px-4 py-4 text-sm whitespace-nowrap">
-                      {user.invitationStatus === 'EXPIRED' && (
-                        <div className="relative">
-                          <button
-                            className="text-gray-400 hover:text-gray-600"
-                            onClick={e => {
-                              e.stopPropagation();
-                              setOpenMenuId(
-                                openMenuId === user.id ? null : user.id,
-                              );
-                            }}
+                      <div className="relative">
+                        <button
+                          className="text-gray-400 hover:text-gray-600"
+                          onClick={e => {
+                            e.stopPropagation();
+                            setOpenMenuId(
+                              openMenuId === user.id ? null : user.id,
+                            );
+                          }}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </button>
+                        {openMenuId === user.id && (
+                          <div
+                            ref={dropdownRef}
+                            className="absolute right-0 z-10 mt-2 w-32 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
                           >
-                            <MoreVertical className="h-4 w-4" />
-                          </button>
-                          {openMenuId === user.id && (
-                            <div
-                              ref={dropdownRef}
-                              className="absolute right-0 z-10 mt-2 w-32 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
-                            >
+                            {user.invitationStatus === 'EXPIRED' && (
                               <button
                                 className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                                 disabled={isRetrying}
@@ -205,10 +218,41 @@ export function RolesForm() {
                               >
                                 {isRetrying ? 'Retrying...' : 'Retry'}
                               </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                            )}
+                            <button
+                              className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                              disabled={isRemoving}
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                setPromptData({
+                                  title: 'Confirm Removal',
+                                  message: `Are you sure you want to remove ${user.firstName} ${user.lastName}? This action cannot be undone.`,
+                                  userId: user.id,
+                                  userName: `${user.firstName} ${user.lastName}`,
+                                  onConfirm: () => {
+                                    removeUser(user.id, {
+                                      onSuccess: () => {
+                                        toast.success(
+                                          `${user.firstName} ${user.lastName} has been removed`,
+                                        );
+                                        setShowPromptModal(false);
+                                      },
+                                      onError: () => {
+                                        setShowPromptModal(false);
+                                      },
+                                    });
+                                  },
+                                });
+                                setShowPromptModal(true);
+                              }}
+                            >
+                              {isRemoving && promptData?.userId === user.id
+                                ? 'Removing...'
+                                : 'Remove'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -236,6 +280,20 @@ export function RolesForm() {
             onPageChange={handlePageChange}
           />
         </div>
+      )}
+
+      {/* Prompt Modal */}
+      {promptData && (
+        <PromptModal
+          isOpen={showPromptModal}
+          onClose={() => setShowPromptModal(false)}
+          onConfirm={promptData.onConfirm}
+          title={promptData.title}
+          message={promptData.message}
+          confirmText="Remove"
+          cancelText="Cancel"
+          isProcessing={isRemoving}
+        />
       )}
     </div>
   );

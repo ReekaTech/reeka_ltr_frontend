@@ -8,6 +8,7 @@ import {
   getUserById,
   getUsers,
   inviteUser,
+  removeUser,
   retryInvite,
   updateUser,
   uploadAvatar,
@@ -108,6 +109,25 @@ export const useRetryInvite = () => {
     },
     onSuccess: () => {
       toast.success('Invitation resent successfully');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+};
+
+export const useRemoveUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => removeUser(id),
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          'Failed to remove user',
+      );
+    },
+    onSuccess: () => {
+      toast.success('User removed successfully');
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });

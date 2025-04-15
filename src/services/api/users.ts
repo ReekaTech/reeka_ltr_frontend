@@ -69,3 +69,8 @@ export async function retryInvite(id: string): Promise<{ message: string }> {
   const response = await api.post(`/users/invite/retry/${id}`);
   return response.data;
 }
+
+export async function removeUser(id: string): Promise<{ message: string }> {
+  const response = await api.delete(`/users/${id}`);
+  return response.data;
+}
