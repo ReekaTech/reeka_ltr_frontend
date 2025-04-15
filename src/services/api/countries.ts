@@ -1,5 +1,5 @@
-import { Country } from '@/services/api/schemas/country';
-import { api } from './api-service';
+import { Country } from '@/services/api/schemas';
+import { api } from '@/services/api';
 
 export async function getCountries(): Promise<Country[]> {
   const response = await api.get('/countries');

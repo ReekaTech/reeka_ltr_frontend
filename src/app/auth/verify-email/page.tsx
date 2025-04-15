@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useVerifyEmail } from '@/services/queries/useAuth';
+import { useVerifyEmail } from '@/services/queries/hooks/useAuth';
 
 export default function VerifyEmail() {
   const router = useRouter();

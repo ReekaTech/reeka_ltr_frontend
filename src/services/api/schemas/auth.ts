@@ -1,12 +1,12 @@
 export enum UserRole {
   VENDOR = 'Vendor',
   TENANT = 'Tenant',
+  OWNER = 'Owner',
   PROPERTY_MANAGER = 'Property Manager',
   BUILDING = 'Building and Maintenance',
   ADMIN = 'Administrator',
   FRONT_DESK = 'Front Desk',
   ASSOCIATE_MANAGER = 'Associate Manager',
-  OTHERS = 'Others',
 }
 
 export interface SignupPayload {
@@ -17,7 +17,7 @@ export interface SignupPayload {
   country: string;
   password: string;
   phoneCountryCode: string;
-  role: UserRole;
+  role?: UserRole;
 }
 
 export interface SigninPayload {
@@ -40,6 +40,19 @@ export interface ForgotPasswordPayload {
 export interface ResetPasswordPayload {
   token: string;
   password: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface InvitationResponsePayload {
+  token: string;
+  action: 'accept' | 'reject';
+  currentPassword?: string; // Only needed when accepting
+  newPassword?: string; // Only needed when accepting
 }
 
 export interface AuthResponse {

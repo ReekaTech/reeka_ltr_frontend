@@ -5,7 +5,7 @@ import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { useLogout } from '@/services/queries/useAuth';
+import { useLogout } from '@/services/queries/hooks';
 import { useRouter } from 'next/navigation';
 
 export default function Logout() {

@@ -10,6 +10,7 @@ export interface SignupFormValues {
   country: string;
   password: string;
   dial_code: string;
+  company: string;
 }
 
 export const getInitialValues = (countries?: Country[]): SignupFormValues => ({
@@ -20,6 +21,7 @@ export const getInitialValues = (countries?: Country[]): SignupFormValues => ({
   country: countries?.[0]?.id || '',
   password: '',
   dial_code: countries?.[0]?.dial_code || '',
+  company: '',
 });
 
 export const SignupSchema = Yup.object().shape({
@@ -46,4 +48,8 @@ export const SignupSchema = Yup.object().shape({
       'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character',
     )
     .required('Password is required'),
+  company: Yup.string()
+    .min(2, 'Too Short!')
+    .max(100, 'Too Long!')
+    .required('Company name is required'),
 });

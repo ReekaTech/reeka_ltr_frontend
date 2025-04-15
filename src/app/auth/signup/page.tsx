@@ -5,10 +5,9 @@ import { SignupFormValues, SignupSchema, getInitialValues } from './schema';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { UserRole } from '@/services/api/schemas/auth';
-import { useCountries } from '@/services/queries/useCountries';
+import { useCountries } from '@/services/queries/hooks';
 import { useRouter } from 'next/navigation';
-import { useSignup } from '@/services/queries/useAuth';
+import { useSignup } from '@/services/queries/hooks/useAuth';
 import { useState } from 'react';
 
 export default function SignUp() {
@@ -40,7 +39,6 @@ export default function SignUp() {
         {
           ...rest,
           phoneCountryCode: dial_code,
-          role: UserRole.PROPERTY_MANAGER,
         },
         {
           onSuccess: () => {
@@ -377,6 +375,27 @@ export default function SignUp() {
                       {errors.password && touched.password && (
                         <div className="mt-1 text-sm text-red-500">
                           {errors.password}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Company Name */}
+                    <div>
+                      <label
+                        htmlFor="company"
+                        className="mb-2 block text-[15px] text-[#3a3a3a]"
+                      >
+                        Company Name
+                      </label>
+                      <Field
+                        name="company"
+                        type="text"
+                        className="w-full rounded-md border border-[#d0d5dd] bg-white px-4 py-3 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                        placeholder="Enter your company name"
+                      />
+                      {errors.company && touched.company && (
+                        <div className="mt-1 text-sm text-red-500">
+                          {errors.company}
                         </div>
                       )}
                     </div>

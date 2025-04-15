@@ -7,7 +7,7 @@ import { Field, Form, Formik } from 'formik';
 import type { FormEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useResendVerification } from '@/services/queries/useAuth';
+import { useResendVerification } from '@/services/queries/hooks';
 import { useRouter } from 'next/navigation';
 
 const validationSchema = Yup.object().shape({

@@ -6,7 +6,7 @@ import { Field, Form, Formik } from 'formik';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useForgotPassword } from '@/services/queries/useAuth';
+import { useForgotPassword } from '@/services/queries/hooks';
 import { useRouter } from 'next/navigation';
 
 const validationSchema = Yup.object().shape({

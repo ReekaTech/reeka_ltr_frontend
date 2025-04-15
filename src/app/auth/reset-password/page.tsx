@@ -7,7 +7,7 @@ import { redirect, useRouter, useSearchParams } from 'next/navigation';
 import {
   useResendVerification,
   useResetPassword,
-} from '@/services/queries/useAuth';
+} from '@/services/queries/hooks';
 
 import Image from 'next/image';
 import Link from 'next/link';

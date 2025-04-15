@@ -3,8 +3,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { Bounce, ToastContainer } from 'react-toastify';
 import { Inter, Modak, Nunito } from 'next/font/google';
+import type { Metadata, Viewport } from 'next';
 
-import type { Metadata } from 'next';
 import { Providers } from '@/components/providers';
 import { QueryProvider } from '@/components/providers/query-provider';
 
@@ -28,6 +28,13 @@ const modak = Modak({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#ffffff',
+};
+
 export const metadata: Metadata = {
   title: 'Reeka Long Term Rentals',
   description: 'Reeka Long Term Rentals - Property Management System',
@@ -38,13 +45,6 @@ export const metadata: Metadata = {
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
     ],
   },
-  manifest: '/site.webmanifest',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
-  themeColor: '#ffffff',
   openGraph: {
     type: 'website',
     title: 'Reeka Long Term Rentals',
