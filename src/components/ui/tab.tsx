@@ -19,9 +19,16 @@ interface TabsProps {
   value?: string;
   onValueChange?: (value: string) => void;
   className?: string;
+  rightSlot?: React.ReactNode;
 }
 
-export function Tabs({ items, value, onValueChange, className }: TabsProps) {
+export function Tabs({
+  items,
+  value,
+  onValueChange,
+  className,
+  rightSlot,
+}: TabsProps) {
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<string>(
     value || items[0]?.value || '',
@@ -76,6 +83,10 @@ export function Tabs({ items, value, onValueChange, className }: TabsProps) {
             );
           })}
         </div>
+
+        {/* Right side slot */}
+        {rightSlot && <div className="ml-auto">{rightSlot}</div>}
+
         <div className="absolute right-0 bottom-0 left-0 h-px bg-black opacity-10 shadow-sm" />
       </div>
     </div>

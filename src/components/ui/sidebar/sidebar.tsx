@@ -37,7 +37,7 @@ const navItems: NavItem[] = [
   },
   {
     title: 'Listing Management',
-    href: '/#',
+    href: '/listings',
     icon: Codesandbox,
   },
   {

@@ -97,7 +97,9 @@ export function Layout({
               : 'left-[240px] w-[calc(100%-240px)]',
           )}
         >
-          <div className="h-full w-full bg-white px-6 py-6">{children}</div>
+          <div className="h-auto min-h-screen w-full bg-white px-6 py-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>

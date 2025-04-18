@@ -197,7 +197,7 @@ export function RolesForm() {
                             );
                           }}
                         >
-                          <MoreVertical className="h-4 w-4" />
+                          <MoreVertical className="h-4 w-4 cursor-pointer" />
                         </button>
                         {openMenuId === user.id && (
                           <div

@@ -4,3 +4,6 @@ export * from './tooltip';
 export * from './tab';
 export * from './pagination';
 export * from './prompt-modal';
+export * from './accordion-item';
+export * from './modal';
+export * from './image-gallery';

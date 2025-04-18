@@ -23,6 +23,7 @@
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "formik": "^2.4.6",
     "lucide-react": "^0.487.0",
     "next": "15.2.5",
@@ -68,5 +69,28 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
+  },
+  "overrides": {
+    "@radix-ui/react-alert-dialog": {
+      "react": "^19.0.0",
+      "react-dom": "^19.1.0"
+    },
+    "@radix-ui/react-dialog": {
+      "react": "^19.0.0",
+      "react-dom": "^19.1.0"
+    },
+    "@radix-ui/react-dropdown-menu": {
+      "react": "^19.0.0",
+      "react-dom": "^19.1.0"
+    },
+    "@radix-ui/react-collapsible": {
+      "react": "^19.0.0",
+      "react-dom": "^19.1.0"
+    },
+    "@radix-ui/react-switch": {
+      "react": "^19.0.0",
+      "react-dom": "^19.1.0"
+    },
+    "glob": "^9.0.0"
   }
 }
