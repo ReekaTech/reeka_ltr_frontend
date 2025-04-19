@@ -6,3 +6,4 @@ export * from './amenities-section';
 export * from './amenities-modal';
 export * from './success-modal';
 export * from './property-form-context';
+export * from './property-detail-card-header'
