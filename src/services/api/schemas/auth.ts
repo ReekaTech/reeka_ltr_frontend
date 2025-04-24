@@ -68,5 +68,7 @@ export interface AuthResponse {
     phone: string;
     country: string;
     isEmailVerified: boolean;
+    role: UserRole;
   };
+  organizationId: string;
 }

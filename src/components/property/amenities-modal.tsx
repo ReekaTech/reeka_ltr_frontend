@@ -6,16 +6,15 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 interface AmenitiesModalProps {
-  selectedAmenities: string[];
-  onSave: (amenities: string[]) => void;
+  selectedAmenities: { [key: string]: { available: boolean; quantity?: number } };
+  onSave: (amenities: { [key: string]: { available: boolean; quantity?: number } }) => void;
   onClose: () => void;
 }
 
 const commonAmenities = [
   'Swimming Pool',
   'Griller',
-  'Bathroom',
-  'Basketball court',
+  'Basketball Court',
   'Gym',
   'WiFi',
   'Air Conditioning',
@@ -31,7 +30,7 @@ export function AmenitiesModal({
   onSave,
   onClose,
 }: AmenitiesModalProps) {
-  const [amenities, setAmenities] = useState<string[]>([...selectedAmenities]);
+  const [amenities, setAmenities] = useState<{ [key: string]: { available: boolean; quantity?: number } }>(selectedAmenities);
   const [inputValue, setInputValue] = useState('');
   const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -59,18 +58,23 @@ export function AmenitiesModal({
   }, []);
 
   const handleAddAmenity = (amenity: string) => {
-    if (amenity.trim() && !amenities.includes(amenity.trim())) {
-      setAmenities([...amenities, amenity.trim()]);
+    const normalizedAmenity = amenity.trim();
+    if (normalizedAmenity && !amenities[normalizedAmenity]) {
+      setAmenities({
+        ...amenities,
+        [normalizedAmenity]: { available: true, quantity: 1 }
+      });
       setInputValue('');
     }
   };
 
   const handleRemoveAmenity = (amenity: string) => {
-    setAmenities(amenities.filter(a => a !== amenity));
+    const { [amenity]: _, ...rest } = amenities;
+    setAmenities(rest);
   };
 
   const handleToggleAmenity = (amenity: string) => {
-    if (amenities.includes(amenity)) {
+    if (amenities[amenity]) {
       handleRemoveAmenity(amenity);
     } else {
       handleAddAmenity(amenity);
@@ -129,7 +133,7 @@ export function AmenitiesModal({
                 type="button"
                 onClick={() => handleToggleAmenity(amenity)}
                 className={`rounded-full px-4 py-2 text-sm transition-colors ${
-                  amenities.includes(amenity)
+                  amenities[amenity]?.available
                     ? 'bg-green-500 text-white'
                     : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                 }`}
@@ -142,22 +146,24 @@ export function AmenitiesModal({
           {/* Selected amenities with input */}
           <div className="mb-6 rounded-lg border border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-200">
             <div className="flex flex-wrap items-center p-3">
-              {amenities.map(amenity => (
-                <div
-                  key={amenity}
-                  className="m-1 flex items-center rounded-full bg-green-500 px-3 py-1 text-sm text-white"
-                >
-                  <span>{amenity}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveAmenity(amenity)}
-                    className="ml-2 flex h-4 w-4 items-center justify-center rounded-full hover:bg-green-600"
-                    aria-label={`Remove ${amenity}`}
+              {Object.entries(amenities)
+                .filter(([_, value]) => value.available)
+                .map(([amenity]) => (
+                  <div
+                    key={amenity}
+                    className="m-1 flex items-center rounded-full bg-green-500 px-3 py-1 text-sm text-white"
                   >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
+                    <span>{amenity}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAmenity(amenity)}
+                      className="ml-2 flex h-4 w-4 items-center justify-center rounded-full hover:bg-green-600"
+                      aria-label={`Remove ${amenity}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
               <div className="min-w-[180px] flex-1">
                 <input
                   ref={inputRef}

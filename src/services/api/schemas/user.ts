@@ -55,4 +55,5 @@ export interface GetUsersParams {
   lastName?: string;
   email?: string;
   role?: string;
+  organizationId?: string;
 }

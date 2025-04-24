@@ -1,18 +1,6 @@
 'use client';
 
-type PropertyFormData = {
-  name: string;
-  type: string;
-  country: string;
-  address: string;
-  bedrooms: number;
-  bathrooms: number;
-  amenities: string[];
-  images: File[];
-  basePrice: string;
-  minPrice: string;
-  maxPrice: string;
-};
+import { PropertyFormData } from "@/services/api/schemas";
 
 interface PriceSectionProps {
   formData: PropertyFormData;
@@ -21,12 +9,14 @@ interface PriceSectionProps {
 
 export function PriceSection({ formData, updateFormData }: PriceSectionProps) {
   const handlePriceChange = (
-    field: 'basePrice' | 'minPrice' | 'maxPrice',
+    field: 'base' | 'min' | 'max',
     value: string,
   ) => {
-    // Only allow numbers and decimal points
     const sanitizedValue = value.replace(/[^0-9.]/g, '');
-    updateFormData(field, sanitizedValue);
+    updateFormData('pricing', {
+      ...formData.pricing,
+      [field]: sanitizedValue
+    });
   };
 
   return (
@@ -46,8 +36,8 @@ export function PriceSection({ formData, updateFormData }: PriceSectionProps) {
           <input
             type="text"
             id="base-price"
-            value={formData.basePrice}
-            onChange={e => handlePriceChange('basePrice', e.target.value)}
+            value={formData.pricing.base}
+            onChange={e => handlePriceChange('base', e.target.value)}
             className="w-full rounded-md border border-gray-300 py-2 pr-16 pl-8 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
             placeholder="0.00"
             inputMode="decimal"
@@ -76,8 +66,8 @@ export function PriceSection({ formData, updateFormData }: PriceSectionProps) {
             <input
               type="text"
               id="min-price"
-              value={formData.minPrice}
-              onChange={e => handlePriceChange('minPrice', e.target.value)}
+              value={formData.pricing.min}
+              onChange={e => handlePriceChange('min', e.target.value)}
               className="w-full rounded-md border border-gray-300 py-2 pr-16 pl-8 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
               placeholder="0.00"
               inputMode="decimal"
@@ -103,8 +93,8 @@ export function PriceSection({ formData, updateFormData }: PriceSectionProps) {
             <input
               type="text"
               id="max-price"
-              value={formData.maxPrice}
-              onChange={e => handlePriceChange('maxPrice', e.target.value)}
+              value={formData.pricing.max}
+              onChange={e => handlePriceChange('max', e.target.value)}
               className="w-full rounded-md border border-gray-300 py-2 pr-16 pl-8 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
               placeholder="0.00"
               inputMode="decimal"

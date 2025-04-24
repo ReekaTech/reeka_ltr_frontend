@@ -7,122 +7,232 @@ import {
   PropertyDetailsSection,
 } from '@/components/property';
 import { Building2, DollarSign, ImageIcon, Tag } from 'lucide-react';
+import { Form, Formik, FormikProps } from 'formik';
 
 import { AccordionItem } from '@/components/ui/accordion-item';
-import type React from 'react';
+import { PropertyFormData } from '@/services/api/schemas/property';
 import { SuccessModal } from './success-modal';
-import { usePropertyForm } from './property-form-context';
+import { propertyValidationSchema } from '@/app/listings/validation';
+import { uploadToS3 } from '@/services/api/upload';
+import { useCreateProperty } from '@/services/queries/hooks/useProperties';
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { useUploadSignedUrl } from '@/services/queries/hooks/useUploadSignedUrl';
 
 type AccordionSection = 'details' | 'amenities' | 'images' | 'price';
 
 export function AddPropertyForm() {
-  const { formData, updateFormData, isSubmitting, setIsSubmitting, resetForm } =
-    usePropertyForm();
-  const [expandedSection, setExpandedSection] =
-    useState<AccordionSection | null>('details');
+  const searchParams = useSearchParams();
+  const portfolioId = searchParams.get('portfolioId');
+  
+  const [expandedSection, setExpandedSection] = useState<AccordionSection | null>('details');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const uploadMutation = useUploadSignedUrl();
+  const createPropertyMutation = useCreateProperty();
 
-  const toggleSection = (section: AccordionSection) => {
-    setExpandedSection(expandedSection === section ? null : section);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const handleSubmit = async (values: PropertyFormData) => {
     try {
-      // In a real app, you would submit the form data to your API here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      setIsSubmitting(true);
+
+      // Group images by extension
+      const groupedImages = values.images.reduce((acc, file) => {
+        const extension = file.name.split('.').pop()?.toLowerCase();
+        if (!extension) return acc;
+        
+        if (!acc[extension]) {
+          acc[extension] = [];
+        }
+        acc[extension].push(file);
+        return acc;
+      }, {} as Record<string, File[]>);
+
+
+      // Upload images in batches by extension
+      const imageUrls = await Promise.all(
+        Object.entries(groupedImages).map(async ([extension, files]) => {
+          // Get signed URL for this extension type
+          const { url, key } = await uploadMutation.mutateAsync({
+            type: 'single',
+            extension
+          });
+          
+          // Upload all files of this extension
+          return Promise.all(
+            files.map(async (file) => {
+              await uploadToS3(url, file, key);
+              return `https://lasser-assets.s3.eu-west-1.amazonaws.com/${key}`;
+            })
+          );
+        })
+      ).then(urls => urls.flat());
+
+      // Convert pricing values to numbers
+      const pricing = {
+        base: Number(values.pricing.base),
+        min: Number(values.pricing.min),
+        max: Number(values.pricing.max),
+      };
+      
+
+      // Create property with uploaded image URLs
+      await createPropertyMutation.mutateAsync({
+        name: values.name,
+        status: values.status,
+        type: values.type,
+        countryId: values.countryId,
+        address: values.address,
+        rooms: values.rooms,
+        amenities: values.amenities,
+        imageUrls: imageUrls,
+        pricing,
+        ...(values.contactPerson && { contactPerson: values.contactPerson }),
+        ...(values.portfolioId && { portfolioId: values.portfolioId }),
+      });
+      
       setShowSuccessModal(true);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      // TODO: Add error handling (toast/notification)
+      console.error('Failed to create property:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSaveDraft = () => {
-    // In a real app, you would save the draft to your API or local storage
-    console.log('Saving draft:', formData);
+  const initialValues: PropertyFormData = {
+    portfolioId: portfolioId || '',
+    name: '',
+    type: '',
+    countryId: '',
+    address: '',
+    rooms: {
+      bedrooms: 1,
+      bathrooms: 1,
+    },
+    amenities: {},
+    images: [],
+    imagePreviews: [],
+    pricing: {
+      base: 0,
+      min: 0,
+      max: 0,
+    },
+    contactPerson: '',
+    status: 'listed' as const,
+  };
+
+  const toggleSection = (section: AccordionSection) => {
+    setExpandedSection(expandedSection === section ? null : section);
   };
 
   return (
     <div className="mx-auto max-w-xl">
-      <form onSubmit={handleSubmit}>
-        <div className="space-y-4 rounded-t-2xl bg-gray-50 px-1 pt-1 pb-6 shadow">
-          {/* Property Details Section */}
-          <AccordionItem
-            title="Property Details"
-            icon={<Building2 className="h-5 w-5 text-white" />}
-            iconBgColor="bg-blue-500"
-            isExpanded={expandedSection === 'details'}
-            onToggle={() => toggleSection('details')}
-          >
-            <PropertyDetailsSection
-              formData={formData}
-              updateFormData={updateFormData}
-            />
-          </AccordionItem>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={propertyValidationSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ values, setFieldValue }: FormikProps<typeof initialValues>) => {
+          return (
+            <Form>
+              <div className="space-y-4 rounded-t-2xl bg-gray-50 px-1 pt-1 pb-6 shadow">
+                {/* Property Details Section */}
+                <AccordionItem
+                  title="Property Details"
+                  icon={<Building2 className="h-5 w-5 text-white" />}
+                  iconBgColor="bg-blue-500"
+                  isExpanded={expandedSection === 'details'}
+                  onToggle={() => toggleSection('details')}
+                >
+                  <PropertyDetailsSection
+                    formData={values}
+                    updateFormData={setFieldValue}
+                  />
+                </AccordionItem>
 
-          {/* Amenities Section */}
-          <AccordionItem
-            title="Rooms and Amenities"
-            icon={<Tag className="h-5 w-5 text-white" />}
-            iconBgColor="bg-green-500"
-            isExpanded={expandedSection === 'amenities'}
-            onToggle={() => toggleSection('amenities')}
-          >
-            <AmenitiesSection
-              formData={formData}
-              updateFormData={updateFormData}
-            />
-          </AccordionItem>
+                {/* Amenities Section */}
+                <AccordionItem
+                  title="Rooms and Amenities"
+                  icon={<Tag className="h-5 w-5 text-white" />}
+                  iconBgColor="bg-green-500"
+                  isExpanded={expandedSection === 'amenities'}
+                  onToggle={() => toggleSection('amenities')}
+                >
+                  <AmenitiesSection
+                    formData={values}
+                    updateFormData={setFieldValue}
+                  />
+                </AccordionItem>
 
-          {/* Images Section */}
-          <AccordionItem
-            title="Images"
-            icon={<ImageIcon className="h-5 w-5 text-white" />}
-            iconBgColor="bg-orange-500"
-            isExpanded={expandedSection === 'images'}
-            onToggle={() => toggleSection('images')}
-          >
-            <ImagesSection
-              formData={formData}
-              updateFormData={updateFormData}
-            />
-          </AccordionItem>
+                {/* Images Section */}
+                <AccordionItem
+                  title="Images"
+                  icon={<ImageIcon className="h-5 w-5 text-white" />}
+                  iconBgColor="bg-orange-500"
+                  isExpanded={expandedSection === 'images'}
+                  onToggle={() => toggleSection('images')}
+                >
+                  <ImagesSection
+                    formData={values}
+                    updateFormData={setFieldValue}
+                  />
+                </AccordionItem>
 
-          {/* Price Section */}
-          <AccordionItem
-            title="Price"
-            icon={<DollarSign className="h-5 w-5 text-white" />}
-            iconBgColor="bg-blue-500"
-            isExpanded={expandedSection === 'price'}
-            onToggle={() => toggleSection('price')}
-          >
-            <PriceSection formData={formData} updateFormData={updateFormData} />
-          </AccordionItem>
-        </div>
+                {/* Price Section */}
+                <AccordionItem
+                  title="Price"
+                  icon={<DollarSign className="h-5 w-5 text-white" />}
+                  iconBgColor="bg-blue-500"
+                  isExpanded={expandedSection === 'price'}
+                  onToggle={() => toggleSection('price')}
+                >
+                  <PriceSection
+                    formData={values}
+                    updateFormData={setFieldValue}
+                  />
+                </AccordionItem>
+              </div>
 
-        {/* Form Actions */}
-        <div className="flex items-center justify-end gap-x-6 rounded-b-2xl bg-[#F0F0F0] p-4">
-          <button
-            type="button"
-            onClick={handleSaveDraft}
-            className="cursor-pointer text-sm font-bold text-gray-600 transition-colors hover:text-gray-800"
-          >
-            Save as draft
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="hover:bg-opacity-90 cursor-pointer rounded-md bg-[#e36b37] px-4 py-2 text-sm font-bold text-white transition-all disabled:opacity-70"
-          >
-            {isSubmitting ? 'Creating...' : 'Create Property'}
-          </button>
-        </div>
-      </form>
+              {/* Form Actions */}
+              <div className="flex items-center justify-end gap-x-6 rounded-b-2xl bg-[#F0F0F0] p-4">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setFieldValue('status', 'unlisted');
+                    await handleSubmit(values);
+                  }}
+                  className="cursor-pointer text-sm font-bold text-gray-600 transition-colors hover:text-gray-800"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-600 border-t-transparent"></div>
+                      <span>Saving as draft...</span>
+                    </div>
+                  ) : (
+                    'Save as draft'
+                  )}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="hover:bg-opacity-90 cursor-pointer rounded-md bg-[#e36b37] px-4 py-2 text-sm font-bold text-white transition-all disabled:opacity-70"
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                      <span>Creating Property...</span>
+                    </div>
+                  ) : (
+                    'Create Property'
+                  )}
+                </button>
+              </div>
+            </Form>
+          );
+        }}
+      </Formik>
 
       {/* Success Modal */}
       {showSuccessModal && (

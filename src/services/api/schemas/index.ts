@@ -3,3 +3,6 @@ export * from './country';
 export * from './portfolio';
 export * from './property';
 export * from './user';
+export * from './lease';
+export * from './maintenance';
+export * from './expense';

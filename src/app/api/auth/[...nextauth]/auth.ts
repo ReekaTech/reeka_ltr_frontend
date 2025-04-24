@@ -26,13 +26,16 @@ export const authOptions: NextAuthOptions = {
               accessToken: response.tokens.accessToken,
               refreshToken: response.tokens.refreshToken,
               expiresIn: '3600',
+              organizationId: response.organizationId,
+              role: response.user.role,
               user: {
                 id: response.user.id,
                 firstName: response.user.firstName,
                 lastName: response.user.lastName,
                 email: response.user.email,
                 isActive: true,
-                role: '',
+                role: response.user.role,
+                organizationId: response.organizationId,
               },
             };
           }
@@ -57,6 +60,7 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
         token.expiresIn = user.expiresIn;
+        token.organizationId = user.organizationId;
         token.user = user.user;
         token.exp = Math.floor(Date.now() / 1000) + Number(user.expiresIn);
       }

@@ -6,13 +6,14 @@ import { X } from 'lucide-react';
 interface MaintenanceTicketViewModalProps {
   isOpen: boolean;
   onClose: () => void;
+
   ticket?: {
     id: string;
     description: string;
-    property: string;
     dateOfCreation: string;
     requestType: string;
     status: string;
+    ticketNumber?: string;
   };
 }
 
@@ -20,6 +21,7 @@ export function MaintenanceTicketViewModal({
   isOpen,
   onClose,
   ticket,
+
 }: MaintenanceTicketViewModalProps) {
   if (!ticket) return null;
 
@@ -57,17 +59,11 @@ export function MaintenanceTicketViewModal({
             <div className="col-span-1">
               <h4 className="text-sm font-normal text-gray-500">Tickets</h4>
               <p className="mt-1 text-lg font-semibold text-gray-900">
-                #{ticket.id}
+                #{ticket.ticketNumber}
               </p>
             </div>
 
-            {/* Property */}
-            <div className="col-span-1">
-              <h4 className="text-sm font-normal text-gray-500">Property</h4>
-              <p className="mt-1 text-lg font-semibold text-gray-900">
-                {ticket.property}
-              </p>
-            </div>
+            
 
             {/* Request Type */}
             <div className="col-span-1">

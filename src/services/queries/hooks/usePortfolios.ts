@@ -9,11 +9,13 @@ import {
   deletePortfolio,
   getPortfolioById,
   getPortfolios,
-  updatePortfolio,
+  getUnassignedProperties,
+  updatePortfolio
 } from '@/services/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { toast } from 'react-toastify';
+import { useSession } from 'next-auth/react';
 
 export const usePortfolio = (portfolioId: string | undefined) => {
   return useQuery<Portfolio>({
@@ -90,3 +92,23 @@ export const useDeletePortfolio = () => {
     },
   });
 };
+
+
+
+
+
+export const useUnassignedProperties = () => {
+  const { data: session } = useSession();
+  const organizationId = session?.user?.organizationId;
+
+  return useQuery({
+    queryKey: ['unassignedProperties', organizationId],
+    queryFn: () => {
+      if (!organizationId) {
+        throw new Error('Organization ID is required');
+      }
+      return getUnassignedProperties(organizationId);
+    },
+    enabled: !!organizationId,
+  });
+}; 

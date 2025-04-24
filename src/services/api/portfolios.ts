@@ -1,10 +1,12 @@
 import {
   CreatePortfolioPayload,
   Portfolio,
+  UnassignedProperty,
   UpdatePortfolioPayload,
 } from '@/services/api/schemas';
 
 import { api } from './api-service';
+import { getSession } from 'next-auth/react';
 
 export interface GetPortfoliosParams {
   search?: string;
@@ -27,7 +29,14 @@ export interface PaginatedPortfolios {
  */
 export async function getPortfolios(
   params: GetPortfoliosParams = {},
-): Promise<PaginatedPortfolios> {
+): Promise<Portfolio[]> {
+  const session = await getSession();
+  const organizationId = session?.user?.organizationId;
+
+  if (!organizationId) {
+    throw new Error('Organization ID is required');
+  }
+
   const queryParams = new URLSearchParams();
 
   // Add pagination and sorting parameters
@@ -39,15 +48,23 @@ export async function getPortfolios(
   // Add search parameter
   if (params.search) queryParams.append('search', params.search);
 
-  const response = await api.get(`/portfolios?${queryParams.toString()}`);
+  const response = await api.get<Portfolio[]>(`/organizations/${organizationId}/portfolios ${queryParams.toString() ? `?search=${queryParams.toString()}` : ''}`);
   return response.data;
+
 }
 
 /**
  * Get a portfolio by ID
  */
 export async function getPortfolioById(id: string): Promise<Portfolio> {
-  const response = await api.get(`/portfolios/${id}`);
+  const session = await getSession();
+  const organizationId = session?.user?.organizationId;
+
+  if (!organizationId) {
+    throw new Error('Organization ID is required');
+  }
+
+  const response = await api.get(`/organizations/${organizationId}/portfolios/${id}`);
   return response.data;
 }
 
@@ -57,7 +74,14 @@ export async function getPortfolioById(id: string): Promise<Portfolio> {
 export async function createPortfolio(
   data: CreatePortfolioPayload,
 ): Promise<Portfolio> {
-  const response = await api.post('/portfolios', data);
+  const session = await getSession();
+  const organizationId = session?.user?.organizationId;
+
+  if (!organizationId) {
+    throw new Error('Organization ID is required');
+  }
+
+  const response = await api.post(`/organizations/${organizationId}/portfolios`, data);
   return response.data;
 }
 
@@ -105,5 +129,12 @@ export async function removePropertiesFromPortfolio(
   const response = await api.delete(`/portfolios/${portfolioId}/properties`, {
     data: { propertyIds },
   });
+  return response.data;
+}
+
+export async function getUnassignedProperties(organizationId: string): Promise<UnassignedProperty[]> {
+  const response = await api.get<UnassignedProperty[]>(
+    `/organizations/${organizationId}/portfolios/unassigned-properties`,
+  );
   return response.data;
 }

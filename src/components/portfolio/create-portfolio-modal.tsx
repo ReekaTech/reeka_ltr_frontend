@@ -1,23 +1,17 @@
 'use client';
 
+import type { CreatePortfolioPayload, Property } from '@/services/api/schemas';
 import { useEffect, useState } from 'react';
 
-import type { CreatePortfolioPayload } from '@/services/api/schemas';
 import { Modal } from '@/components/ui/modal';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface Property {
-  id: string;
-  name: string;
-  location: string;
-}
 
 interface CreatePortfolioModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: CreatePortfolioPayload) => Promise<void>;
-  properties: Property[];
+  properties: Partial<Property>[];
 }
 
 export function CreatePortfolioModal({
@@ -43,8 +37,7 @@ export function CreatePortfolioModal({
 
   const filteredProperties = properties.filter(
     property =>
-      property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      property.location.toLowerCase().includes(searchQuery.toLowerCase()),
+      property.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const togglePropertySelection = (propertyId: string) => {
@@ -153,17 +146,17 @@ export function CreatePortfolioModal({
             {filteredProperties.length > 0 ? (
               filteredProperties.map(property => (
                 <label
-                  key={property.id}
+                  key={property._id}
                   className="flex cursor-pointer items-center rounded-md p-2 hover:bg-gray-50"
                 >
                   <input
                     type="checkbox"
-                    checked={selectedProperties.includes(property.id)}
-                    onChange={() => togglePropertySelection(property.id)}
+                    checked={selectedProperties.includes(property._id as string)}
+                    onChange={() => togglePropertySelection(property._id as string)}
                     className="h-5 w-5 rounded border-gray-300 text-[#e36b37] focus:ring-[#e36b37]"
                   />
                   <span className="ml-3 block text-sm font-medium text-gray-700">
-                    {property.name}, {property.location}
+                    {property.name}
                   </span>
                 </label>
               ))

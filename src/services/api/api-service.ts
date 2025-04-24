@@ -19,6 +19,8 @@ api.interceptors.request.use(async config => {
   if (session?.accessToken) {
     config.headers.Authorization = `Bearer ${session.accessToken}`;
   }
+  // console.log(`[AXIOS] Request: ${config.method?.toUpperCase()} ${config.url}`);
+  // console.trace('Called from:');
   return config;
 });
 

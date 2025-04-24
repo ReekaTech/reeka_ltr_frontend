@@ -1,13 +1,11 @@
 'use client';
 
-import {
-  EnhancedPropertyListings,
-  PropertyProvider,
-} from '@/components/listings';
 import { Layout, Tabs, TabsContent } from '@/components/ui';
 
 import { ContextPortfolioManagement } from '@/components/portfolio/context-portfolio-management';
-import { PortfolioProvider } from '@/components/portfolio';
+import {
+  EnhancedPropertyListings,
+} from '@/components/listings';
 import { useState } from 'react';
 
 export default function ListingsPage() {
@@ -43,17 +41,13 @@ export default function ListingsPage() {
         />
 
         <TabsContent value="properties" activeValue={activeTab}>
-          <PropertyProvider>
             <EnhancedPropertyListings onTotalCountChange={setPropertyCount} />
-          </PropertyProvider>
         </TabsContent>
 
         <TabsContent value="portfolios" activeValue={activeTab}>
-          <PortfolioProvider>
             <ContextPortfolioManagement
               onTotalCountChange={setPortfolioCount}
             />
-          </PortfolioProvider>
         </TabsContent>
       </div>
     </Layout>

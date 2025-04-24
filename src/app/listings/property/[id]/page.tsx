@@ -4,77 +4,28 @@ import {
   ArrowLeft,
   Search,
 } from 'lucide-react';
-import { ExpensesTab, MaintenanceTab } from '@/components/portfolio/tabs';
+import { ExpensesTab, MaintenanceTab } from '@/components/tabs';
 import { ImageGallery, Layout, Tabs, TabsContent } from '@/components/ui';
-import { useEffect, useState } from 'react';
+import { format, parseISO } from 'date-fns';
+import { use, useEffect, useState } from 'react';
+import { useLeases, useProperty, useUpdateProperty } from '@/services/queries/hooks';
 
+import { AddExpenseModal } from '@/components/portfolio/add-expense-modal';
 import { AddLeaseModal } from '@/components/portfolio/add-lease-modal';
+import { AddTicketModal } from '@/components/portfolio/add-ticket-modal';
 import { Badge } from "@/components/ui/badge";
-import Link from 'next/link';
+import type { Lease } from '@/services/api/schemas';
 import { PropertyDetailHeadCard } from '@/components/property';
 import { ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { propertyTypes } from '@/app/constants';
+import { useCountries } from '@/services/queries/hooks';
+import { useDebounce } from '@/hooks/use-debounce';
 import { useRouter } from 'next/navigation';
 
-// Sample property data
-const properties = {
-  prop1: {
-    id: 'prop1',
-    title: '3 Bedroom Apartment in Lekki',
-    address: '123 Admiralty Way, Lekki Phase 1, Lagos',
-    type: 'Apartment',
-    status: 'Occupied',
-    bedrooms: 3,
-    bathrooms: 2,
-    sqft: 1200,
-    rent: 5000000,
-    images: [
-      { id: '1', src: 'https://images.unsplash.com/photo-1586105251261-72a756497a12?w=800&q=80', alt: 'Living room' },
-      { id: '2', src: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80', alt: 'Kitchen' },
-      { id: '3', src: 'https://images.unsplash.com/photo-1599423300746-b62533397364?w=800&q=80', alt: 'Bedroom' },
-      { id: '3', src: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80', alt: 'Bedroom' },
-      { id: '3', src: 'https://images.unsplash.com/photo-1599423300795-f31c51b7c0e5?w=800&q=80', alt: 'Bedroom' },
-    ],
-    tenant: {
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-      phone: '+234 801 234 5678',
-      occupants: 2,
-      leaseStart: '01 Jan 2023',
-      leaseEnd: '31 Dec 2023',
-    },
-  },
-  prop2: {
-    id: 'prop2',
-    title: '4 Bedroom Duplex in Ikoyi',
-    address: '456 Bourdillon Road, Ikoyi, Lagos',
-    type: 'Duplex',
-    status: 'Vacant',
-    bedrooms: 4,
-    bathrooms: 3,
-    sqft: 2500,
-    rent: 12000000,
-    images: [
-      { id: '1', src: 'https://images.unsplash.com/photo-1586105251261-72a756497a12?w=800&q=80', alt: 'Living room' },
-      { id: '2', src: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80', alt: 'Kitchen' },
-      { id: '3', src: 'https://images.unsplash.com/photo-1599423300746-b62533397364?w=800&q=80', alt: 'Bedroom' },
-      { id: '3', src: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80', alt: 'Bedroom' },
-      { id: '3', src: 'https://images.unsplash.com/photo-1599423300795-f31c51b7c0e5?w=800&q=80', alt: 'Bedroom' },
-    ],
-    tenant: null,
-  },
-};
-
-const amenities = [
-  "Swimming Pool",
-  "Gym",
-  "Parking",
-  "Security",
-];
-
-function AmenityCard({ label }: { label: string }) {
+function AmenityCard({ label }: { label: string; quantity?: number }) {
   return (
-    <div className="flex items-center gap-2 px-6 py-4 rounded-2xl border border-gray-50 text-black text-xs bg-gray-50 shadow">
+    <div className="flex items-center justify-center gap-2 px-2 py-4 rounded-2xl border border-gray-50 text-black text-xs bg-gray-50 shadow">
       <ShoppingCart className="w-5 h-5" />
       <span>{label}</span>
     </div>
@@ -93,50 +44,63 @@ function FormField({ label, children }: { label: string; children: React.ReactNo
 export default function PropertyDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = use(params);
   const router = useRouter();
-  const [property, setProperty] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('details');
+  const { data: property, isLoading } = useProperty(id);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const { data: leases, isLoading: isLoadingLeases } = useLeases({ 
+    propertyId: id,
+    search: debouncedSearchTerm 
+  });
+  const [activeTab, setActiveTab] = useState('details');
   const [isAddLeaseModalOpen, setIsAddLeaseModalOpen] = useState(false);
+  const { data: countries } = useCountries();
+  const updateProperty = useUpdateProperty();
+  const [isEditing, setIsEditing] = useState(false);
 
   // Form state
   const [propertyName, setPropertyName] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [country, setCountry] = useState("");
   const [address, setAddress] = useState("");
-  const [leases] = useState([
-    { date: "Dec 14", time: "12:00PM", apartment: "Ama's Nest", address: "Lagos Island, Nigeria", amount: "$4000", status: "Ongoing" },
-    { date: "Dec 14", time: "12:00PM", apartment: "Ama's Nest", address: "Lagos Island, Nigeria", amount: "$4000", status: "Completed" },
-    { date: "Dec 14", time: "12:00PM", apartment: "Ama's Nest", address: "Lagos Island, Nigeria", amount: "$4000", status: "Completed" }
-  ]);
-
-  const images = [
-    { id: '1', src: 'https://images.unsplash.com/photo-1599423300746-b62533397364?w=800&q=80', alt: 'Living room' },
-    { id: '2', src: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80', alt: 'Kitchen' },
-    { id: '3', src: 'https://images.unsplash.com/photo-1599423300746-b62533397364?w=800&q=80', alt: 'Bedroom' },
-    { id: '3', src: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80', alt: 'Bedroom' },
-    { id: '3', src: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80', alt: 'Bedroom' },
-  ]
+  const [isAddExpenseModalOpen, setIsAddExpenseModalOpen] = useState(false);
+  const [isAddTicketModalOpen, setIsAddTicketModalOpen] = useState(false);
 
   useEffect(() => {
-    // In a real app, fetch property data from API
-    setLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setProperty(properties[params.id as keyof typeof properties]);
-      setLoading(false);
-    }, 500);
-  }, [params.id]);
+    if (property) {
+      setPropertyName(property.name);
+      setPropertyType(property.type);
+      setCountry(property.countryId);
+      setAddress(property.address);
+    }
+  }, [property]);
 
   const handleGoBack = () => {
     router.back();
   };
 
-  if (loading) {
+  const handleSave = async () => {
+    try {
+      await updateProperty.mutateAsync({
+        id,
+        data: {
+          name: propertyName,
+          address: address,
+          status: property?.status || 'listed',
+          location: address,
+          description: '',
+        },
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to update property:', error);
+    }
+  };
+
+  if (isLoading) {
     return (
       <Layout title="Property Details">
         <div className="flex h-64 items-center justify-center">
@@ -172,7 +136,10 @@ export default function PropertyDetailPage({
   ];
 
   return (
-    <Layout title={property.title} description={property.address}>
+    <Layout 
+      title={property.name} 
+      description={`Created on ${format(new Date(property.createdAt), 'do MMMM yyyy')}`}
+    >
       {/* Back button */}
       <div className="mb-6">
         <button
@@ -206,9 +173,19 @@ export default function PropertyDetailPage({
 
             {activeTab === 'expenses' && (
               <button
-                className="hover:bg-opacity-90 rounded-md bg-[#e36b37] px-4 py-2 whitespace-nowrap text-white transition-all"
+                onClick={() => setIsAddExpenseModalOpen(true)}
+                className="hover:bg-opacity-90 rounded-md cursor-pointer bg-[#e36b37] px-4 py-2 whitespace-nowrap text-white transition-all"
               >
                 Add Expense
+              </button>
+            )}
+
+            {activeTab === 'maintenance' && (
+              <button
+                onClick={() => setIsAddTicketModalOpen(true)}
+                className="hover:bg-opacity-90 rounded-md cursor-pointer bg-[#e36b37] px-4 py-2 whitespace-nowrap text-white transition-all"
+              >
+                Add Ticket
               </button>
             )}
           </div>
@@ -216,18 +193,23 @@ export default function PropertyDetailPage({
 
         <TabsContent value="details" activeValue={activeTab}>
           <PropertyDetailHeadCard
-            title="Ama's Nest"
-            address="24 Drive, Lagos Island, Nigeria"
-            type="Apartment"
-            price={1000}
-            status="Booked"
+            title={property.name}
+            address={property.address}
+            type={property.type}
+            price={property.pricing.base}
+            status={property.status}
+            imageUrl={property.imageUrls[0]}
           />
           <div className="flex flex-col md:flex-row gap-8 p-6 w-full">
-            {/* Left Column - Property Details */}
             <div className="flex-1 space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-semibold">Property Details</h2>
-                <button className="text-sm text-gray-500 cursor-pointer">Edit</button>
+                <button 
+                  className="text-sm text-gray-500 cursor-pointer"
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  {isEditing ? 'Cancel' : 'Edit'}
+                </button>
               </div>
 
               <div className="space-y-6">
@@ -237,29 +219,40 @@ export default function PropertyDetailPage({
                     placeholder="Enter property name"
                     value={propertyName}
                     onChange={(e) => setPropertyName(e.target.value)}
-                    className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37]"
+                    disabled={!isEditing}
+                    className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37] disabled:bg-gray-50"
                   />
                 </FormField>
 
                 <FormField label="Type">
-                  <input
-                    type="text"
-                    placeholder="Enter property type"
+                  <select
                     value={propertyType}
                     onChange={(e) => setPropertyType(e.target.value)}
-                    className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37]"
-                  />
+                    disabled={!isEditing}
+                    className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37] disabled:bg-gray-50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNC42NjY3NSAxMkw4IDguNjY2NzVMMTEuMzMzMyAxMkwxMiAxMS4zMzMzTDggNy4zMzMzNUw0IDExLjMzMzNMNC42NjY3NSAxMloiIGZpbGw9IiM2QjcyODAiLz48L3N2Zz4=')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.5em_1.5em]"
+                  >
+                    {Object.entries(propertyTypes).map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
                 </FormField>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField label="Country">
-                    <input
-                      type="text"
-                      placeholder="Enter country"
+                    <select
                       value={country}
                       onChange={(e) => setCountry(e.target.value)}
-                      className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37]"
-                    />
+                      disabled={!isEditing}
+                      className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37] disabled:bg-gray-50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNC42NjY3NSAxMkw4IDguNjY2NzVMMTEuMzMzMyAxMkwxMiAxMS4zMzMzTDggNy4zMzMzNUw0IDExLjMzMzNMNC42NjY3NSAxMloiIGZpbGw9IiM2QjcyODAiLz48L3N2Zz4=')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.5em_1.5em]"
+                    >
+                      {countries?.map((country) => (
+                        <option key={country.id} value={country.id}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
                   </FormField>
 
                   <FormField label="Address">
@@ -268,17 +261,29 @@ export default function PropertyDetailPage({
                       placeholder="Enter address"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37]"
+                      disabled={!isEditing}
+                      className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37] disabled:bg-gray-50"
                     />
                   </FormField>
                 </div>
+
+                {isEditing && (
+                  <div className="flex justify-end">
+                    <button
+                      onClick={handleSave}
+                      className="px-4 py-2 bg-[#e36b37] text-white rounded-md hover:bg-opacity-90"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                )}
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium text-black text-base">Images</h3>
                     <button className="text-sm text-gray-500 cursor-pointer">Edit</button>
                   </div>
-                  <ImageGallery images={images} />
+                  <ImageGallery images={property.imageUrls.map(url => ({ id: url, src: url, alt: property.name })) || []} />
                 </div>
 
                 <div className="space-y-4">
@@ -286,10 +291,22 @@ export default function PropertyDetailPage({
                     <h3 className="font-medium text-black text-base">Amenities</h3>
                     <button className="text-sm text-gray-500 cursor-pointer">Edit</button>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {amenities.map((item, index) => (
-                      <AmenityCard key={index} label={item} />
-                    ))}
+                  <div className="flex overflow-x-auto gap-4 pb-4 md:grid md:grid-cols-3 md:overflow-x-visible">
+                    {Object.entries(property?.amenities || {}).map(([key, value]) => {
+                      if (value.available) {
+                        const displayName = key.split('_').map(word => 
+                          word.charAt(0).toUpperCase() + word.slice(1)
+                        ).join(' ');
+                        return (
+                          <AmenityCard 
+                            key={key} 
+                            label={displayName}
+                            quantity={value.quantity}
+                          />
+                        );
+                      }
+                      return null;
+                    })}
                   </div>
                 </div>
               </div>
@@ -322,62 +339,110 @@ export default function PropertyDetailPage({
               </div>
 
               <div className="space-y-4">
-                {leases.map((lease, index) => (
-                  <div key={index} className="space-y-1">
-                    <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl">
-                      <span className="w-1/4">Date</span>
-                      <span className="w-1/4">Apartment</span>
-                      <span className="w-1/4">Amount Paid</span>
-                      <span className="w-1/4">Status</span>
-                    </div>
-
-                    <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-3 flex items-center justify-between">
-                      <div className="w-1/4">
-                        <p className="text-sm font-medium text-gray-900">{lease.date}</p>
-                        <p className="text-xs text-gray-500">{lease.time}</p>
-                      </div>
-                      <div className="w-1/4">
-                        <p className="text-sm font-medium text-gray-900">{lease.apartment}</p>
-                        <p className="text-xs text-gray-500">{lease.address}</p>
-                      </div>
-                      <div className="w-1/4">
-                        <p className="text-sm font-medium text-gray-900">{lease.amount}</p>
-                        <p className="text-xs text-gray-500">For 3 days</p>
-                      </div>
-                      <div className="w-1/4 flex justify-end">
-                        <Badge
-                          className={cn(
-                            "text-xs font-medium px-3 py-1 rounded-full",
-                            lease.status === "Ongoing"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-blue-100 text-blue-700"
-                          )}
-                        >
-                          {lease.status}
-                        </Badge>
-                      </div>
-                    </div>
+                {isLoadingLeases ? (
+                  <div className="flex justify-center py-8">
+                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#e36b37]"></div>
                   </div>
-                ))}
+                ) : (
+                  <>
+                   
+
+                    {leases?.items.length === 0 ? (
+                      <>
+                       <div className="overflow-x-auto">
+                        <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl min-w-[400px]">
+                          <span className="w-[100px]">Date</span>
+                          <span className="w-[100px]">Apartment</span>
+                          <span className="w-[100px]">Amount Paid</span>
+                          <span className="w-[100px]">Status</span>
+                        </div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-8 text-center text-gray-500">
+                        No leases found
+                      </div>
+                      </>
+                    ) : (
+                      leases?.items.map((lease: Lease, index: number) => (
+                        <div key={index} className="space-y-1">
+                          <div className="overflow-x-auto">
+                            <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl min-w-[400px]">
+                              <span className="w-[100px]">Date</span>
+                              <span className="w-[100px]">Apartment</span>
+                              <span className="w-[100px]">Amount Paid</span>
+                              <span className="w-[100px]">Status</span>
+                            </div>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-3 flex items-center justify-between min-w-[400px]">
+                              <div className="w-[100px]">
+                                <p className="text-sm font-medium text-gray-900">
+                                  {format(parseISO(lease.startDate), 'MMMM yyyy')}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {format(parseISO(lease.startDate), 'h:mm a')}
+                                </p>
+                              </div>
+                              <div className="w-[100px]">
+                                <p className="text-sm font-medium text-gray-900">{lease.property.name}</p>
+                                <p className="text-xs text-gray-500">{lease.property.address}</p>
+                              </div>
+                              
+                              <div className="w-[100px]">
+                                <p className="text-sm font-medium text-gray-900">{lease.rentalRate}</p>
+                                <p className="text-xs text-gray-500">{lease.paymentFrequency}</p>
+                              </div>
+                              <div className="w-[100px]">
+                                <Badge
+                                  className={cn(
+                                    "text-xs font-medium px-3 py-1 rounded-full",
+                                    lease.status === "active"
+                                      ? "bg-green-100 text-green-700"
+                                      : "bg-blue-100 text-blue-700"
+                                  )}
+                                >
+                                  {lease.status}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="expenses" activeValue={activeTab}>
-          <ExpensesTab searchTerm={searchTerm} />
+          <ExpensesTab searchTerm={searchTerm} propertyId={id} />
         </TabsContent>
 
         <TabsContent value="maintenance" activeValue={activeTab}>
-          <MaintenanceTab searchTerm={searchTerm} />
+          <MaintenanceTab searchTerm={searchTerm} propertyId={id} />
         </TabsContent>
       </div>
 
       <AddLeaseModal
         isOpen={isAddLeaseModalOpen}
         onClose={() => setIsAddLeaseModalOpen(false)}
-        propertyId={params.id}
-        propertyName={property?.title}
+        propertyId={id}
+        propertyName={property?.name}
+      />
+
+      <AddExpenseModal
+        isOpen={isAddExpenseModalOpen}
+        onClose={() => setIsAddExpenseModalOpen(false)}
+        portfolioId=""
+        propertyId={id}
+      />
+
+      <AddTicketModal
+        isOpen={isAddTicketModalOpen}
+        onClose={() => setIsAddTicketModalOpen(false)}
+        portfolioId=""
+        propertyId={id}
       />
     </Layout>
   );

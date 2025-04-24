@@ -38,7 +38,7 @@ export function PortfolioCard({
         <div className="text-left">
           <h3 className="font-medium text-gray-900">{name}</h3>
           <p className="mt-1 text-sm text-gray-500">
-            {propertyCount} Properties
+            {propertyCount} {propertyCount === 1 ? 'Property' : 'Properties'}
           </p>
         </div>
       </div>

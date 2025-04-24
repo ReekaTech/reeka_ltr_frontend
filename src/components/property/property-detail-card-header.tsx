@@ -3,13 +3,14 @@
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { propertyTypes } from "@/app/constants";
 
 interface PropertyCardProps {
   title: string;
   address: string;
   type: string;
   price: number;
-  status: "Booked" | "Available";
+  status: string;
   imageUrl?: string;
 }
 
@@ -44,7 +45,7 @@ export const PropertyDetailHeadCard = ({
         </div>
         <p className="text-sm text-gray-700">{address}</p>
         <p className="text-sm text-gray-500">
-          {type} • <span className="font-medium text-gray-700">${price}</span> per night
+          {propertyTypes[type as keyof typeof propertyTypes]} • <span className="font-medium text-gray-700">${price}</span> per night
         </p>
       </div>
     </div>

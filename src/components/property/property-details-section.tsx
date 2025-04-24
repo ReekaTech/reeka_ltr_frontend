@@ -1,46 +1,18 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-type PropertyFormData = {
-  name: string;
-  type: string;
-  country: string;
-  address: string;
-  bedrooms: number;
-  bathrooms: number;
-  amenities: string[];
-  images: File[];
-  basePrice: string;
-  minPrice: string;
-  maxPrice: string;
-};
+import { ChevronDown } from 'lucide-react';
+import { PropertyFormData } from '@/services/api/schemas';
+import { propertyTypes } from '@/app/constants';
+import { useCountries } from '@/services/queries/hooks';
+import { useSession } from 'next-auth/react';
+import { useUsers } from '@/services/queries/hooks/useUser';
 
 interface PropertyDetailsSectionProps {
   formData: PropertyFormData;
   updateFormData: (field: keyof PropertyFormData, value: any) => void;
 }
-
-const propertyTypes = [
-  'Apartment',
-  'House',
-  'Villa',
-  'Condo',
-  'Townhouse',
-  'Cabin',
-  'Cottage',
-];
-
-const countries = [
-  'Nigeria',
-  'Ghana',
-  'Kenya',
-  'South Africa',
-  'United States',
-  'United Kingdom',
-  'Canada',
-];
 
 export function PropertyDetailsSection({
   formData,
@@ -48,6 +20,40 @@ export function PropertyDetailsSection({
 }: PropertyDetailsSectionProps) {
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [showContactDropdown, setShowContactDropdown] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
+  const [contactSearch, setContactSearch] = useState('');
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
+  const contactDropdownRef = useRef<HTMLDivElement>(null);
+  const { data: countries, isLoading: isCountriesLoading } = useCountries();
+  const { data: session } = useSession();
+  const { data: users, isLoading: isUsersLoading } = useUsers({organizationId: session?.user?.organizationId});
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
+        setShowCountryDropdown(false);
+      }
+      if (contactDropdownRef.current && !contactDropdownRef.current.contains(event.target as Node)) {
+        setShowContactDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredCountries = countries?.filter(country =>
+    country.name.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  const filteredUsers = users?.items?.filter(user =>
+    `${user.firstName} ${user.lastName}`.toLowerCase().includes(contactSearch.toLowerCase())
+  );
+
+  if (isCountriesLoading || isUsersLoading) {
+    return <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#e36b37] border-t-transparent"></div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -70,60 +76,122 @@ export function PropertyDetailsSection({
         />
       </div>
 
-      {/* Property Type */}
-      <div className="!overflow-visible">
-        <label
-          htmlFor="property-type"
-          className="mb-1 block text-xs font-medium text-gray-700"
-        >
-          Property Type
-        </label>
-        <div className="relative !overflow-visible">
-          <button
-            type="button"
-            className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
-            onClick={() => setShowTypeDropdown(!showTypeDropdown)}
-            aria-haspopup="listbox"
-            aria-expanded={showTypeDropdown}
-            id="property-type"
-          >
-            <span>{formData.type || 'Type'}</span>
-            <ChevronDown className="h-4 w-4 text-gray-500" />
-          </button>
 
-          {showTypeDropdown && (
-            <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg">
-              <ul
-                className="py-1"
-                role="listbox"
-                aria-labelledby="property-type"
-              >
-                {propertyTypes.map(type => (
-                  <li
-                    key={type}
-                    role="option"
-                    aria-selected={formData.type === type}
-                    className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 ${
-                      formData.type === type ? 'bg-gray-100' : ''
-                    }`}
-                    onClick={() => {
-                      updateFormData('type', type);
-                      setShowTypeDropdown(false);
-                    }}
-                  >
-                    {type}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* Property Type */}
+        <div className="!overflow-visible">
+          <label
+            htmlFor="property-type"
+            className="mb-1 block text-xs font-medium text-gray-700"
+          >
+            Property Type
+          </label>
+          <div className="relative !overflow-visible">
+            <button
+              type="button"
+              className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+              onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+              aria-haspopup="listbox"
+              aria-expanded={showTypeDropdown}
+              id="property-type"
+            >
+              <span>{formData.type ? propertyTypes[formData.type as keyof typeof propertyTypes] : 'Type'}</span>
+              <ChevronDown className="h-4 w-4 text-gray-500" />
+            </button>
+
+            {showTypeDropdown && (
+              <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg">
+                <ul
+                  className="py-1"
+                  role="listbox"
+                  aria-labelledby="property-type"
+                >
+                  {Object.entries(propertyTypes).map(([key, displayName]) => (
+                    <li
+                      key={key}
+                      role="option"
+                      aria-selected={formData.type === key}
+                      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 ${
+                        formData.type === key ? 'bg-gray-100' : ''
+                      }`}
+                      onClick={() => {
+                        updateFormData('type', key);
+                        setShowTypeDropdown(false);
+                      }}
+                    >
+                      {displayName}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+         {/* Contact Person */}
+        <div className="!overflow-visible" ref={contactDropdownRef}>
+          <label
+            htmlFor="contact-person"
+            className="mb-1 block text-xs font-medium text-gray-700"
+          >
+            Contact Person
+          </label>
+          <div className="relative !overflow-visible">
+            <button
+              type="button"
+              className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+              onClick={() => setShowContactDropdown(!showContactDropdown)}
+              aria-haspopup="listbox"
+              aria-expanded={showContactDropdown}
+              id="contact-person"
+            >
+              <span>
+                {users?.items?.find(u => u.id === formData.contactPerson)
+                  ? `${users.items.find(u => u.id === formData.contactPerson)?.firstName} ${users.items.find(u => u.id === formData.contactPerson)?.lastName}`
+                  : 'Select Contact'}
+              </span>
+              <ChevronDown className="h-4 w-4 text-gray-500" />
+            </button>
+
+            {showContactDropdown && (
+              <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg">
+                <div className="sticky top-0 border-b border-gray-200 bg-white p-2">
+                  <input
+                    type="text"
+                    placeholder="Search contacts..."
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                    value={contactSearch}
+                    onChange={(e) => setContactSearch(e.target.value)}
+                  />
+                </div>
+                <ul className="py-1" role="listbox" aria-labelledby="contact-person">
+                  {filteredUsers?.map(user => (
+                    <li
+                      key={user.id}
+                      role="option"
+                      aria-selected={formData.contactPerson === user.id}
+                      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 ${
+                        formData.contactPerson === user.id ? 'bg-gray-100' : ''
+                      }`}
+                      onClick={() => {
+                        updateFormData('contactPerson', user.id);
+                        setShowContactDropdown(false);
+                      }}
+                    >
+                      {`${user.firstName} ${user.lastName}`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Country and Address */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Country */}
-        <div className="!overflow-visible">
+        <div className="!overflow-visible" ref={countryDropdownRef}>
           <label
             htmlFor="country"
             className="mb-1 block text-xs font-medium text-gray-700"
@@ -139,27 +207,36 @@ export function PropertyDetailsSection({
               aria-expanded={showCountryDropdown}
               id="country"
             >
-              <span>{formData.country || 'Country'}</span>
+              <span>{countries?.find(c => c.id === formData.countryId)?.name || 'Country'}</span>
               <ChevronDown className="h-4 w-4 text-gray-500" />
             </button>
 
             {showCountryDropdown && (
               <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg">
+                <div className="sticky top-0 border-b border-gray-200 bg-white p-2">
+                  <input
+                    type="text"
+                    placeholder="Search countries..."
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                    value={countrySearch}
+                    onChange={(e) => setCountrySearch(e.target.value)}
+                  />
+                </div>
                 <ul className="py-1" role="listbox" aria-labelledby="country">
-                  {countries.map(country => (
+                  {filteredCountries?.map(country => (
                     <li
-                      key={country}
+                      key={country.id}
                       role="option"
-                      aria-selected={formData.country === country}
+                      aria-selected={formData.countryId === country.id}
                       className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 ${
-                        formData.country === country ? 'bg-gray-100' : ''
+                        formData.countryId === country.id ? 'bg-gray-100' : ''
                       }`}
                       onClick={() => {
-                        updateFormData('country', country);
+                        updateFormData('countryId', country.id);
                         setShowCountryDropdown(false);
                       }}
                     >
-                      {country}
+                      {country.name}
                     </li>
                   ))}
                 </ul>
@@ -186,6 +263,8 @@ export function PropertyDetailsSection({
           />
         </div>
       </div>
+
+     
     </div>
   );
 }

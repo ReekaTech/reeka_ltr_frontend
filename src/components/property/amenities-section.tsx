@@ -3,21 +3,8 @@
 import { Plus, X } from 'lucide-react';
 
 import { AmenitiesModal } from './amenities-modal';
+import { PropertyFormData } from '@/services/api/schemas';
 import { useState } from 'react';
-
-type PropertyFormData = {
-  name: string;
-  type: string;
-  country: string;
-  address: string;
-  bedrooms: number;
-  bathrooms: number;
-  amenities: string[];
-  images: File[];
-  basePrice: string;
-  minPrice: string;
-  maxPrice: string;
-};
 
 interface AmenitiesSectionProps {
   formData: PropertyFormData;
@@ -31,31 +18,31 @@ export function AmenitiesSection({
   const [showAmenitiesModal, setShowAmenitiesModal] = useState(false);
 
   const handleBedroomChange = (value: number) => {
-    updateFormData('bedrooms', Math.max(1, value));
+    updateFormData('rooms', { ...formData.rooms, bedrooms: Math.max(1, value) });
   };
 
   const handleBathroomChange = (value: number) => {
-    updateFormData('bathrooms', Math.max(1, value));
+    updateFormData('rooms', { ...formData.rooms, bathrooms: Math.max(1, value) });
   };
 
   const handleRemoveAmenity = (amenity: string) => {
-    updateFormData(
-      'amenities',
-      formData.amenities.filter(a => a !== amenity),
-    );
+    const { [amenity]: _, ...rest } = formData.amenities;
+    updateFormData('amenities', rest);
   };
 
-  const handleAddAmenities = (amenities: string[]) => {
+  const handleAddAmenities = (amenities: { [key: string]: { available: boolean; quantity?: number } }) => {
     updateFormData('amenities', amenities);
     setShowAmenitiesModal(false);
   };
 
   const handleToggleAmenity = (amenity: string) => {
-    if (formData.amenities.includes(amenity)) {
-      handleRemoveAmenity(amenity);
-    } else {
-      updateFormData('amenities', [...formData.amenities, amenity]);
-    }
+    updateFormData('amenities', {
+      ...formData.amenities,
+      [amenity]: {
+        available: !formData.amenities[amenity]?.available,
+        quantity: !formData.amenities[amenity]?.available ? 0 : undefined
+      }
+    });
   };
 
   return (
@@ -76,18 +63,18 @@ export function AmenitiesSection({
             <div className="flex items-center">
               <button
                 type="button"
-                onClick={() => handleBedroomChange(formData.bedrooms - 1)}
+                onClick={() => handleBedroomChange(formData.rooms.bedrooms - 1)}
                 className="flex h-8 w-8 items-center justify-center rounded-l-md border border-gray-300 bg-gray-50 text-gray-600"
                 aria-label="Decrease bedrooms"
               >
                 -
               </button>
               <span className="flex h-8 w-8 items-center justify-center border-t border-b border-gray-300 bg-white text-sm">
-                {formData.bedrooms}
+                {formData.rooms.bedrooms}
               </span>
               <button
                 type="button"
-                onClick={() => handleBedroomChange(formData.bedrooms + 1)}
+                onClick={() => handleBedroomChange(formData.rooms.bedrooms + 1)}
                 className="flex h-8 w-8 items-center justify-center rounded-r-md border border-gray-300 bg-gray-50 text-gray-600"
                 aria-label="Increase bedrooms"
               >
@@ -97,25 +84,25 @@ export function AmenitiesSection({
           </div>
 
           {/* Bathrooms */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-6 ">
             <label htmlFor="bathrooms" className="text-sm">
               Baths
             </label>
             <div className="flex items-center">
               <button
                 type="button"
-                onClick={() => handleBathroomChange(formData.bathrooms - 1)}
+                onClick={() => handleBathroomChange(formData.rooms.bathrooms - 1)}
                 className="flex h-8 w-8 items-center justify-center rounded-l-md border border-gray-300 bg-gray-50 text-gray-600"
                 aria-label="Decrease bathrooms"
               >
                 -
               </button>
               <span className="flex h-8 w-8 items-center justify-center border-t border-b border-gray-300 bg-white text-sm">
-                {formData.bathrooms}
+                {formData.rooms.bathrooms}
               </span>
               <button
                 type="button"
-                onClick={() => handleBathroomChange(formData.bathrooms + 1)}
+                onClick={() => handleBathroomChange(formData.rooms.bathrooms + 1)}
                 className="flex h-8 w-8 items-center justify-center rounded-r-md border border-gray-300 bg-gray-50 text-gray-600"
                 aria-label="Increase bathrooms"
               >
@@ -140,11 +127,11 @@ export function AmenitiesSection({
                   <input
                     type="checkbox"
                     className="peer sr-only"
-                    checked={formData.amenities.includes('Swimming Pool')}
+                    checked={!!formData.amenities['Swimming Pool']?.available}
                     onChange={() => handleToggleAmenity('Swimming Pool')}
                   />
                   <div className="h-5 w-5 rounded border border-gray-300 bg-white peer-checked:bg-green-500"></div>
-                  {formData.amenities.includes('Swimming Pool') && (
+                  {!!formData.amenities['Swimming Pool']?.available && (
                     <svg
                       className="absolute h-3.5 w-3.5 text-white"
                       xmlns="http://www.w3.org/2000/svg"
@@ -167,17 +154,43 @@ export function AmenitiesSection({
               <div className="flex items-center">
                 <button
                   type="button"
-                  className="flex h-8 w-8 items-center justify-center rounded-l-md border border-gray-300 bg-gray-50 text-gray-600"
+                  onClick={() => {
+                    if ((formData.amenities['Swimming Pool']?.quantity ?? 0) > 0) {
+                      updateFormData('amenities', {
+                        ...formData.amenities,
+                        'Swimming Pool': {
+                          ...formData.amenities['Swimming Pool'],
+                          quantity: (formData.amenities['Swimming Pool']?.quantity ?? 0) - 1
+                        }
+                      });
+                    }
+                  }}
+                  disabled={!formData.amenities['Swimming Pool']?.available}
+                  className={`flex h-8 w-8 items-center justify-center rounded-l-md border border-gray-300 ${
+                    formData.amenities['Swimming Pool']?.available ? 'bg-gray-50 text-gray-600' : 'bg-gray-100 text-gray-400'
+                  }`}
                   aria-label="Decrease swimming pools"
                 >
                   -
                 </button>
                 <span className="flex h-8 w-8 items-center justify-center border-t border-b border-gray-300 bg-white text-sm">
-                  1
+                  {formData.amenities['Swimming Pool']?.quantity || 0}
                 </span>
                 <button
                   type="button"
-                  className="flex h-8 w-8 items-center justify-center rounded-r-md border border-gray-300 bg-gray-50 text-gray-600"
+                  onClick={() => {
+                    updateFormData('amenities', {
+                      ...formData.amenities,
+                      'Swimming Pool': {
+                        ...formData.amenities['Swimming Pool'],
+                        quantity: (formData.amenities['Swimming Pool']?.quantity || 0) + 1
+                      }
+                    });
+                  }}
+                  disabled={!formData.amenities['Swimming Pool']?.available}
+                  className={`flex h-8 w-8 items-center justify-center rounded-r-md border border-gray-300 ${
+                    formData.amenities['Swimming Pool']?.available ? 'bg-gray-50 text-gray-600' : 'bg-gray-100 text-gray-400'
+                  }`}
                   aria-label="Increase swimming pools"
                 >
                   +
@@ -191,11 +204,11 @@ export function AmenitiesSection({
                   <input
                     type="checkbox"
                     className="peer sr-only"
-                    checked={formData.amenities.includes('Basketball Court')}
+                    checked={!!formData.amenities['Basketball Court']?.available}
                     onChange={() => handleToggleAmenity('Basketball Court')}
                   />
                   <div className="h-5 w-5 rounded border border-gray-300 bg-white peer-checked:bg-green-500"></div>
-                  {formData.amenities.includes('Basketball Court') && (
+                  {!!formData.amenities['Basketball Court']?.available && (
                     <svg
                       className="absolute h-3.5 w-3.5 text-white"
                       xmlns="http://www.w3.org/2000/svg"
@@ -218,17 +231,43 @@ export function AmenitiesSection({
               <div className="flex items-center">
                 <button
                   type="button"
-                  className="flex h-8 w-8 items-center justify-center rounded-l-md border border-gray-300 bg-gray-50 text-gray-600"
+                  onClick={() => {
+                    if ((formData.amenities['Basketball Court']?.quantity ?? 0) > 0) {
+                      updateFormData('amenities', {
+                        ...formData.amenities,
+                        'Basketball Court': {
+                          ...formData.amenities['Basketball Court'],
+                          quantity: (formData.amenities['Basketball Court']?.quantity ?? 0) - 1
+                        }
+                      });
+                    }
+                  }}
+                  disabled={!formData.amenities['Basketball Court']?.available}
+                  className={`flex h-8 w-8 items-center justify-center rounded-l-md border border-gray-300 ${
+                    formData.amenities['Basketball Court']?.available ? 'bg-gray-50 text-gray-600' : 'bg-gray-100 text-gray-400'
+                  }`}
                   aria-label="Decrease basketball courts"
                 >
                   -
                 </button>
                 <span className="flex h-8 w-8 items-center justify-center border-t border-b border-gray-300 bg-white text-sm">
-                  1
+                  {formData.amenities['Basketball Court']?.quantity || 0}
                 </span>
                 <button
                   type="button"
-                  className="flex h-8 w-8 items-center justify-center rounded-r-md border border-gray-300 bg-gray-50 text-gray-600"
+                  onClick={() => {
+                    updateFormData('amenities', {
+                      ...formData.amenities,
+                      'Basketball Court': {
+                        ...formData.amenities['Basketball Court'],
+                        quantity: (formData.amenities['Basketball Court']?.quantity || 0) + 1
+                      }
+                    });
+                  }}
+                  disabled={!formData.amenities['Basketball Court']?.available}
+                  className={`flex h-8 w-8 items-center justify-center rounded-r-md border border-gray-300 ${
+                    formData.amenities['Basketball Court']?.available ? 'bg-gray-50 text-gray-600' : 'bg-gray-100 text-gray-400'
+                  }`}
                   aria-label="Increase basketball courts"
                 >
                   +

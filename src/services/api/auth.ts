@@ -65,7 +65,6 @@ export async function respondToInvitation(
 }
 
 export const logout = async () => {
-  console.log('logging out', baseURL);
   const response = await api.post('/auth/logout');
   return response.data;
 };

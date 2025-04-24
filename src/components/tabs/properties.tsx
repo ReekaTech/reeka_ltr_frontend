@@ -27,9 +27,10 @@ const properties = [
 interface PropertiesTabProps {
   searchTerm: string;
   viewMode: 'grid' | 'list';
+  portfolioId?: string;
 }
 
-export function PropertiesTab({ searchTerm, viewMode }: PropertiesTabProps) {
+export function PropertiesTab({ searchTerm, viewMode, portfolioId }: PropertiesTabProps) {
   // Filter properties based on search term
   const filteredProperties = properties.filter(
     property =>

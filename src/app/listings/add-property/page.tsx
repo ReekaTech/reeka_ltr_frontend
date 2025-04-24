@@ -13,7 +13,7 @@ export default function AddPropertyPage() {
   };
 
   return (
-    <Layout>
+    <Layout title="Add Property" description="Add a new property to your listings">
       <div className="space-y-6">
         {/* Breadcrumb */}
         <div className="flex items-center text-sm text-gray-500">
@@ -27,14 +27,7 @@ export default function AddPropertyPage() {
           <span className="mx-2">/</span>
           <span>Add Property</span>
         </div>
-
-        {/* Page Header */}
-        <div>
-          <h1 className="text-normal font-extrabold">Add Property</h1>
-          <p className="text-sm font-light text-gray-500">
-            Manage your bookings with ease.
-          </p>
-        </div>
+        
 
         {/* Property Form with Context Provider */}
         <PropertyFormProvider>

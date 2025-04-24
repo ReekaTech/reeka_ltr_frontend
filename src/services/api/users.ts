@@ -24,7 +24,7 @@ export async function getUsers(
   if (params.lastName) queryParams.append('lastName', params.lastName);
   if (params.email) queryParams.append('email', params.email);
   if (params.role) queryParams.append('role', params.role);
-
+  if (params.organizationId) queryParams.append('organizationId', params.organizationId);
   const response = await api.get(`/users?${queryParams.toString()}`);
   return response.data;
 }

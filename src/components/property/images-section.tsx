@@ -1,23 +1,10 @@
 'use client';
 
 import { Upload, X } from 'lucide-react';
-import { useRef, useState } from 'react';
 
+import { PropertyFormData } from '@/services/api/schemas';
 import type React from 'react';
-
-type PropertyFormData = {
-  name: string;
-  type: string;
-  country: string;
-  address: string;
-  bedrooms: number;
-  bathrooms: number;
-  amenities: string[];
-  images: File[];
-  basePrice: string;
-  minPrice: string;
-  maxPrice: string;
-};
+import { useRef } from 'react';
 
 interface ImagesSectionProps {
   formData: PropertyFormData;
@@ -29,7 +16,6 @@ export function ImagesSection({
   updateFormData,
 }: ImagesSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -37,23 +23,27 @@ export function ImagesSection({
 
     const newFiles = Array.from(files);
     const updatedImages = [...formData.images, ...newFiles];
-    updateFormData('images', updatedImages);
-
-    // Create preview URLs for the images
+    
+    // Create preview URLs for new files
     const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
-    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    const updatedPreviews = [...formData.imagePreviews, ...newPreviewUrls];
+
+    updateFormData('images', updatedImages);
+    updateFormData('imagePreviews', updatedPreviews);
   };
 
   const handleRemoveImage = (index: number) => {
     const updatedImages = [...formData.images];
-    updatedImages.splice(index, 1);
-    updateFormData('images', updatedImages);
+    const updatedPreviews = [...formData.imagePreviews];
 
     // Revoke the URL to avoid memory leaks
-    URL.revokeObjectURL(previewUrls[index]);
-    const updatedPreviewUrls = [...previewUrls];
-    updatedPreviewUrls.splice(index, 1);
-    setPreviewUrls(updatedPreviewUrls);
+    URL.revokeObjectURL(updatedPreviews[index]);
+
+    updatedImages.splice(index, 1);
+    updatedPreviews.splice(index, 1);
+
+    updateFormData('images', updatedImages);
+    updateFormData('imagePreviews', updatedPreviews);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -69,21 +59,23 @@ export function ImagesSection({
       file.type.startsWith('image/'),
     );
     const updatedImages = [...formData.images, ...newFiles];
-    updateFormData('images', updatedImages);
-
-    // Create preview URLs for the images
+    
+    // Create preview URLs for new files
     const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
-    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    const updatedPreviews = [...formData.imagePreviews, ...newPreviewUrls];
+
+    updateFormData('images', updatedImages);
+    updateFormData('imagePreviews', updatedPreviews);
   };
 
   return (
     <div className="space-y-6">
       {/* Image Grid */}
       <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {previewUrls.map((url, index) => (
+        {formData.imagePreviews.map((url, index) => (
           <div key={index} className="relative aspect-square">
             <img
-              src={url || '/placeholder.svg'}
+              src={url}
               alt={`Property image ${index + 1}`}
               className="h-full w-full rounded-md object-cover"
             />
@@ -99,7 +91,7 @@ export function ImagesSection({
         ))}
 
         {/* Empty slots */}
-        {Array.from({ length: Math.max(0, 1 - previewUrls.length) }).map(
+        {Array.from({ length: Math.max(0, 1 - formData.imagePreviews.length) }).map(
           (_, index) => (
             <div
               key={`empty-${index}`}

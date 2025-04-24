@@ -2,12 +2,11 @@
  * Portfolio model returned from the API
  */
 export interface Portfolio {
-  id: string;
+  _id: string;
   name: string;
-  propertyCount: number;
-  properties?: string[];
-  createdAt: string;
-  updatedAt: string;
+  propertyCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**
@@ -24,4 +23,9 @@ export interface CreatePortfolioPayload {
 export interface UpdatePortfolioPayload {
   name?: string;
   properties?: string[]; // Optional array of property IDs to update in the portfolio
+}
+
+export interface UnassignedProperty {
+  _id: string;
+  name: string;
 }
