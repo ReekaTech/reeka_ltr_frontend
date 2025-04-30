@@ -39,11 +39,11 @@ export const useCreatePortfolio = () => {
   return useMutation({
     mutationFn: (data: CreatePortfolioPayload) => createPortfolio(data),
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to create portfolio',
-      );
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to create portfolio';
+      
+      toast.error(errorMessage);
     },
     onSuccess: () => {
       toast.success('Portfolio created successfully');
@@ -59,11 +59,11 @@ export const useUpdatePortfolio = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdatePortfolioPayload }) =>
       updatePortfolio(id, data),
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to update portfolio',
-      );
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to update portfolio';
+      
+      toast.error(errorMessage);
     },
     onSuccess: (_, variables) => {
       toast.success('Portfolio updated successfully');
@@ -79,11 +79,11 @@ export const useDeletePortfolio = () => {
   return useMutation({
     mutationFn: (id: string) => deletePortfolio(id),
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to delete portfolio',
-      );
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to delete portfolio';
+      
+      toast.error(errorMessage);
     },
     onSuccess: (_, variables) => {
       toast.success('Portfolio deleted successfully');

@@ -11,6 +11,7 @@ export interface SignupFormValues {
   password: string;
   dial_code: string;
   company: string;
+  contactPerson: string;
 }
 
 export const getInitialValues = (countries?: Country[]): SignupFormValues => ({
@@ -22,6 +23,7 @@ export const getInitialValues = (countries?: Country[]): SignupFormValues => ({
   password: '',
   dial_code: countries?.[0]?.dial_code || '',
   company: '',
+  contactPerson: '',
 });
 
 export const SignupSchema = Yup.object().shape({
@@ -52,4 +54,8 @@ export const SignupSchema = Yup.object().shape({
     .min(2, 'Too Short!')
     .max(100, 'Too Long!')
     .required('Company name is required'),
+  contactPerson: Yup.string()
+    .min(2, 'Too Short!')
+    .max(100, 'Too Long!')
+    .required('Contact person is required'),
 });

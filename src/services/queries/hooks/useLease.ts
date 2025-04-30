@@ -42,11 +42,11 @@ export const useCreateLease = () => {
       return createLease(data);
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to create lease',
-      );
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to create lease';
+      
+      toast.error(errorMessage);
     },
     onSuccess: () => {
       toast.success('Lease created successfully');

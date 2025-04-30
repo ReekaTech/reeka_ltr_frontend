@@ -51,11 +51,7 @@ export interface CreatePropertyPayload {
       quantity?: number;
     };
   };
-  pricing: {
-    base: number;
-    min: number;
-    max: number;
-  };
+  rentalPrice: number;
 }
 
 /**
@@ -113,11 +109,7 @@ export interface PropertyFormData {
   };
   images: File[];
   imagePreviews: string[];
-  pricing: {
-    base: number;
-    min: number;
-    max: number;
-  };
+  rentalPrice: number;
   contactPerson: string;
   status: 'listed' | 'unlisted';
 }

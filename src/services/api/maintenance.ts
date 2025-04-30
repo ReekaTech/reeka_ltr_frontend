@@ -1,4 +1,5 @@
 import { GetMaintenanceTicketsParams, MaintenanceTicket } from '@/services/api/schemas';
+import type { Maintenance, MaintenanceFilters, UpdateMaintenanceStatusPayload } from './schemas/maintenance';
 
 import { api } from '@/services/api';
 import { getSession } from 'next-auth/react';
@@ -28,6 +29,7 @@ export async function getMaintenanceTickets(params: GetMaintenanceTicketsParams)
   if (params.propertyId) queryParams.append('propertyId', params.propertyId);
   if (params.portfolioId) queryParams.append('portfolioId', params.portfolioId);
   if (params.search) queryParams.append('search', params.search);
+  if (params.status) queryParams.append('status', params.status);
 
   const response = await api.get(`/organizations/${organizationId}/maintenance?${queryParams.toString()}`);
   return response.data;
@@ -42,5 +44,20 @@ export async function createMaintenanceTicket(data: Omit<MaintenanceTicket, '_id
   }
 
   const response = await api.post(`/organizations/${organizationId}/maintenance`, data);
+  return response.data;
+}
+
+export async function updateMaintenanceStatus(
+  ticketId: string,
+  payload: UpdateMaintenanceStatusPayload,
+): Promise<MaintenanceTicket> {
+  const session = await getSession();
+  const organizationId = session?.user?.organizationId;
+  
+  if (!organizationId) {
+    throw new Error('Organization ID is required');
+  }
+
+  const response = await api.patch(`/organizations/${organizationId}/maintenance/${ticketId}/status`, payload);
   return response.data;
 } 

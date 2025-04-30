@@ -43,11 +43,12 @@ export const useCreateProperty = () => {
       return createProperty(session.user.organizationId, data);
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to create property',
-      );
+      // Handle array of error messages
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to create property';
+      
+      toast.error(errorMessage);
     },
     onSuccess: () => {
       toast.success('Property created successfully');
@@ -68,11 +69,11 @@ export const useUpdateProperty = () => {
       return updateProperty(session.user.organizationId, id, data);
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to update property',
-      );
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to create property';
+      
+      toast.error(errorMessage);
     },
     onSuccess: () => {
       toast.success('Property updated successfully');
@@ -93,11 +94,11 @@ export const useDeleteProperty = () => {
       return deleteProperty(session.user.organizationId, id);
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to delete property',
-      );
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to create property';
+      
+      toast.error(errorMessage);
     },
     onSuccess: () => {
       toast.success('Property deleted successfully');

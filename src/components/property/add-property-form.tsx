@@ -13,6 +13,7 @@ import { AccordionItem } from '@/components/ui/accordion-item';
 import { PropertyFormData } from '@/services/api/schemas/property';
 import { SuccessModal } from './success-modal';
 import { propertyValidationSchema } from '@/app/listings/validation';
+import { toast } from 'react-toastify';
 import { uploadToS3 } from '@/services/api/upload';
 import { useCreateProperty } from '@/services/queries/hooks/useProperties';
 import { useSearchParams } from 'next/navigation';
@@ -69,11 +70,8 @@ export function AddPropertyForm() {
       ).then(urls => urls.flat());
 
       // Convert pricing values to numbers
-      const pricing = {
-        base: Number(values.pricing.base),
-        min: Number(values.pricing.min),
-        max: Number(values.pricing.max),
-      };
+      const rentalPrice = Number(values.rentalPrice);
+  
       
 
       // Create property with uploaded image URLs
@@ -86,14 +84,13 @@ export function AddPropertyForm() {
         rooms: values.rooms,
         amenities: values.amenities,
         imageUrls: imageUrls,
-        pricing,
+        rentalPrice,
         ...(values.contactPerson && { contactPerson: values.contactPerson }),
         ...(values.portfolioId && { portfolioId: values.portfolioId }),
       });
       
       setShowSuccessModal(true);
     } catch (error) {
-      // TODO: Add error handling (toast/notification)
       console.error('Failed to create property:', error);
     } finally {
       setIsSubmitting(false);
@@ -113,11 +110,7 @@ export function AddPropertyForm() {
     amenities: {},
     images: [],
     imagePreviews: [],
-    pricing: {
-      base: 0,
-      min: 0,
-      max: 0,
-    },
+    rentalPrice: 0,
     contactPerson: '',
     status: 'listed' as const,
   };
@@ -133,7 +126,7 @@ export function AddPropertyForm() {
         validationSchema={propertyValidationSchema}
         onSubmit={handleSubmit}
       >
-        {({ values, setFieldValue }: FormikProps<typeof initialValues>) => {
+        {({ values, setFieldValue, validateForm, errors }: FormikProps<typeof initialValues>) => {
           return (
             <Form>
               <div className="space-y-4 rounded-t-2xl bg-gray-50 px-1 pt-1 pb-6 shadow">
@@ -216,6 +209,13 @@ export function AddPropertyForm() {
                 </button>
                 <button
                   type="submit"
+                  onClick={async () => {
+                    await validateForm();
+                    if (Object.keys(errors).length > 0) {
+                      toast.error('Please fill in all required fields');
+                      return;
+                    }
+                  }}
                   disabled={isSubmitting}
                   className="hover:bg-opacity-90 cursor-pointer rounded-md bg-[#e36b37] px-4 py-2 text-sm font-bold text-white transition-all disabled:opacity-70"
                 >

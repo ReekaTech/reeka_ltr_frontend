@@ -82,11 +82,11 @@ export const useInviteUser = () => {
   return useMutation({
     mutationFn: (data: UserInvitePayload) => inviteUser(data),
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to invite user',
-      );
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to invite user';
+      
+      toast.error(errorMessage);
     },
     onSuccess: () => {
       toast.success('Invitation sent successfully');
@@ -101,11 +101,11 @@ export const useRetryInvite = () => {
   return useMutation({
     mutationFn: (id: string) => retryInvite(id),
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to retry invitation',
-      );
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to retry invitation';
+      
+      toast.error(errorMessage);
     },
     onSuccess: () => {
       toast.success('Invitation resent successfully');

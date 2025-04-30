@@ -55,7 +55,6 @@ export function AddLeaseModal({
     startDate: '',
     endDate: '',
     rentalRate: '',
-    depositAmount: '',
     paymentFrequency: '',
     notes: '',
   };
@@ -65,7 +64,6 @@ export function AddLeaseModal({
       await createLeaseMutation.mutateAsync({
         ...values,
         rentalRate: Number(values.rentalRate),
-        depositAmount: Number(values.depositAmount),
       });
       onClose();
     } catch (error) {
@@ -422,25 +420,7 @@ export function AddLeaseModal({
                         className="mt-1 text-sm text-red-500"
                       />
                     </div>
-
-                    {/* Deposit Amount */}
-                    <div>
-                      <label htmlFor="depositAmount" className="mb-2 block text-sm">
-                        Deposit Amount
-                      </label>
-                      <Field
-                        type="number"
-                        id="depositAmount"
-                        name="depositAmount"
-                        className="w-full rounded-md border border-[#e5e5e5] px-3 py-2.5"
-                        placeholder="Deposit Amount"
-                      />
-                      <ErrorMessage
-                        name="depositAmount"
-                        component="div"
-                        className="mt-1 text-sm text-red-500"
-                      />
-                    </div>
+                   
 
                     {/* Notes */}
                     <div>

@@ -1,4 +1,6 @@
+import type { MaintenanceFilters, UpdateMaintenanceStatusPayload } from '@/services/api/schemas/maintenance';
 import { createMaintenanceTicket, getMaintenanceTickets } from '@/services/api';
+import { getMaintenanceTickets as getMaintenanceTicketsApi, updateMaintenanceStatus } from '@/services/api/maintenance';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { GetMaintenanceTicketsParams } from '@/services/api/schemas';
@@ -28,15 +30,41 @@ export const useCreateMaintenanceTicket = () => {
       return createMaintenanceTicket(data);
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to create maintenance ticket',
-      );
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to create maintenance ticket';
+      
+      toast.error(errorMessage);
     },
     onSuccess: () => {
       toast.success('Maintenance ticket created successfully');
       queryClient.invalidateQueries({ queryKey: ['maintenanceTickets'] });
     },
   });
-}; 
+};
+
+export function useMaintenanceQuery(filters: MaintenanceFilters = {}) {
+  return useQuery({
+    queryKey: ['maintenance', filters],
+    queryFn: () => getMaintenanceTicketsApi(filters),
+  });
+}
+
+export function useUpdateMaintenanceStatusMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ ticketId, status }: { ticketId: string; status: UpdateMaintenanceStatusPayload['status'] }) =>
+      updateMaintenanceStatus(ticketId, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['maintenance'] });
+    },
+    onError: (error: any) => {
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to update maintenance status';
+      
+      toast.error(errorMessage);
+    },
+  });
+} 

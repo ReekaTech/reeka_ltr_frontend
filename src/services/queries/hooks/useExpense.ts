@@ -33,9 +33,12 @@ export const useCreateExpense = () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       toast.success('Expense created successfully');
     },
-    onError: (error) => {
-      console.error('Error creating expense:', error);
-      toast.error('Failed to create expense');
+    onError: (error: any) => {
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to create expense';
+      
+      toast.error(errorMessage);
     },
   });
 }; 

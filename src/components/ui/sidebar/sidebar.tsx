@@ -42,12 +42,12 @@ const navItems: NavItem[] = [
   },
   {
     title: 'Tenants',
-    href: '/#',
+    href: '/tenants',
     icon: Calendar1,
   },
   {
     title: 'Maintenance',
-    href: '/#',
+    href: '/maintenance',
     icon: Drill,
   },
   {

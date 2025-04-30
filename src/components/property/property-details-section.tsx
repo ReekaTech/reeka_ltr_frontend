@@ -6,6 +6,7 @@ import { ChevronDown } from 'lucide-react';
 import { PropertyFormData } from '@/services/api/schemas';
 import { propertyTypes } from '@/app/constants';
 import { useCountries } from '@/services/queries/hooks';
+import { useFormikContext } from 'formik';
 import { useSession } from 'next-auth/react';
 import { useUsers } from '@/services/queries/hooks/useUser';
 
@@ -18,6 +19,7 @@ export function PropertyDetailsSection({
   formData,
   updateFormData,
 }: PropertyDetailsSectionProps) {
+  const { errors, touched } = useFormikContext<PropertyFormData>();
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [showContactDropdown, setShowContactDropdown] = useState(false);
@@ -74,6 +76,9 @@ export function PropertyDetailsSection({
           placeholder="Name"
           required
         />
+        {errors.name && touched.name && (
+          <div className="mt-1 text-sm text-red-500">{errors.name}</div>
+        )}
       </div>
 
 
@@ -98,7 +103,9 @@ export function PropertyDetailsSection({
               <span>{formData.type ? propertyTypes[formData.type as keyof typeof propertyTypes] : 'Type'}</span>
               <ChevronDown className="h-4 w-4 text-gray-500" />
             </button>
-
+            {errors.type && touched.type && (
+              <div className="mt-1 text-sm text-red-500">{errors.type}</div>
+            )}
             {showTypeDropdown && (
               <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg">
                 <ul
@@ -152,7 +159,9 @@ export function PropertyDetailsSection({
               </span>
               <ChevronDown className="h-4 w-4 text-gray-500" />
             </button>
-
+            {errors.contactPerson && touched.contactPerson && (
+              <div className="mt-1 text-sm text-red-500">{errors.contactPerson}</div>
+            )}
             {showContactDropdown && (
               <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg">
                 <div className="sticky top-0 border-b border-gray-200 bg-white p-2">
@@ -210,7 +219,9 @@ export function PropertyDetailsSection({
               <span>{countries?.find(c => c.id === formData.countryId)?.name || 'Country'}</span>
               <ChevronDown className="h-4 w-4 text-gray-500" />
             </button>
-
+            {errors.countryId && touched.countryId && (
+              <div className="mt-1 text-sm text-red-500">{errors.countryId}</div>
+            )}
             {showCountryDropdown && (
               <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg">
                 <div className="sticky top-0 border-b border-gray-200 bg-white p-2">
@@ -261,6 +272,9 @@ export function PropertyDetailsSection({
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
             placeholder="Address"
           />
+          {errors.address && touched.address && (
+            <div className="mt-1 text-sm text-red-500">{errors.address}</div>
+          )}
         </div>
       </div>
 

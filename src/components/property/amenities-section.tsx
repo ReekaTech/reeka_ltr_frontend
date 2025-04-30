@@ -116,164 +116,34 @@ export function AmenitiesSection({
         <div>
           <div className="mb-3">
             <h3 className="text-sm font-medium">Amenities</h3>
-            <p className="text-xs font-light text-gray-500">Select or add</p>
+            <p className="text-xs font-light text-gray-500">Select and add</p>
           </div>
 
-          {/* Amenity Checkboxes */}
-          <div className="mb-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2">
-                <div className="relative flex h-5 w-5 items-center justify-center">
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={!!formData.amenities['Swimming Pool']?.available}
-                    onChange={() => handleToggleAmenity('Swimming Pool')}
-                  />
-                  <div className="h-5 w-5 rounded border border-gray-300 bg-white peer-checked:bg-green-500"></div>
-                  {!!formData.amenities['Swimming Pool']?.available && (
-                    <svg
-                      className="absolute h-3.5 w-3.5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  )}
-                </div>
-                <span className="text-sm">Swimming Pool</span>
-              </label>
-
-              <div className="flex items-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if ((formData.amenities['Swimming Pool']?.quantity ?? 0) > 0) {
-                      updateFormData('amenities', {
-                        ...formData.amenities,
-                        'Swimming Pool': {
-                          ...formData.amenities['Swimming Pool'],
-                          quantity: (formData.amenities['Swimming Pool']?.quantity ?? 0) - 1
-                        }
-                      });
-                    }
-                  }}
-                  disabled={!formData.amenities['Swimming Pool']?.available}
-                  className={`flex h-8 w-8 items-center justify-center rounded-l-md border border-gray-300 ${
-                    formData.amenities['Swimming Pool']?.available ? 'bg-gray-50 text-gray-600' : 'bg-gray-100 text-gray-400'
-                  }`}
-                  aria-label="Decrease swimming pools"
+          {/* Amenity Sections */}
+          <div className="mb-4 flex flex-wrap gap-3">
+            {Object.entries(formData.amenities).map(([amenity, details]) => (
+              <div
+                key={amenity}
+                className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow-sm"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  -
-                </button>
-                <span className="flex h-8 w-8 items-center justify-center border-t border-b border-gray-300 bg-white text-sm">
-                  {formData.amenities['Swimming Pool']?.quantity || 0}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData('amenities', {
-                      ...formData.amenities,
-                      'Swimming Pool': {
-                        ...formData.amenities['Swimming Pool'],
-                        quantity: (formData.amenities['Swimming Pool']?.quantity || 0) + 1
-                      }
-                    });
-                  }}
-                  disabled={!formData.amenities['Swimming Pool']?.available}
-                  className={`flex h-8 w-8 items-center justify-center rounded-r-md border border-gray-300 ${
-                    formData.amenities['Swimming Pool']?.available ? 'bg-gray-50 text-gray-600' : 'bg-gray-100 text-gray-400'
-                  }`}
-                  aria-label="Increase swimming pools"
-                >
-                  +
-                </button>
+                  <circle cx="8" cy="21" r="1" />
+                  <circle cx="19" cy="21" r="1" />
+                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                </svg>
+                <span className="text-sm">{amenity}</span>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2">
-                <div className="relative flex h-5 w-5 items-center justify-center">
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={!!formData.amenities['Basketball Court']?.available}
-                    onChange={() => handleToggleAmenity('Basketball Court')}
-                  />
-                  <div className="h-5 w-5 rounded border border-gray-300 bg-white peer-checked:bg-green-500"></div>
-                  {!!formData.amenities['Basketball Court']?.available && (
-                    <svg
-                      className="absolute h-3.5 w-3.5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  )}
-                </div>
-                <span className="text-sm">Basketball Court</span>
-              </label>
-
-              <div className="flex items-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if ((formData.amenities['Basketball Court']?.quantity ?? 0) > 0) {
-                      updateFormData('amenities', {
-                        ...formData.amenities,
-                        'Basketball Court': {
-                          ...formData.amenities['Basketball Court'],
-                          quantity: (formData.amenities['Basketball Court']?.quantity ?? 0) - 1
-                        }
-                      });
-                    }
-                  }}
-                  disabled={!formData.amenities['Basketball Court']?.available}
-                  className={`flex h-8 w-8 items-center justify-center rounded-l-md border border-gray-300 ${
-                    formData.amenities['Basketball Court']?.available ? 'bg-gray-50 text-gray-600' : 'bg-gray-100 text-gray-400'
-                  }`}
-                  aria-label="Decrease basketball courts"
-                >
-                  -
-                </button>
-                <span className="flex h-8 w-8 items-center justify-center border-t border-b border-gray-300 bg-white text-sm">
-                  {formData.amenities['Basketball Court']?.quantity || 0}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateFormData('amenities', {
-                      ...formData.amenities,
-                      'Basketball Court': {
-                        ...formData.amenities['Basketball Court'],
-                        quantity: (formData.amenities['Basketball Court']?.quantity || 0) + 1
-                      }
-                    });
-                  }}
-                  disabled={!formData.amenities['Basketball Court']?.available}
-                  className={`flex h-8 w-8 items-center justify-center rounded-r-md border border-gray-300 ${
-                    formData.amenities['Basketball Court']?.available ? 'bg-gray-50 text-gray-600' : 'bg-gray-100 text-gray-400'
-                  }`}
-                  aria-label="Increase basketball courts"
-                >
-                  +
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Add Facility Button */}
@@ -285,7 +155,7 @@ export function AmenitiesSection({
             <div className="mr-2 flex h-6 w-6 items-center justify-center rounded-full border border-green-600">
               <Plus className="h-4 w-4" />
             </div>
-            Add new facility/Equipment
+            Add / Remove Facility / Equipment
           </button>
         </div>
       </div>

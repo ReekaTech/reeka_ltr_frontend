@@ -4,6 +4,7 @@ import { Upload, X } from 'lucide-react';
 
 import { PropertyFormData } from '@/services/api/schemas';
 import type React from 'react';
+import { toast } from 'react-toastify';
 import { useRef } from 'react';
 
 interface ImagesSectionProps {
@@ -11,17 +12,30 @@ interface ImagesSectionProps {
   updateFormData: (field: keyof PropertyFormData, value: any) => void;
 }
 
+const MAX_SIZE_MB = 7;
+const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+
 export function ImagesSection({
   formData,
   updateFormData,
 }: ImagesSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const validateImageSize = (file: File): boolean => {
+    if (file.size > MAX_SIZE_BYTES) {
+      toast.error(`Image ${file.name} is too large. Maximum size is ${MAX_SIZE_MB}MB`);
+      return false;
+    }
+    return true;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    const newFiles = Array.from(files);
+    const newFiles = Array.from(files).filter(validateImageSize);
+    if (newFiles.length === 0) return;
+
     const updatedImages = [...formData.images, ...newFiles];
     
     // Create preview URLs for new files
@@ -55,9 +69,12 @@ export function ImagesSection({
     const files = e.dataTransfer.files;
     if (!files) return;
 
-    const newFiles = Array.from(files).filter(file =>
-      file.type.startsWith('image/'),
-    );
+    const newFiles = Array.from(files)
+      .filter(file => file.type.startsWith('image/'))
+      .filter(validateImageSize);
+
+    if (newFiles.length === 0) return;
+    
     const updatedImages = [...formData.images, ...newFiles];
     
     // Create preview URLs for new files

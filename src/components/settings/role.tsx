@@ -119,155 +119,136 @@ export function RolesForm() {
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <div className="min-w-full">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="rounded-t-lg bg-[#f6f6f6]">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 first:rounded-tl-lg">
-                  Name
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                  Date Added
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                  Role
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                  Email
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                  Phone No
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                  Invitation Status
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 last:rounded-tr-lg">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center">
-                    <div className="flex justify-center">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#e36b37] border-t-transparent"></div>
-                    </div>
-                  </td>
-                </tr>
-              ) : isError ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="px-4 py-8 text-center text-red-500"
-                  >
-                    Error loading users. Please try again.
-                  </td>
-                </tr>
-              ) : usersData?.items && usersData.items.length > 0 ? (
-                usersData.items.map(user => (
-                  <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-                      {user.firstName} {user.lastName}
-                    </td>
-                    <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
-                      {formatDate(user.createdAt)}
-                    </td>
-                    <td className="px-4 py-4 text-sm whitespace-nowrap">
-                      <RoleBadge role={user.role} />
-                    </td>
-                    <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
-                      {user.email}
-                    </td>
-                    <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
-                      {user.phoneCountryCode}
-                      {user.phone}
-                    </td>
-                    <td className="px-4 py-4 text-sm whitespace-nowrap">
-                      <StatusBadge status={user.invitationStatus || 'OWNER'} />
-                    </td>
-                    <td className="px-4 py-4 text-sm whitespace-nowrap">
-                      <div className="relative">
-                        <button
-                          className="text-gray-400 hover:text-gray-600"
-                          onClick={e => {
-                            e.stopPropagation();
-                            setOpenMenuId(
-                              openMenuId === user.id ? null : user.id,
-                            );
-                          }}
+        <div className="min-w-[1000px]">
+          {/* Header */}
+          <div className="grid grid-cols-6 bg-[#f6f6f6] rounded-t-lg">
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Name</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Date Added</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Role</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Phone No</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Invitation Status</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Actions</div>
+          </div>
+
+          {/* Content */}
+          <div className="divide-y divide-gray-200 bg-white">
+            {isLoading ? (
+              // Skeleton Loading State
+              Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="grid grid-cols-6 animate-pulse">
+                  <div className="px-4 py-4">
+                    <div className="h-4 w-32 rounded bg-gray-200"></div>
+                  </div>
+                  <div className="px-4 py-4">
+                    <div className="h-4 w-24 rounded bg-gray-200"></div>
+                  </div>
+                  <div className="px-4 py-4">
+                    <div className="h-5 w-28 rounded-full bg-gray-200"></div>
+                  </div>
+                  <div className="px-4 py-4">
+                    <div className="h-4 w-28 rounded bg-gray-200"></div>
+                  </div>
+                  <div className="px-4 py-4">
+                    <div className="h-5 w-20 rounded-full bg-gray-200"></div>
+                  </div>
+                  <div className="px-4 py-4">
+                    <div className="h-4 w-8 rounded bg-gray-200"></div>
+                  </div>
+                </div>
+              ))
+            ) : usersData?.items && usersData.items.length > 0 ? (
+              usersData.items.map(user => (
+                <div key={user.id} className="grid grid-cols-6 hover:bg-gray-50">
+                  <div className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
+                    {user.firstName} {user.lastName}
+                  </div>
+                  <div className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
+                    {formatDate(user.createdAt)}
+                  </div>
+                  <div className="px-4 py-4 text-sm whitespace-nowrap">
+                    <RoleBadge role={user.role} />
+                  </div>
+                  <div className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
+                    {user.phoneCountryCode}
+                    {user.phone}
+                  </div>
+                  <div className="px-4 py-4 text-sm whitespace-nowrap">
+                    <StatusBadge status={user.invitationStatus || 'OWNER'} />
+                  </div>
+                  <div className="px-4 py-4 text-sm whitespace-nowrap">
+                    <div className="relative">
+                      <button
+                        className="text-gray-400 hover:text-gray-600"
+                        onClick={e => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === user.id ? null : user.id);
+                        }}
+                      >
+                        <MoreVertical className="h-4 w-4 cursor-pointer" />
+                      </button>
+                      {openMenuId === user.id && (
+                        <div
+                          ref={dropdownRef}
+                          className="absolute right-0 z-10 mt-2 w-32 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
                         >
-                          <MoreVertical className="h-4 w-4 cursor-pointer" />
-                        </button>
-                        {openMenuId === user.id && (
-                          <div
-                            ref={dropdownRef}
-                            className="absolute right-0 z-10 mt-2 w-32 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
-                          >
-                            {user.invitationStatus === 'EXPIRED' && (
-                              <button
-                                className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-                                disabled={isRetrying}
-                                onClick={() => {
-                                  retryInvitation(user.id, {
-                                    onSuccess: () => {
-                                      setOpenMenuId(null);
-                                    },
-                                  });
-                                }}
-                              >
-                                {isRetrying ? 'Retrying...' : 'Retry'}
-                              </button>
-                            )}
+                          {user.invitationStatus === 'EXPIRED' && (
                             <button
-                              className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                              disabled={isRemoving}
+                              className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                              disabled={isRetrying}
                               onClick={() => {
-                                setOpenMenuId(null);
-                                setPromptData({
-                                  title: 'Confirm Removal',
-                                  message: `Are you sure you want to remove ${user.firstName} ${user.lastName}? This action cannot be undone.`,
-                                  userId: user.id,
-                                  userName: `${user.firstName} ${user.lastName}`,
-                                  onConfirm: () => {
-                                    removeUser(user.id, {
-                                      onSuccess: () => {
-                                        toast.success(
-                                          `${user.firstName} ${user.lastName} has been removed`,
-                                        );
-                                        setShowPromptModal(false);
-                                      },
-                                      onError: () => {
-                                        setShowPromptModal(false);
-                                      },
-                                    });
+                                retryInvitation(user.id, {
+                                  onSuccess: () => {
+                                    setOpenMenuId(null);
                                   },
                                 });
-                                setShowPromptModal(true);
                               }}
                             >
-                              {isRemoving && promptData?.userId === user.id
-                                ? 'Removing...'
-                                : 'Remove'}
+                              {isRetrying ? 'Retrying...' : 'Retry'}
                             </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="px-4 py-8 text-center text-gray-500"
-                  >
-                    No staff members found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                          )}
+                          <button
+                            className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                            disabled={isRemoving}
+                            onClick={() => {
+                              setOpenMenuId(null);
+                              setPromptData({
+                                title: 'Confirm Removal',
+                                message: `Are you sure you want to remove ${user.firstName} ${user.lastName}? This action cannot be undone.`,
+                                userId: user.id,
+                                userName: `${user.firstName} ${user.lastName}`,
+                                onConfirm: () => {
+                                  removeUser(user.id, {
+                                    onSuccess: () => {
+                                      toast.success(
+                                        `${user.firstName} ${user.lastName} has been removed`,
+                                      );
+                                      setShowPromptModal(false);
+                                    },
+                                    onError: () => {
+                                      setShowPromptModal(false);
+                                    },
+                                  });
+                                },
+                              });
+                              setShowPromptModal(true);
+                            }}
+                          >
+                            {isRemoving && promptData?.userId === user.id
+                              ? 'Removing...'
+                              : 'Remove'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-12 text-center">
+                <p className="text-gray-500">No staff members found</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

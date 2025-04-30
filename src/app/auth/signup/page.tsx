@@ -399,6 +399,25 @@ export default function SignUp() {
                         </div>
                       )}
                     </div>
+                    <div>
+                      <label
+                        htmlFor="contactPerson"
+                        className="mb-2 block text-[15px] text-[#3a3a3a]"
+                      >
+                        Contact Person
+                      </label>
+                      <Field
+                        name="contactPerson"
+                        type="text"
+                        className="w-full rounded-md border border-[#d0d5dd] bg-white px-4 py-3 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                        placeholder="Enter contact person name"
+                      />
+                      {errors.contactPerson && touched.contactPerson && (
+                        <div className="mt-1 text-sm text-red-500">
+                          {errors.contactPerson}
+                        </div>
+                      )}
+                    </div>
 
                     {/* Sign Up button */}
                     <div className="pt-5">
