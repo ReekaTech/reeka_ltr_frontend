@@ -71,4 +71,5 @@ export interface AuthResponse {
     role: UserRole;
   };
   organizationId: string;
+  organizationName: string;
 }

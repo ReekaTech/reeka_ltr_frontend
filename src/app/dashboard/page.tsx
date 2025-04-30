@@ -1,12 +1,22 @@
 'use client';
 
-import { Layout } from '@/components/ui';
-import Link from 'next/link';
-import { useEffect } from 'react';
+import { Layout, Tabs, TabsContent } from '@/components/ui';
+import { useEffect, useState } from 'react';
+
+import { formatDate } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState('overview');
+  
+
+  const tabs = [
+    { label: 'Overview', value: 'overview' },
+    { label: 'Properties', value: 'properties' },
+    { label: 'Portfolios', value: 'portfolios' },
+  ];
+  
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -25,14 +35,26 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f9fafb]">
-      <Layout>
-        {/* Main content */}
-        <div className="w-full flex-1">
-          {/* Dashboard content */}
-          <main className="h-screen w-full bg-amber-600 p-6"></main>
-        </div>
-      </Layout>
-    </div>
+    <Layout title={`${session?.user.organizationName} Dashboard`} description={formatDate(new Date().toISOString())}>
+      <div className="space-y-4">
+        <Tabs
+          items={tabs}
+          value={activeTab}
+          onValueChange={setActiveTab}
+        />
+
+        <TabsContent value="overview" activeValue={activeTab}>
+            <div>Overview</div>
+        </TabsContent>
+
+        <TabsContent value="properties" activeValue={activeTab}>
+            <div>Properties</div>
+        </TabsContent>
+
+        <TabsContent value="portfolios" activeValue={activeTab}>
+            <div>Portfolios</div>
+        </TabsContent>
+      </div>
+    </Layout>
   );
 }

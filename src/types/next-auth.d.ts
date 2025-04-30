@@ -14,6 +14,7 @@ declare module 'next-auth' {
       isActive: boolean;
       role: string;
       organizationId: string;
+      organizationName: string;
     };
   }
 

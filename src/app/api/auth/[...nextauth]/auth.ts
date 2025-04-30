@@ -36,6 +36,7 @@ export const authOptions: NextAuthOptions = {
                 isActive: true,
                 role: response.user.role,
                 organizationId: response.organizationId,
+                organizationName: response.organizationName,
               },
             };
           }
