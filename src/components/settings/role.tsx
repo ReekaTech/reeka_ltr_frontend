@@ -132,7 +132,7 @@ export function RolesForm() {
 
           {/* Content */}
           <div className="divide-y divide-gray-200 bg-white">
-            {isLoading ? (
+              {isLoading ? (
               // Skeleton Loading State
               Array.from({ length: 3 }).map((_, index) => (
                 <div key={index} className="grid grid-cols-6 animate-pulse">
@@ -154,100 +154,100 @@ export function RolesForm() {
                   <div className="px-4 py-4">
                     <div className="h-4 w-8 rounded bg-gray-200"></div>
                   </div>
-                </div>
+                    </div>
               ))
-            ) : usersData?.items && usersData.items.length > 0 ? (
-              usersData.items.map(user => (
+              ) : usersData?.items && usersData.items.length > 0 ? (
+                usersData.items.map(user => (
                 <div key={user.id} className="grid grid-cols-6 hover:bg-gray-50">
                   <div className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-                    {user.firstName} {user.lastName}
+                      {user.firstName} {user.lastName}
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
-                    {formatDate(user.createdAt)}
+                      {formatDate(user.createdAt)}
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap">
-                    <RoleBadge role={user.role} />
+                      <RoleBadge role={user.role} />
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
-                    {user.phoneCountryCode}
-                    {user.phone}
+                      {user.phoneCountryCode}
+                      {user.phone}
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap">
-                    <StatusBadge status={user.invitationStatus || 'OWNER'} />
+                      <StatusBadge status={user.invitationStatus || 'OWNER'} />
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap">
-                    <div className="relative">
-                      <button
-                        className="text-gray-400 hover:text-gray-600"
-                        onClick={e => {
-                          e.stopPropagation();
+                      <div className="relative">
+                        <button
+                          className="text-gray-400 hover:text-gray-600"
+                          onClick={e => {
+                            e.stopPropagation();
                           setOpenMenuId(openMenuId === user.id ? null : user.id);
-                        }}
-                      >
-                        <MoreVertical className="h-4 w-4 cursor-pointer" />
-                      </button>
-                      {openMenuId === user.id && (
-                        <div
-                          ref={dropdownRef}
-                          className="absolute right-0 z-10 mt-2 w-32 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+                          }}
                         >
-                          {user.invitationStatus === 'EXPIRED' && (
-                            <button
-                              className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-                              disabled={isRetrying}
-                              onClick={() => {
-                                retryInvitation(user.id, {
-                                  onSuccess: () => {
-                                    setOpenMenuId(null);
-                                  },
-                                });
-                              }}
-                            >
-                              {isRetrying ? 'Retrying...' : 'Retry'}
-                            </button>
-                          )}
-                          <button
-                            className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                            disabled={isRemoving}
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              setPromptData({
-                                title: 'Confirm Removal',
-                                message: `Are you sure you want to remove ${user.firstName} ${user.lastName}? This action cannot be undone.`,
-                                userId: user.id,
-                                userName: `${user.firstName} ${user.lastName}`,
-                                onConfirm: () => {
-                                  removeUser(user.id, {
+                          <MoreVertical className="h-4 w-4 cursor-pointer" />
+                        </button>
+                        {openMenuId === user.id && (
+                          <div
+                            ref={dropdownRef}
+                            className="absolute right-0 z-10 mt-2 w-32 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+                          >
+                            {user.invitationStatus === 'EXPIRED' && (
+                              <button
+                                className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                                disabled={isRetrying}
+                                onClick={() => {
+                                  retryInvitation(user.id, {
                                     onSuccess: () => {
-                                      toast.success(
-                                        `${user.firstName} ${user.lastName} has been removed`,
-                                      );
-                                      setShowPromptModal(false);
-                                    },
-                                    onError: () => {
-                                      setShowPromptModal(false);
+                                      setOpenMenuId(null);
                                     },
                                   });
-                                },
-                              });
-                              setShowPromptModal(true);
-                            }}
-                          >
-                            {isRemoving && promptData?.userId === user.id
-                              ? 'Removing...'
-                              : 'Remove'}
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                                }}
+                              >
+                                {isRetrying ? 'Retrying...' : 'Retry'}
+                              </button>
+                            )}
+                            <button
+                              className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                              disabled={isRemoving}
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                setPromptData({
+                                  title: 'Confirm Removal',
+                                  message: `Are you sure you want to remove ${user.firstName} ${user.lastName}? This action cannot be undone.`,
+                                  userId: user.id,
+                                  userName: `${user.firstName} ${user.lastName}`,
+                                  onConfirm: () => {
+                                    removeUser(user.id, {
+                                      onSuccess: () => {
+                                        toast.success(
+                                          `${user.firstName} ${user.lastName} has been removed`,
+                                        );
+                                        setShowPromptModal(false);
+                                      },
+                                      onError: () => {
+                                        setShowPromptModal(false);
+                                      },
+                                    });
+                                  },
+                                });
+                                setShowPromptModal(true);
+                              }}
+                            >
+                              {isRemoving && promptData?.userId === user.id
+                                ? 'Removing...'
+                                : 'Remove'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
                   </div>
                 </div>
-              ))
-            ) : (
+                ))
+              ) : (
               <div className="py-12 text-center">
                 <p className="text-gray-500">No staff members found</p>
               </div>
-            )}
+              )}
           </div>
         </div>
       </div>

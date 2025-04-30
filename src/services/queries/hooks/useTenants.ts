@@ -1,7 +1,7 @@
 import { fetchTenants, updatePaymentStatus } from '@/services/api/tenants';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { GetTenantsParams } from '@/services/api/tenants';
+import type { GetTenantsParams } from '@/services/api/schemas';
 import { toast } from 'react-toastify';
 
 export function useTenantsQuery(params: GetTenantsParams) {

@@ -252,7 +252,7 @@ export function AddLeaseModal({
                         <Field
                           type="tel"
                           name="tenant.phone"
-                          className="flex-1 rounded-r-md border border-l-0 border-[#e5e5e5] px-3 py-2.5"
+                          className="h-[42px] flex-1 rounded-r-md border border-l-0 border-[#e5e5e5] px-3 py-2.5"
                           placeholder="Enter Phone Number"
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             const value = e.target.value;

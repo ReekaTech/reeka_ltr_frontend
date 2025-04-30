@@ -13,9 +13,7 @@ import { useDebounce } from '@/services/queries/hooks';
 export function MaintenanceList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedPortfolio, setSelectedPortfolio] = useState<string>('all');
   const [showPortfolioDropdown, setShowPortfolioDropdown] = useState(false);
-  const [portfolioSearch, setPortfolioSearch] = useState('');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const portfolioDropdownRef = useRef<HTMLDivElement>(null);
@@ -32,10 +30,9 @@ export function MaintenanceList() {
   } = useMaintenanceQuery({
     page: currentPage,
     limit: ITEMS_PER_PAGE,
-    sortBy: 'dateOfCreation',
+    sortBy: 'createdAt',
     sortOrder: 'desc',
     search: debouncedSearch,
-    portfolioId: selectedPortfolio === 'all' ? undefined : selectedPortfolio,
   });
 
   const { mutate: updateStatus } = useUpdateMaintenanceStatusMutation();
@@ -83,24 +80,6 @@ export function MaintenanceList() {
     <div className="rounded-lg bg-white p-4">
       <div className="mb-6 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div className="flex w-full flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0 sm:w-[80%] md:w-[70%] lg:w-[50%]">
-          {/* Portfolio Filter Dropdown */}
-          <div className="relative w-full sm:w-1/2" ref={portfolioDropdownRef}>
-            <button
-              type="button"
-              className="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-4 text-sm text-gray-900 focus:border-[#e36b37] focus:ring-[#e36b37] focus:outline-none"
-              onClick={() => setShowPortfolioDropdown(!showPortfolioDropdown)}
-            >
-              <span className="truncate">All Portfolio</span>
-              <svg
-                className="ml-2 h-4 w-4 flex-shrink-0 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          </div>
 
           {/* Search Input */}
           <div className="relative w-full sm:w-1/2">
@@ -121,7 +100,7 @@ export function MaintenanceList() {
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <div className="min-w-[1000px]">
           {/* Header */}
-          <div className="grid grid-cols-7 bg-[#f6f6f6] rounded-t-lg" style={{ gridTemplateColumns: '100px 1.5fr 1fr 1fr 1fr 1fr 80px' }}>
+          <div className="grid grid-cols-7 bg-[#f6f6f6] rounded-t-lg" style={{ gridTemplateColumns: '100px 300px 200px 150px 150px 120px 80px' }}>
             <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Ticket No</div>
             <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Description</div>
             <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Property</div>
@@ -136,7 +115,7 @@ export function MaintenanceList() {
             {isLoading ? (
               // Skeleton Loading State
               Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="grid grid-cols-7 animate-pulse" style={{ gridTemplateColumns: '100px 1.5fr 1fr 1fr 1fr 1fr 80px' }}>
+                <div key={index} className="grid grid-cols-7 animate-pulse" style={{ gridTemplateColumns: '100px 300px 200px 150px 150px 120px 80px' }}>
                   <div className="px-4 py-4">
                     <div className="h-4 w-14 rounded bg-gray-200"></div>
                   </div>
@@ -162,8 +141,8 @@ export function MaintenanceList() {
               ))
             ) : maintenanceData?.items && maintenanceData.items.length > 0 ? (
               maintenanceData.items.map((ticket: MaintenanceTicket) => (
-                <div key={ticket._id} className="grid grid-cols-7 hover:bg-gray-50" style={{ gridTemplateColumns: '100px 1.5fr 1fr 1fr 1fr 1fr 80px' }}>
-                  <div className="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                <div key={ticket._id} className="grid grid-cols-7 hover:bg-gray-50" style={{ gridTemplateColumns: '100px 300px 200px 150px 150px 120px 80px' }}>
+                  <div className="px-4 py-4 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
                     <a href="#" className="text-[#e36b37] hover:underline">
                       {ticket.ticketNumber}
                     </a>
@@ -173,16 +152,16 @@ export function MaintenanceList() {
                       {ticket.description}
                     </div>
                   </div>
-                  <div className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
-                    {ticket.property || 'N/A'}
+                  <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis text-gray-500">
+                    {ticket.property?.name || 'N/A'}
                   </div>
-                  <div className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
+                  <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis text-gray-500">
                     {formatDate(ticket.createdAt)}
                   </div>
-                  <div className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
+                  <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis text-gray-500">
                     {ticket.type}
                   </div>
-                  <div className="px-4 py-4 text-sm whitespace-nowrap">
+                  <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis">
                     <StatusBadge status={ticket.status} />
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap">
@@ -203,13 +182,13 @@ export function MaintenanceList() {
                         >
                           <button
                             className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onClick={() => handleStatusChange(ticket._id, 'COMPLETED')}
+                            onClick={() => handleStatusChange(ticket._id, 'completed')}
                           >
                             Complete
                           </button>
                           <button
                             className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onClick={() => handleStatusChange(ticket._id, 'IN_PROGRESS')}
+                            onClick={() => handleStatusChange(ticket._id, 'in_progress')}
                           >
                             In Progress
                           </button>
@@ -246,13 +225,13 @@ function StatusBadge({ status }: { status: MaintenanceStatus }) {
   let color = '';
 
   switch (status) {
-    case 'COMPLETED':
+    case 'completed':
       color = 'text-green-600 bg-green-50';
       break;
-    case 'IN_PROGRESS':
+    case 'in_progress':
       color = 'text-orange-600 bg-orange-50';
       break;
-    case 'OPEN':
+    case 'open':
       color = 'text-blue-600 bg-blue-50';
       break;
     default:

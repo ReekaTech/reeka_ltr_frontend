@@ -196,12 +196,13 @@ export default function PropertyDetailPage({
             title={property.name}
             address={property.address}
             type={property.type}
-            price={property.pricing.base}
+            price={property.rentalPrice}
             status={property.status}
             imageUrl={property.imageUrls[0]}
           />
-          <div className="flex flex-col md:flex-row gap-8 p-6 w-full">
-            <div className="flex-1 space-y-6">
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 p-4 lg:p-6 w-full">
+            {/* Left Column - Property Details */}
+            <div className="w-full lg:w-1/2 space-y-4 lg:space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-semibold">Property Details</h2>
                 <button 
@@ -212,7 +213,7 @@ export default function PropertyDetailPage({
                 </button>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 lg:space-y-6">
                 <FormField label="Name">
                   <input
                     type="text"
@@ -239,7 +240,7 @@ export default function PropertyDetailPage({
                   </select>
                 </FormField>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
                   <FormField label="Country">
                     <select
                       value={country}
@@ -291,7 +292,7 @@ export default function PropertyDetailPage({
                     <h3 className="font-medium text-black text-base">Amenities</h3>
                     <button className="text-sm text-gray-500 cursor-pointer">Edit</button>
                   </div>
-                  <div className="flex overflow-x-auto gap-4 pb-4 md:grid md:grid-cols-3 md:overflow-x-visible">
+                  <div className="flex overflow-x-auto gap-4 pb-4 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-x-visible">
                     {Object.entries(property?.amenities || {}).map(([key, value]) => {
                       if (value.available) {
                         const displayName = key.split('_').map(word => 
@@ -313,7 +314,7 @@ export default function PropertyDetailPage({
             </div>
 
             {/* Right Column - Leases */}
-            <div className="flex-1 bg-white rounded-2xl shadow p-6">
+            <div className="w-full lg:w-1/2 bg-white rounded-2xl shadow p-4 lg:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-semibold">Leases</h2>
                 <button 
@@ -345,8 +346,6 @@ export default function PropertyDetailPage({
                   </div>
                 ) : (
                   <>
-                   
-
                     {leases?.items.length === 0 ? (
                       <>
                        <div className="overflow-x-auto">

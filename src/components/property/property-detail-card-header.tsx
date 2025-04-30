@@ -45,7 +45,7 @@ export const PropertyDetailHeadCard = ({
         </div>
         <p className="text-sm text-gray-700">{address}</p>
         <p className="text-sm text-gray-500">
-          {propertyTypes[type as keyof typeof propertyTypes]} • <span className="font-medium text-gray-700">${price}</span> per night
+          {propertyTypes[type as keyof typeof propertyTypes]} • <span className="font-medium text-gray-700">₦{price}</span>
         </p>
       </div>
     </div>

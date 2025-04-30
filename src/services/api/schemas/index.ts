@@ -6,3 +6,4 @@ export * from './user';
 export * from './lease';
 export * from './maintenance';
 export * from './expense';
+export * from './tenant';

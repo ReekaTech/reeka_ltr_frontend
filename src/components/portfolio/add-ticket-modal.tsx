@@ -115,7 +115,7 @@ export function AddTicketModal({
           validationSchema={maintenanceValidationSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, touched, handleChange, handleBlur, setFieldValue }) => {
+          {({ values, errors, touched, handleChange, handleBlur, setFieldValue, isSubmitting }) => {
            
             const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               const files = e.target.files;
@@ -183,7 +183,11 @@ export function AddTicketModal({
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="Brief title of the issue"
-                    className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                    className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
+                      touched.title && errors.title
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-200 focus:border-[#e36b37]'
+                    }`}
                   />
                   {touched.title && errors.title && (
                     <p className="mt-1 text-sm text-red-600">{errors.title}</p>
@@ -204,7 +208,11 @@ export function AddTicketModal({
                       value={values.type}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full appearance-none rounded-md border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                      className={`w-full appearance-none rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
+                        touched.type && errors.type
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-gray-200 focus:border-[#e36b37]'
+                      }`}
                     >
                       {MAINTENANCE_TYPES.map(type => (
                         <option key={type.key} value={type.key}>
@@ -235,7 +243,11 @@ export function AddTicketModal({
                       value={values.priority}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full appearance-none rounded-md border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                      className={`w-full appearance-none rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
+                        touched.priority && errors.priority
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-gray-200 focus:border-[#e36b37]'
+                      }`}
                     >
                       <option value="">Select priority</option>
                       {priorities.map(priority => (
@@ -268,7 +280,11 @@ export function AddTicketModal({
                     onBlur={handleBlur}
                     placeholder="Describe the issue in detail"
                     rows={4}
-                    className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                    className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
+                      touched.description && errors.description
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-200 focus:border-[#e36b37]'
+                    }`}
                   />
                   {touched.description && errors.description && (
                     <p className="mt-1 text-sm text-red-600">{errors.description}</p>
@@ -280,7 +296,11 @@ export function AddTicketModal({
                     Attachments
                   </label>
                   <div
-                    className="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6"
+                    className={`mt-1 flex justify-center rounded-md border-2 border-dashed px-6 pt-5 pb-6 ${
+                      touched.attachments && errors.attachments
+                        ? 'border-red-300'
+                        : 'border-gray-300'
+                    }`}
                     onClick={() => fileInputRef.current?.click()}
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
@@ -370,10 +390,10 @@ export function AddTicketModal({
                 <div className="pt-4">
                   <button
                     type="submit"
+                    disabled={isSubmitting || createTicketMutation.isPending}
                     className="hover:bg-opacity-90 w-full rounded-md bg-[#e36b37] px-4 py-2 text-white transition-colors focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none disabled:opacity-70"
-                    disabled={createTicketMutation.isPending}
                   >
-                    {createTicketMutation.isPending ? 'Adding...' : 'Add Ticket'}
+                    {isSubmitting || createTicketMutation.isPending ? 'Adding...' : 'Add Ticket'}
                   </button>
                 </div>
               </Form>

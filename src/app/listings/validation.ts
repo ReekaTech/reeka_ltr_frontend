@@ -51,5 +51,4 @@ export const maintenanceValidationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
   type: Yup.string().required('Request type is required'),
   priority: Yup.string().required('Priority is required'),
-  dueDate: Yup.string().required('Due date is required'),
 }); 

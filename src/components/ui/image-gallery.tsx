@@ -57,11 +57,7 @@ export function ImageGallery({
         )}
         style={{ zIndex: 10 }}
       >
-        <CloudUpload size={16} className="mb-1" />
-        <div className="text-[10px] font-light flex flex-col items-center">
-          <p>Add</p>
-          <p>pictures</p>
-        </div>
+        
       </div>
     </div>
   );

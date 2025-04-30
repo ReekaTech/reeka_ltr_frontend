@@ -26,7 +26,9 @@ export interface MaintenanceTicket {
   updatedAt: string;
   dueDate?: string;
   attachments?: string[];
-  property?: string;
+  property?: {
+    name: string;
+  };
 }
 
 export interface UpdateMaintenanceStatusPayload {

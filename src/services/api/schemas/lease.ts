@@ -1,46 +1,31 @@
 import { Property } from "./property";
-
-export interface Tenant {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  isEmailVerified: boolean;
-  failedLoginAttempts: number;
-  isActive: boolean;
-  phone: string;
-  phoneCountryCode: string;
-  country: string;
-  role: string;
-  invitationStatus: string | null;
-  invitationToken: string | null;
-  lastInvitationSentAt: string | null;
-  invitationAttempts: number;
-  isInvited: boolean;
-  gender: string;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-  fullName: string;
-  id: string;
-}
+import { Tenant } from "@/services/api/schemas";
 
 export interface Lease {
   _id: string;
   organizationId: string;
   property: Property;
-  tenantId: Tenant;
+  tenantId: string;
   startDate: string;
   endDate: string;
   rentalRate: number;
-  depositAmount: number;
   paymentFrequency: string;
   notes: string;
-  status: 'active' | 'completed';
+  status?: 'active' | 'terminated' | 'expired';
+  paymentStatus?: 'paid' | 'unpaid';
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  tenant?: Tenant;
   __v: number;
+}
+
+export interface CreateLease {
+  _id: string;
+  organizationId: string;
+  property: Property;
+  tenantId: string;
+  startDate: string;
 }
 
   
@@ -54,6 +39,7 @@ export interface Lease {
   
   
   export interface GetLeasesParams {
+    portfolioId?: string;
     propertyId?: string;
     organizationId?: string;
     page?: number;

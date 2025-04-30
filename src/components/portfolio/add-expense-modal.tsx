@@ -92,8 +92,11 @@ export function AddExpenseModal({
                     value={values.name}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className="w-full rounded-md border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
-                    required
+                    className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
+                      touched.name && errors.name
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-200 focus:border-[#e36b37]'
+                    }`}
                   />
                   {touched.name && errors.name && (
                     <p className="mt-1 text-sm text-red-600">{errors.name}</p>
@@ -113,9 +116,13 @@ export function AddExpenseModal({
                     value={values.category}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className="w-full rounded-md border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
-                    required
+                    className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
+                      touched.category && errors.category
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-200 focus:border-[#e36b37]'
+                    }`}
                   >
+                    <option value="">Select Category</option>
                     {Object.values(ExpenseCategory).map((category) => (
                       <option key={category} value={category}>
                         {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -141,8 +148,11 @@ export function AddExpenseModal({
                     value={values.amount}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className="w-full rounded-md border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
-                    required
+                    className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
+                      touched.amount && errors.amount
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-200 focus:border-[#e36b37]'
+                    }`}
                     min="0"
                     step="0.01"
                   />
@@ -166,8 +176,11 @@ export function AddExpenseModal({
                       placeholder="Choose Date"
                       value={values.date}
                       onChange={handleChange}
-                      className="w-full rounded-md border border-gray-200 py-2 pr-3 pl-10 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
-                      required
+                      className={`w-full rounded-md border py-2 pr-3 pl-10 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
+                        touched.date && errors.date
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-gray-200 focus:border-[#e36b37]'
+                      }`}
                       onFocus={(e) => (e.target.type = 'date')}
                       onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                         handleBlur(e);

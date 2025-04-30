@@ -57,6 +57,7 @@ export function useUpdateMaintenanceStatusMutation() {
     mutationFn: ({ ticketId, status }: { ticketId: string; status: UpdateMaintenanceStatusPayload['status'] }) =>
       updateMaintenanceStatus(ticketId, { status }),
     onSuccess: () => {
+      toast.success('Maintenance status updated successfully');
       queryClient.invalidateQueries({ queryKey: ['maintenance'] });
     },
     onError: (error: any) => {

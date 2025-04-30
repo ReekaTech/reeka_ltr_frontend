@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { format } from 'date-fns';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -8,19 +9,14 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Format a date string to a more readable format
  * @param dateString - ISO date string
- * @returns Formatted date (DD-MM-YYYY)
+ * @returns Formatted date (e.g. "30 April, 2025")
  */
 export function formatDate(dateString: string): string {
   try {
     const date = new Date(dateString);
-    return date
-      .toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      })
-      .replace(/\//g, '-');
+    return format(date, 'd MMMM, yyyy');
   } catch (error) {
-    return 'Invalid date';
+    console.error('Error formatting date:', error);
+    return dateString;
   }
 }

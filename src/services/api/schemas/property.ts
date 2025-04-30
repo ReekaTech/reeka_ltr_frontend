@@ -19,11 +19,7 @@ export interface Property {
     };
   };
   imageUrls: string[];
-  pricing: {
-    base: number;
-    min: number;
-    max: number;
-  };
+  rentalPrice: number;
   status: string;
   createdAt: string;
   updatedAt: string;

@@ -1,39 +1,14 @@
+import { GetTenantsParams, PaginatedLeases, PaginatedTenants, Tenant } from '@/services/api/schemas';
+
 import { api } from '@/services/api';
 import { getSession } from 'next-auth/react';
-
-export interface Tenant {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  startDate: string;
-  endDate: string;
-  currentRate: number;
-  paymentFrequency: 'Annually' | 'Monthly';
-  paymentStatus: 'Paid' | 'Unpaid';
-}
-
-export interface GetTenantsParams {
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  search?: string;
-  portfolioId?: string;
-}
-
-export interface PaginatedTenants {
-  items: Tenant[];
-  total: number;
-  pages: number;
-  currentPage: number;
-}
 
 /**
  * Get all tenants with optional filtering and pagination
  */
 export async function fetchTenants(
   params: GetTenantsParams,
-): Promise<PaginatedTenants> {
+): Promise<PaginatedLeases> {
   const session = await getSession();
   const organizationId = session?.user?.organizationId;
   

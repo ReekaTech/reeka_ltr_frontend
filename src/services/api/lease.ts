@@ -29,7 +29,7 @@ export async function getLeases(
   if (params.status) queryParams.append('status', params.status);
   if (params.propertyId) queryParams.append('propertyId', params.propertyId);
 
-  const response = await api.get(`/organizations/${organizationId}/leases?${queryParams.toString()}`);
+  const response = await api.get(`/organizations/${organizationId}/leases/portfolio/${params.portfolioId}?${queryParams.toString()}`);
   return response.data;
 }
 
