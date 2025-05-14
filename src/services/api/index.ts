@@ -6,3 +6,4 @@ export * from './users';
 export * from './api-service';
 export * from './maintenance';
 export * from './expense'
+export * from './organizations';

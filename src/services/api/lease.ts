@@ -1,4 +1,4 @@
-import { GetLeasesParams, Lease, PaginatedLeases } from '@/services/api/schemas';
+import { CancelLease, GetLeasesParams, Lease, PaginatedLeases, RenewLease } from '@/services/api/schemas';
 
 import { api } from '@/services/api';
 import { getSession } from 'next-auth/react';
@@ -66,7 +66,7 @@ export async function createLease(data: Partial<Lease>): Promise<Lease> {
 /**
  * Update a lease
  */
-export async function updateLease(id: string, data: Partial<Lease>): Promise<Lease> {
+export async function updateLease(id: string, data: RenewLease): Promise<Lease> {
   const session = await getSession();
   const organizationId = session?.user?.organizationId;
   
@@ -90,4 +90,34 @@ export async function deleteLease(id: string): Promise<void> {
   }
 
   await api.delete(`/organizations/${organizationId}/leases/${id}`);
+}
+
+/**
+ * Cancel a lease
+ */
+export async function cancelLease(id: string, data: CancelLease): Promise<Lease> {
+  const session = await getSession();
+  const organizationId = session?.user?.organizationId;
+  
+  if (!organizationId) {
+    throw new Error('Organization ID is required');
+  }
+
+  const response = await api.patch(`/organizations/${organizationId}/leases/${id}/cancel`, data);
+  return response.data;
+}
+
+/**
+ * Renew a lease
+ */
+export async function renewLease(id: string, data: RenewLease): Promise<Lease> {
+  const session = await getSession();
+  const organizationId = session?.user?.organizationId;
+  
+  if (!organizationId) {
+    throw new Error('Organization ID is required');
+  }
+
+  const response = await api.put(`/organizations/${organizationId}/leases/${id}/renew`, data);
+  return response.data;
 }

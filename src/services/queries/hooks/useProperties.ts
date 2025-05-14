@@ -75,9 +75,10 @@ export const useUpdateProperty = () => {
       
       toast.error(errorMessage);
     },
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       toast.success('Property updated successfully');
       queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['property', id] });
     },
   });
 };

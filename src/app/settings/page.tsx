@@ -4,6 +4,7 @@ import { PasswordForm, ProfileForm, RolesForm } from '@/components/settings';
 import { Tabs, TabsContent } from '@/components/ui';
 
 import { Layout } from '@/components/ui';
+import { RevenueSettings } from '@/components/settings/revenue-settings-form';
 import { useState } from 'react';
 
 export default function SettingsPage() {
@@ -13,6 +14,7 @@ export default function SettingsPage() {
     { label: 'Edit Info', value: 'edit-info' },
     { label: 'Password Reset', value: 'password-reset' },
     { label: 'Roles', value: 'roles' },
+    { label: 'Revenue Settings', value: 'revenue-settings' },
   ];
 
   return (
@@ -30,6 +32,10 @@ export default function SettingsPage() {
 
         <TabsContent value="roles" activeValue={activeTab}>
           <RolesForm />
+        </TabsContent>
+
+        <TabsContent value="revenue-settings" activeValue={activeTab}>
+          <RevenueSettings />
         </TabsContent>
       </div>
     </Layout>

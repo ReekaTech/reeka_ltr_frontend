@@ -1,4 +1,5 @@
-import { createLease, getLeases } from '@/services/api/lease';
+import type { CancelLease, GetLeasesParams, Lease, RenewLease } from '@/services/api/schemas';
+import { cancelLease, createLease, deleteLease, getLeaseById, getLeases, renewLease, updateLease } from '@/services/api/lease';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { toast } from 'react-toastify';
@@ -50,6 +51,70 @@ export const useCreateLease = () => {
     },
     onSuccess: () => {
       toast.success('Lease created successfully');
+      queryClient.invalidateQueries({ queryKey: ['leases'] });
+    },
+  });
+};
+
+export const useCancelLease = () => {
+  const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const organizationId = session?.user?.organizationId;
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CancelLease }) => {
+      if (!organizationId) throw new Error('Organization ID is required');
+      return cancelLease(id, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leases'] });
+    },
+  });
+};
+
+export const useRenewLease = () => {
+  const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const organizationId = session?.user?.organizationId;
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: RenewLease }) => {
+      if (!organizationId) throw new Error('Organization ID is required');
+      return renewLease(id, data);
+    },
+    onError: (error: any) => {
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to renew lease';
+      
+      toast.error(errorMessage);
+    },
+    onSuccess: () => {
+      toast.success('Lease renewed successfully');
+      queryClient.invalidateQueries({ queryKey: ['leases'] });
+    },
+  });
+};
+
+export const useUpdateLease = () => {
+  const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const organizationId = session?.user?.organizationId;
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: RenewLease }) => {
+      if (!organizationId) throw new Error('Organization ID is required');
+      return updateLease(id, data);
+    },
+    onError: (error: any) => {
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to update lease';
+      
+      toast.error(errorMessage);
+    },
+    onSuccess: () => {
+      toast.success('Lease updated successfully');
       queryClient.invalidateQueries({ queryKey: ['leases'] });
     },
   });

@@ -14,7 +14,6 @@ export const propertyValidationSchema = Yup.object().shape({
     bedrooms: Yup.number().min(1, 'Must have at least 1 bedroom').required('Number of bedrooms is required'),
     bathrooms: Yup.number().min(1, 'Must have at least 1 bathroom').required('Number of bathrooms is required')
   }),
-  rentalPrice: Yup.number().min(0, 'Base price must be 0 or greater').required('Base price is required'),
 });
 
 export const leaseValidationSchema = Yup.object().shape({
@@ -33,6 +32,15 @@ export const leaseValidationSchema = Yup.object().shape({
   rentalRate: Yup.number().required('Rental rate is required').min(0, 'Rental rate must be positive'),
   paymentFrequency: Yup.string().required('Payment frequency is required'),
   notes: Yup.string(),
+});
+
+
+export const renewLeaseValidationSchema = Yup.object().shape({
+  propertyId: Yup.string().required('Property ID is required'),
+  startDate: Yup.string().required('Start date is required'),
+  endDate: Yup.string().required('End date is required'),
+  rentalRate: Yup.number().required('Rental rate is required').min(0, 'Rental rate must be positive'),
+  paymentFrequency: Yup.string().required('Payment frequency is required'),
 });
 
 export const expenseValidationSchema = Yup.object().shape({

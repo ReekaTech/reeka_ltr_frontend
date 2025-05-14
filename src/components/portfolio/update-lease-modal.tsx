@@ -1,26 +1,25 @@
 'use client';
 
+import { AdditionalCharges, Lease } from '@/services/api/schemas/lease';
 import { ChevronDown, Plus, Upload, X } from 'lucide-react';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
 
-import { AdditionalCharges } from '@/services/api/schemas/lease';
 import { Modal } from '@/components/ui/modal';
 import { leaseValidationSchema } from '@/app/listings/validation';
 import { toast } from 'react-toastify';
 import { uploadToS3 } from '@/services/api/upload';
 import { useCountries } from '@/services/queries/hooks/useCountries';
-import { useCreateLease } from '@/services/queries/hooks/useLease';
+import { useUpdateLease } from '@/services/queries/hooks/useLease';
 import { useUploadSignedUrl } from '@/services/queries/hooks/useUploadSignedUrl';
 
 const MAX_SIZE_MB = 10;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
-interface AddLeaseModalProps {
+interface UpdateLeaseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  propertyId: string;
-  propertyName: string;
+  lease: Lease;
 }
 
 interface ChargeInput {
@@ -28,20 +27,20 @@ interface ChargeInput {
   amount: number;
 }
 
-export function AddLeaseModal({
+export function UpdateLeaseModal({
   isOpen,
   onClose,
-  propertyId,
-  propertyName,
-}: AddLeaseModalProps) {
+  lease,
+}: UpdateLeaseModalProps) {
+  console.log(lease);
   const { data: countries, isLoading: isCountriesLoading } = useCountries();
-  const createLeaseMutation = useCreateLease();
+  const updateLeaseMutation = useUpdateLease();
   const uploadMutation = useUploadSignedUrl();
   const [showDialCodeDropdown, setShowDialCodeDropdown] = useState(false);
   const [dialCodeSearch, setDialCodeSearch] = useState('');
   const [additionalCharges, setAdditionalCharges] = useState<ChargeInput[]>([]);
   const [leaseAgreementFile, setLeaseAgreementFile] = useState<File | null>(null);
-  const [leaseAgreementUrl, setLeaseAgreementUrl] = useState<string>('');
+  const [leaseAgreementUrl, setLeaseAgreementUrl] = useState<string>(lease.leaseAgreementUrl || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredDialCodes = countries?.filter(
@@ -56,26 +55,37 @@ export function AddLeaseModal({
       setShowDialCodeDropdown(false);
       setAdditionalCharges([]);
       setLeaseAgreementFile(null);
-      setLeaseAgreementUrl('');
+      setLeaseAgreementUrl(lease.leaseAgreementUrl || '');
     }
-  }, [isOpen]);
+  }, [isOpen, lease.leaseAgreementUrl]);
+
+  // Convert additionalCharges from Record to array format
+  useEffect(() => {
+    if (lease.additionalCharges) {
+      const chargesArray = Object.entries(lease.additionalCharges).map(([name, amount]) => ({
+        name,
+        amount
+      }));
+      setAdditionalCharges(chargesArray);
+    }
+  }, [lease.additionalCharges]);
 
   const initialValues = {
     tenant: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      currentAddress: '',
-      gender: '',
-      phoneCountryCode: '+234',
-      phone: '',
+      firstName: lease.tenant?.firstName || '',
+      lastName: lease.tenant?.lastName || '',
+      email: lease.tenant?.email || '',
+      currentAddress: lease.tenant?.currentAddress || '',
+      gender: lease.tenant?.gender || '',
+      phoneCountryCode: lease.tenant?.phoneCountryCode || '+234',
+      phone: lease.tenant?.phone || '',
     },
-    propertyId: propertyId || '',
-    startDate: '',
-    endDate: '',
-    rentalRate: '',
-    paymentFrequency: '',
-    notes: '',
+    propertyId: lease.propertyId || '',
+    startDate: lease.startDate,
+    endDate: lease.endDate,
+    rentalRate: lease.rentalRate.toString(),
+    paymentFrequency: lease.paymentFrequency,
+    notes: lease.notes || '',
   };
 
   const validateFileSize = (file: File): boolean => {
@@ -135,15 +145,18 @@ export function AddLeaseModal({
         [charge.name]: charge.amount
       }), {});
 
-      await createLeaseMutation.mutateAsync({
-        ...values,
-        rentalRate: Number(values.rentalRate),
-        leaseAgreementUrl,
-        additionalCharges: formattedCharges
+      await updateLeaseMutation.mutateAsync({
+        id: lease._id,
+        data: {
+          ...values,
+          rentalRate: Number(values.rentalRate),
+          leaseAgreementUrl,
+          additionalCharges: formattedCharges
+        }
       });
       onClose();
     } catch (error) {
-      console.error('Failed to create lease:', error);
+      console.error('Failed to update lease:', error);
     }
   };
 
@@ -151,7 +164,7 @@ export function AddLeaseModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Lease"
+      title="Update Lease"
       contentClassName="max-h-[90vh]"
     >
       <div className="max-h-[calc(90vh-120px)] overflow-y-auto pr-2">
@@ -496,7 +509,6 @@ export function AddLeaseModal({
                         className="mt-1 text-sm text-red-500"
                       />
                     </div>
-                   
 
                     {/* Notes */}
                     <div>
@@ -611,15 +623,15 @@ export function AddLeaseModal({
                 <button
                   type="submit"
                   className="w-full rounded-md bg-[#e36b37] px-4 py-2.5 text-white"
-                  disabled={createLeaseMutation.isPending}
+                  disabled={updateLeaseMutation.isPending}
                 >
-                  {createLeaseMutation.isPending ? (
+                  {updateLeaseMutation.isPending ? (
                     <div className="flex items-center justify-center">
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       <span>Processing...</span>
                     </div>
                   ) : (
-                    'Add Lease'
+                    'Update Lease'
                   )}
                 </button>
               </div>
@@ -629,4 +641,4 @@ export function AddLeaseModal({
       </div>
     </Modal>
   );
-}
+} 

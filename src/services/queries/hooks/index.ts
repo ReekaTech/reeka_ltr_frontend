@@ -8,3 +8,4 @@ export * from './useLease';
 export * from './useUploadSignedUrl';
 export * from './useMaintenance';
 export * from './useExpense';
+export * from './useOrganization';

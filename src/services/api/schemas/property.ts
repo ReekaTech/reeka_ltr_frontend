@@ -47,7 +47,6 @@ export interface CreatePropertyPayload {
       quantity?: number;
     };
   };
-  rentalPrice: number;
 }
 
 /**
@@ -62,6 +61,13 @@ export interface UpdatePropertyPayload {
   price?: number;
   currency?: string;
   address?: string;
+  imageUrls?: string[];
+  amenities?: {
+    [key: string]: {
+      available: boolean;
+      quantity: number;
+    };
+  };
 }
 
 /**
@@ -105,7 +111,6 @@ export interface PropertyFormData {
   };
   images: File[];
   imagePreviews: string[];
-  rentalPrice: number;
   contactPerson: string;
   status: 'listed' | 'unlisted';
 }

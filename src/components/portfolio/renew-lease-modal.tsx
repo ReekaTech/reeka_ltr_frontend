@@ -1,26 +1,33 @@
-'use client';
-
 import { ChevronDown, Plus, Upload, X } from 'lucide-react';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
+import { leaseValidationSchema, renewLeaseValidationSchema } from '@/app/listings/validation';
 import { useEffect, useRef, useState } from 'react';
 
 import { AdditionalCharges } from '@/services/api/schemas/lease';
 import { Modal } from '@/components/ui/modal';
-import { leaseValidationSchema } from '@/app/listings/validation';
+import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { uploadToS3 } from '@/services/api/upload';
-import { useCountries } from '@/services/queries/hooks/useCountries';
-import { useCreateLease } from '@/services/queries/hooks/useLease';
+import { useRenewLease } from '@/services/queries/hooks';
 import { useUploadSignedUrl } from '@/services/queries/hooks/useUploadSignedUrl';
 
 const MAX_SIZE_MB = 10;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
-interface AddLeaseModalProps {
+interface RenewLeaseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  propertyId: string;
-  propertyName: string;
+  leaseId: string;
+  currentLease: {
+    startDate: string;
+    endDate: string;
+    rentalRate: number;
+    paymentFrequency: string;
+    notes?: string;
+    leaseAgreementUrl?: string;
+    additionalCharges?: Record<string, number>;
+    propertyId: string;
+  };
 }
 
 interface ChargeInput {
@@ -28,54 +35,30 @@ interface ChargeInput {
   amount: number;
 }
 
-export function AddLeaseModal({
-  isOpen,
-  onClose,
-  propertyId,
-  propertyName,
-}: AddLeaseModalProps) {
-  const { data: countries, isLoading: isCountriesLoading } = useCountries();
-  const createLeaseMutation = useCreateLease();
+export function RenewLeaseModal({ isOpen, onClose, leaseId, currentLease }: RenewLeaseModalProps) {
+  const renewLease = useRenewLease();
   const uploadMutation = useUploadSignedUrl();
-  const [showDialCodeDropdown, setShowDialCodeDropdown] = useState(false);
-  const [dialCodeSearch, setDialCodeSearch] = useState('');
   const [additionalCharges, setAdditionalCharges] = useState<ChargeInput[]>([]);
   const [leaseAgreementFile, setLeaseAgreementFile] = useState<File | null>(null);
-  const [leaseAgreementUrl, setLeaseAgreementUrl] = useState<string>('');
+  const [leaseAgreementUrl, setLeaseAgreementUrl] = useState<string>(currentLease.leaseAgreementUrl || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const filteredDialCodes = countries?.filter(
-    country =>
-      country.name.toLowerCase().includes(dialCodeSearch.toLowerCase()) ||
-      country.dial_code.includes(dialCodeSearch),
-  );
 
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
-      setShowDialCodeDropdown(false);
       setAdditionalCharges([]);
       setLeaseAgreementFile(null);
-      setLeaseAgreementUrl('');
+      setLeaseAgreementUrl(currentLease.leaseAgreementUrl || '');
     }
-  }, [isOpen]);
+  }, [isOpen, currentLease.leaseAgreementUrl]);
 
   const initialValues = {
-    tenant: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      currentAddress: '',
-      gender: '',
-      phoneCountryCode: '+234',
-      phone: '',
-    },
-    propertyId: propertyId || '',
-    startDate: '',
+    startDate: format(new Date(currentLease.startDate), 'yyyy-MM-dd'),
     endDate: '',
-    rentalRate: '',
-    paymentFrequency: '',
-    notes: '',
+    rentalRate: currentLease.rentalRate.toString(),
+    paymentFrequency: currentLease.paymentFrequency,
+    notes: currentLease.notes || '',
+    propertyId: currentLease.propertyId,
   };
 
   const validateFileSize = (file: File): boolean => {
@@ -135,15 +118,23 @@ export function AddLeaseModal({
         [charge.name]: charge.amount
       }), {});
 
-      await createLeaseMutation.mutateAsync({
-        ...values,
-        rentalRate: Number(values.rentalRate),
-        leaseAgreementUrl,
-        additionalCharges: formattedCharges
+      await renewLease.mutateAsync({
+        id: leaseId,
+        data: {
+          startDate: values.startDate,
+          endDate: values.endDate,
+          rentalRate: Number(values.rentalRate),
+          paymentFrequency: values.paymentFrequency,
+          notes: values.notes,
+          propertyId: values.propertyId,
+          leaseAgreementUrl,
+          additionalCharges: formattedCharges
+        }
       });
+      
       onClose();
     } catch (error) {
-      console.error('Failed to create lease:', error);
+      console.error('Failed to renew lease:', error);
     }
   };
 
@@ -151,204 +142,18 @@ export function AddLeaseModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Lease"
+      title="Renew Lease"
       contentClassName="max-h-[90vh]"
     >
       <div className="max-h-[calc(90vh-120px)] overflow-y-auto pr-2">
         <Formik
           initialValues={initialValues}
-          validationSchema={leaseValidationSchema}
+          validationSchema={renewLeaseValidationSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, setFieldValue }) => (
+          {({ values }) => (
             <Form>
               <div className="space-y-6">
-                {/* Tenant Section */}
-                <div>
-                  <div className="mb-4 text-base font-medium">Tenant</div>
-
-                  <div className="space-y-4">
-                    {/* First Name */}
-                    <div>
-                      <label htmlFor="firstName" className="mb-2 block text-sm">
-                        First Name
-                      </label>
-                      <Field
-                        id="firstName"
-                        name="tenant.firstName"
-                        type="text"
-                        className="w-full rounded-md border border-[#e5e5e5] px-3 py-2.5"
-                      />
-                      <ErrorMessage
-                        name="tenant.firstName"
-                        component="div"
-                        className="mt-1 text-sm text-red-500"
-                      />
-                    </div>
-
-                    {/* Last Name */}
-                    <div>
-                      <label htmlFor="lastName" className="mb-2 block text-sm">
-                        Last Name
-                      </label>
-                      <Field
-                        id="lastName"
-                        name="tenant.lastName"
-                        type="text"
-                        className="w-full rounded-md border border-[#e5e5e5] px-3 py-2.5"
-                      />
-                      <ErrorMessage
-                        name="tenant.lastName"
-                        component="div"
-                        className="mt-1 text-sm text-red-500"
-                      />
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                      <label htmlFor="email" className="mb-2 block text-sm">
-                        Email
-                      </label>
-                      <Field
-                        id="email"
-                        name="tenant.email"
-                        type="email"
-                        className="w-full rounded-md border border-[#e5e5e5] px-3 py-2.5"
-                      />
-                      <ErrorMessage
-                        name="tenant.email"
-                        component="div"
-                        className="mt-1 text-sm text-red-500"
-                      />
-                    </div>
-
-                    {/* Current Address */}
-                    <div>
-                      <label htmlFor="currentAddress" className="mb-2 block text-sm">
-                        Current Address
-                      </label>
-                      <Field
-                        id="currentAddress"
-                        name="tenant.currentAddress"
-                        type="text"
-                        className="w-full rounded-md border border-[#e5e5e5] px-3 py-2.5"
-                      />
-                      <ErrorMessage
-                        name="tenant.currentAddress"
-                        component="div"
-                        className="mt-1 text-sm text-red-500"
-                      />
-                    </div>
-
-                    {/* Gender */}
-                    <div>
-                      <label htmlFor="gender" className="mb-2 block text-sm">
-                        Gender
-                      </label>
-                      <div className="relative">
-                        <Field
-                          as="select"
-                          id="gender"
-                          name="tenant.gender"
-                          className="w-full appearance-none rounded-md border border-[#e5e5e5] px-3 py-2.5 pe-10"
-                        >
-                          <option value="">Select Gender</option>
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                          <option value="other">Other</option>
-                        </Field>
-                        <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                      </div>
-                      <ErrorMessage
-                        name="tenant.gender"
-                        component="div"
-                        className="mt-1 text-sm text-red-500"
-                      />
-                    </div>
-
-                    {/* Phone Number */}
-                    <div>
-                      <label htmlFor="phone" className="mb-2 block text-sm">
-                        Phone Number
-                      </label>
-                      <div className="flex">
-                        {/* Dial Code Dropdown */}
-                        <div className="relative">
-                          <button
-                            type="button"
-                            className="flex h-[42px] items-center rounded-l-md border border-[#e5e5e5] bg-white px-2 focus:outline-none"
-                            onClick={() =>
-                              setShowDialCodeDropdown(!showDialCodeDropdown)
-                            }
-                          >
-                            <span className="mr-1">
-                              {countries?.find(
-                                c => c.dial_code === values.tenant.phoneCountryCode,
-                              )?.flag || '🇳🇬'}
-                            </span>
-                            <span>{values.tenant.phoneCountryCode}</span>
-                            <ChevronDown className="ml-1 h-4 w-4" />
-                          </button>
-
-                          {showDialCodeDropdown && (
-                            <div className="absolute z-10 mt-1 max-h-60 w-48 overflow-y-auto rounded-md border border-[#e5e5e5] bg-white shadow-lg">
-                              <div className="sticky top-0 bg-white p-2">
-                                <input
-                                  type="text"
-                                  className="w-full rounded-md border border-[#e5e5e5] px-2 py-1 text-sm focus:outline-none"
-                                  placeholder="Search country or code..."
-                                  value={dialCodeSearch}
-                                  onChange={e => setDialCodeSearch(e.target.value)}
-                                  onClick={e => e.stopPropagation()}
-                                />
-                              </div>
-                              {filteredDialCodes?.map(country => (
-                                <button
-                                  key={country.id}
-                                  type="button"
-                                  className="flex w-full items-center px-4 py-2 text-left hover:bg-gray-100"
-                                  onClick={() => {
-                                    setFieldValue('tenant.phoneCountryCode', country.dial_code);
-                                    setShowDialCodeDropdown(false);
-                                    setDialCodeSearch('');
-                                  }}
-                                >
-                                  <span className="mr-2">{country.flag}</span>
-                                  <span>{country.name}</span>
-                                  <span className="ml-auto text-gray-500">
-                                    {country.dial_code}
-                                  </span>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Phone Number Input */}
-                        <Field
-                          type="tel"
-                          name="tenant.phone"
-                          className="h-[42px] flex-1 rounded-r-md border border-l-0 border-[#e5e5e5] px-3 py-2.5"
-                          placeholder="Enter Phone Number"
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            const value = e.target.value;
-                            // Remove leading zero if present
-                            const formattedValue = value.startsWith('0')
-                              ? value.slice(1)
-                              : value;
-                            setFieldValue('tenant.phone', formattedValue);
-                          }}
-                        />
-                      </div>
-                      <ErrorMessage
-                        name="tenant.phone"
-                        component="div"
-                        className="mt-1 text-sm text-red-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 {/* Date Section */}
                 <div>
                   <div className="mb-4 text-base font-medium">Date</div>
@@ -496,7 +301,6 @@ export function AddLeaseModal({
                         className="mt-1 text-sm text-red-500"
                       />
                     </div>
-                   
 
                     {/* Notes */}
                     <div>
@@ -611,15 +415,15 @@ export function AddLeaseModal({
                 <button
                   type="submit"
                   className="w-full rounded-md bg-[#e36b37] px-4 py-2.5 text-white"
-                  disabled={createLeaseMutation.isPending}
+                  disabled={renewLease.isPending}
                 >
-                  {createLeaseMutation.isPending ? (
+                  {renewLease.isPending ? (
                     <div className="flex items-center justify-center">
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       <span>Processing...</span>
                     </div>
                   ) : (
-                    'Add Lease'
+                    'Renew Lease'
                   )}
                 </button>
               </div>
@@ -629,4 +433,4 @@ export function AddLeaseModal({
       </div>
     </Modal>
   );
-}
+} 

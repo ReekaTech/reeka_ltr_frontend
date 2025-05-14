@@ -70,7 +70,6 @@ export function AddPropertyForm() {
       ).then(urls => urls.flat());
 
       // Convert pricing values to numbers
-      const rentalPrice = Number(values.rentalPrice);
   
       
 
@@ -84,7 +83,6 @@ export function AddPropertyForm() {
         rooms: values.rooms,
         amenities: values.amenities,
         imageUrls: imageUrls,
-        rentalPrice,
         ...(values.contactPerson && { contactPerson: values.contactPerson }),
         ...(values.portfolioId && { portfolioId: values.portfolioId }),
       });
@@ -110,7 +108,6 @@ export function AddPropertyForm() {
     amenities: {},
     images: [],
     imagePreviews: [],
-    rentalPrice: 0,
     contactPerson: '',
     status: 'listed' as const,
   };
@@ -173,7 +170,7 @@ export function AddPropertyForm() {
                 </AccordionItem>
 
                 {/* Price Section */}
-                <AccordionItem
+                {/* <AccordionItem
                   title="Price"
                   icon={<DollarSign className="h-5 w-5 text-white" />}
                   iconBgColor="bg-blue-500"
@@ -184,7 +181,7 @@ export function AddPropertyForm() {
                     formData={values}
                     updateFormData={setFieldValue}
                   />
-                </AccordionItem>
+                </AccordionItem> */}
               </div>
 
               {/* Form Actions */}

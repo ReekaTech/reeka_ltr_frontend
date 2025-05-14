@@ -2,23 +2,31 @@
 
 import {
   ArrowLeft,
+  MoreVertical,
   Search,
 } from 'lucide-react';
 import { ExpensesTab, MaintenanceTab } from '@/components/tabs';
 import { ImageGallery, Layout, Tabs, TabsContent } from '@/components/ui';
 import { format, parseISO } from 'date-fns';
-import { use, useEffect, useState } from 'react';
-import { useLeases, useProperty, useUpdateProperty } from '@/services/queries/hooks';
+import { use, useEffect, useRef, useState } from 'react';
+import { useCancelLease, useLeases, useProperty, useRenewLease, useUpdateProperty } from '@/services/queries/hooks';
 
 import { AddExpenseModal } from '@/components/portfolio/add-expense-modal';
 import { AddLeaseModal } from '@/components/portfolio/add-lease-modal';
 import { AddTicketModal } from '@/components/portfolio/add-ticket-modal';
 import { Badge } from "@/components/ui/badge";
+import { EditAmenitiesModal } from '@/components/property/edit-amenities-modal';
+import { EditImagesModal } from '@/components/property/edit-images-modal';
 import type { Lease } from '@/services/api/schemas';
+import { PromptModal } from '@/components/ui/prompt-modal';
 import { PropertyDetailHeadCard } from '@/components/property';
+import { RenewLeaseModal } from '@/components/portfolio/renew-lease-modal';
 import { ShoppingCart } from "lucide-react";
+import { UpdateLeaseModal } from '@/components/portfolio/update-lease-modal';
 import { cn } from "@/lib/utils";
+import { createPortal } from 'react-dom';
 import { propertyTypes } from '@/app/constants';
+import { toast } from 'react-toastify';
 import { useCountries } from '@/services/queries/hooks';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useRouter } from 'next/navigation';
@@ -41,6 +49,151 @@ function FormField({ label, children }: { label: string; children: React.ReactNo
   );
 }
 
+function LeaseActions({ lease }: { lease: Lease }) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const cancelLease = useCancelLease();
+
+  const handleAction = (action: string) => {
+    setIsDropdownOpen(false);
+    switch (action) {
+      // case 'edit':
+      //   setIsUpdateModalOpen(true);
+      //   break;
+      case 'renew':
+        setIsRenewModalOpen(true);
+        break;
+      case 'cancel':
+        setIsCancelModalOpen(true);
+        break;
+    }
+  };
+
+  const handleCancelLease = async () => {
+    try {
+      const reason = (document.querySelector('textarea') as HTMLTextAreaElement)?.value;
+      if (!reason) {
+        toast.error('Please provide a reason for cancellation');
+        return;
+      }
+
+      await cancelLease.mutateAsync({ 
+        id: lease._id, 
+        data: { reasonForTermination: reason } 
+      });
+      
+      toast.success('Lease cancelled successfully');
+      setIsCancelModalOpen(false);
+    } catch (error) {
+      console.error('Failed to cancel lease:', error);
+      toast.error('Failed to cancel lease');
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const dropdown = document.querySelector('[data-dropdown]');
+      
+      if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(target) && !dropdown?.contains(target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDropdownOpen]);
+
+  return (
+    <>
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="text-gray-500 hover:text-gray-700"
+          disabled={lease.status === 'terminated'}
+        >
+          <MoreVertical className="h-5 w-5" />
+        </button>
+
+        {isDropdownOpen && (
+          <div className="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+            <div className="py-1">
+              {/* <button
+                onClick={() => handleAction('edit')}
+                className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Edit
+              </button> */}
+              <button
+                onClick={() => handleAction('renew')}
+                className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Renew
+              </button>
+              {lease.status !== 'terminated' && (
+                <button
+                  onClick={() => handleAction('cancel')}
+                  className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <PromptModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onConfirm={handleCancelLease}
+        title="Cancel Lease"
+        message={
+          <div className="space-y-4">
+            <p>Please provide a reason for cancelling this lease.</p>
+            <textarea
+              className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37]"
+              rows={4}
+              placeholder="Enter reason for cancellation..."
+              required
+            />
+          </div>
+        }
+        confirmText="Confirm Cancellation"
+        cancelText="Cancel"
+        confirmButtonClass="bg-red-600 hover:bg-red-700 text-white"
+      />
+
+      {/* Renew modal */}
+      <RenewLeaseModal
+        isOpen={isRenewModalOpen}
+        onClose={() => setIsRenewModalOpen(false)}
+        leaseId={lease._id}
+        currentLease={{
+          startDate: lease.startDate,
+          endDate: lease.endDate,
+          rentalRate: lease.rentalRate,
+          paymentFrequency: lease.paymentFrequency,
+          notes: lease.notes,
+          leaseAgreementUrl: lease.leaseAgreementUrl,
+          additionalCharges: lease.additionalCharges,
+          propertyId: lease.propertyId as string,
+        }}
+      />
+
+      {/* Update modal */}
+      <UpdateLeaseModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        lease={lease}
+      />
+    </>
+  );
+}
+
 export default function PropertyDetailPage({
   params,
 }: {
@@ -60,6 +213,8 @@ export default function PropertyDetailPage({
   const { data: countries } = useCountries();
   const updateProperty = useUpdateProperty();
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditImagesModalOpen, setIsEditImagesModalOpen] = useState(false);
+  const [isEditAmenitiesModalOpen, setIsEditAmenitiesModalOpen] = useState(false);
 
   // Form state
   const [propertyName, setPropertyName] = useState("");
@@ -97,6 +252,55 @@ export default function PropertyDetailPage({
       setIsEditing(false);
     } catch (error) {
       console.error('Failed to update property:', error);
+    }
+  };
+
+  const handleUpdateImages = async (imageUrls: string[]) => {
+    if (!property) return;
+    
+    try {
+      await updateProperty.mutateAsync({
+        id,
+        data: {
+          name: property.name,
+          address: property.address,
+          status: property.status,
+          location: property.address,
+          description: '',
+          imageUrls,
+        },
+      });
+      toast.success('Property images updated successfully');
+    } catch (error) {
+      console.error('Failed to update property images:', error);
+      toast.error('Failed to update property images');
+    }
+  };
+
+  const handleUpdateAmenities = async (amenities: {
+    [key: string]: {
+      available: boolean;
+      quantity: number;
+    };
+  }) => {
+    if (!property) return;
+    
+    try {
+      await updateProperty.mutateAsync({
+        id,
+        data: {
+          name: property.name,
+          address: property.address,
+          status: property.status,
+          location: property.address,
+          description: '',
+          amenities,
+        },
+      });
+      toast.success('Property amenities updated successfully');
+    } catch (error) {
+      console.error('Failed to update property amenities:', error);
+      toast.error('Failed to update property amenities');
     }
   };
 
@@ -282,7 +486,12 @@ export default function PropertyDetailPage({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium text-black text-base">Images</h3>
-                    <button className="text-sm text-gray-500 cursor-pointer">Edit</button>
+                    <button 
+                      className="text-sm text-gray-500 cursor-pointer"
+                      onClick={() => setIsEditImagesModalOpen(true)}
+                    >
+                      Edit
+                    </button>
                   </div>
                   <ImageGallery images={property.imageUrls.map(url => ({ id: url, src: url, alt: property.name })) || []} />
                 </div>
@@ -290,7 +499,12 @@ export default function PropertyDetailPage({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium text-black text-base">Amenities</h3>
-                    <button className="text-sm text-gray-500 cursor-pointer">Edit</button>
+                    <button 
+                      className="text-sm text-gray-500 cursor-pointer"
+                      onClick={() => setIsEditAmenitiesModalOpen(true)}
+                    >
+                      Edit
+                    </button>
                   </div>
                   <div className="flex overflow-x-auto gap-4 pb-4 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-x-visible">
                     {Object.entries(property?.amenities || {}).map(([key, value]) => {
@@ -354,6 +568,7 @@ export default function PropertyDetailPage({
                           <span className="w-[100px]">Apartment</span>
                           <span className="w-[100px]">Amount Paid</span>
                           <span className="w-[100px]">Status</span>
+                          <span className="w-[50px]">Actions</span>
                         </div>
                       </div>
                       <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-8 text-center text-gray-500">
@@ -369,6 +584,7 @@ export default function PropertyDetailPage({
                               <span className="w-[100px]">Apartment</span>
                               <span className="w-[100px]">Amount Paid</span>
                               <span className="w-[100px]">Status</span>
+                              <span className="w-[50px]">Actions</span>
                             </div>
                           </div>
                           <div className="overflow-x-auto">
@@ -401,6 +617,9 @@ export default function PropertyDetailPage({
                                 >
                                   {lease.status}
                                 </Badge>
+                              </div>
+                              <div className="w-[50px]">
+                                <LeaseActions lease={lease} />
                               </div>
                             </div>
                           </div>
@@ -442,6 +661,20 @@ export default function PropertyDetailPage({
         onClose={() => setIsAddTicketModalOpen(false)}
         portfolioId=""
         propertyId={id}
+      />
+
+      <EditImagesModal
+        isOpen={isEditImagesModalOpen}
+        onClose={() => setIsEditImagesModalOpen(false)}
+        currentImages={property.imageUrls}
+        onSave={handleUpdateImages}
+      />
+
+      <EditAmenitiesModal
+        isOpen={isEditAmenitiesModalOpen}
+        onClose={() => setIsEditAmenitiesModalOpen(false)}
+        currentAmenities={property?.amenities || {}}
+        onSave={handleUpdateAmenities}
       />
     </Layout>
   );
