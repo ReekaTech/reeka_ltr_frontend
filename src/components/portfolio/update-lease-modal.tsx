@@ -32,7 +32,6 @@ export function UpdateLeaseModal({
   onClose,
   lease,
 }: UpdateLeaseModalProps) {
-  console.log(lease);
   const { data: countries, isLoading: isCountriesLoading } = useCountries();
   const updateLeaseMutation = useUpdateLease();
   const uploadMutation = useUploadSignedUrl();

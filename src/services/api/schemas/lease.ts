@@ -57,7 +57,6 @@ export interface PaginatedLeases {
 }
 
 export interface GetLeasesParams {
-  portfolioId?: string;
   propertyId?: string;
   organizationId?: string;
   page?: number;

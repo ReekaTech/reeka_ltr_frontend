@@ -11,7 +11,7 @@ export async function getLeases(
 ): Promise<PaginatedLeases> {
   const session = await getSession();
   const organizationId = session?.user?.organizationId;
-  
+
   if (!organizationId) {
     throw new Error('Organization ID is required');
   }
@@ -29,7 +29,7 @@ export async function getLeases(
   if (params.status) queryParams.append('status', params.status);
   if (params.propertyId) queryParams.append('propertyId', params.propertyId);
 
-  const response = await api.get(`/organizations/${organizationId}/leases/portfolio/${params.portfolioId}?${queryParams.toString()}`);
+  const response = await api.get(`/organizations/${organizationId}/leases?${queryParams.toString()}`);
   return response.data;
 }
 
@@ -39,7 +39,7 @@ export async function getLeases(
 export async function getLeaseById(id: string): Promise<Lease> {
   const session = await getSession();
   const organizationId = session?.user?.organizationId;
-  
+
   if (!organizationId) {
     throw new Error('Organization ID is required');
   }
@@ -54,7 +54,7 @@ export async function getLeaseById(id: string): Promise<Lease> {
 export async function createLease(data: Partial<Lease>): Promise<Lease> {
   const session = await getSession();
   const organizationId = session?.user?.organizationId;
-  
+
   if (!organizationId) {
     throw new Error('Organization ID is required');
   }
@@ -69,7 +69,7 @@ export async function createLease(data: Partial<Lease>): Promise<Lease> {
 export async function updateLease(id: string, data: RenewLease): Promise<Lease> {
   const session = await getSession();
   const organizationId = session?.user?.organizationId;
-  
+
   if (!organizationId) {
     throw new Error('Organization ID is required');
   }
@@ -84,7 +84,7 @@ export async function updateLease(id: string, data: RenewLease): Promise<Lease> 
 export async function deleteLease(id: string): Promise<void> {
   const session = await getSession();
   const organizationId = session?.user?.organizationId;
-  
+
   if (!organizationId) {
     throw new Error('Organization ID is required');
   }
@@ -98,7 +98,7 @@ export async function deleteLease(id: string): Promise<void> {
 export async function cancelLease(id: string, data: CancelLease): Promise<Lease> {
   const session = await getSession();
   const organizationId = session?.user?.organizationId;
-  
+
   if (!organizationId) {
     throw new Error('Organization ID is required');
   }
@@ -113,7 +113,7 @@ export async function cancelLease(id: string, data: CancelLease): Promise<Lease>
 export async function renewLease(id: string, data: RenewLease): Promise<Lease> {
   const session = await getSession();
   const organizationId = session?.user?.organizationId;
-  
+
   if (!organizationId) {
     throw new Error('Organization ID is required');
   }

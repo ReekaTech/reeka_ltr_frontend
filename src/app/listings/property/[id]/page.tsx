@@ -80,11 +80,11 @@ function LeaseActions({ lease }: { lease: Lease }) {
         return;
       }
 
-      await cancelLease.mutateAsync({ 
-        id: lease._id, 
-        data: { reasonForTermination: reason } 
+      await cancelLease.mutateAsync({
+        id: lease._id,
+        data: { reasonForTermination: reason }
       });
-      
+
       toast.success('Lease cancelled successfully');
       setIsCancelModalOpen(false);
     } catch (error) {
@@ -97,7 +97,7 @@ function LeaseActions({ lease }: { lease: Lease }) {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       const dropdown = document.querySelector('[data-dropdown]');
-      
+
       if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(target) && !dropdown?.contains(target)) {
         setIsDropdownOpen(false);
       }
@@ -204,9 +204,9 @@ export default function PropertyDetailPage({
   const { data: property, isLoading } = useProperty(id);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const { data: leases, isLoading: isLoadingLeases } = useLeases({ 
+  const { data: leases, isLoading: isLoadingLeases } = useLeases({
     propertyId: id,
-    search: debouncedSearchTerm 
+    search: debouncedSearchTerm
   });
   const [activeTab, setActiveTab] = useState('details');
   const [isAddLeaseModalOpen, setIsAddLeaseModalOpen] = useState(false);
@@ -257,7 +257,7 @@ export default function PropertyDetailPage({
 
   const handleUpdateImages = async (imageUrls: string[]) => {
     if (!property) return;
-    
+
     try {
       await updateProperty.mutateAsync({
         id,
@@ -284,7 +284,7 @@ export default function PropertyDetailPage({
     };
   }) => {
     if (!property) return;
-    
+
     try {
       await updateProperty.mutateAsync({
         id,
@@ -340,8 +340,8 @@ export default function PropertyDetailPage({
   ];
 
   return (
-    <Layout 
-      title={property.name} 
+    <Layout
+      title={property.name}
       description={`Created on ${format(new Date(property.createdAt), 'do MMMM yyyy')}`}
     >
       {/* Back button */}
@@ -409,7 +409,7 @@ export default function PropertyDetailPage({
             <div className="w-full lg:w-1/2 space-y-4 lg:space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-semibold">Property Details</h2>
-                <button 
+                <button
                   className="text-sm text-gray-500 cursor-pointer"
                   onClick={() => setIsEditing(!isEditing)}
                 >
@@ -486,7 +486,7 @@ export default function PropertyDetailPage({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium text-black text-base">Images</h3>
-                    <button 
+                    <button
                       className="text-sm text-gray-500 cursor-pointer"
                       onClick={() => setIsEditImagesModalOpen(true)}
                     >
@@ -499,7 +499,7 @@ export default function PropertyDetailPage({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium text-black text-base">Amenities</h3>
-                    <button 
+                    <button
                       className="text-sm text-gray-500 cursor-pointer"
                       onClick={() => setIsEditAmenitiesModalOpen(true)}
                     >
@@ -509,12 +509,12 @@ export default function PropertyDetailPage({
                   <div className="flex overflow-x-auto gap-4 pb-4 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-x-visible">
                     {Object.entries(property?.amenities || {}).map(([key, value]) => {
                       if (value.available) {
-                        const displayName = key.split('_').map(word => 
+                        const displayName = key.split('_').map(word =>
                           word.charAt(0).toUpperCase() + word.slice(1)
                         ).join(' ');
                         return (
-                          <AmenityCard 
-                            key={key} 
+                          <AmenityCard
+                            key={key}
                             label={displayName}
                             quantity={value.quantity}
                           />
@@ -531,7 +531,7 @@ export default function PropertyDetailPage({
             <div className="w-full lg:w-1/2 bg-white rounded-2xl shadow p-4 lg:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-semibold">Leases</h2>
-                <button 
+                <button
                   className="text-sm text-orange-500 flex items-center gap-1 cursor-pointer"
                   onClick={() => setIsAddLeaseModalOpen(true)}
                 >
@@ -562,18 +562,18 @@ export default function PropertyDetailPage({
                   <>
                     {leases?.items.length === 0 ? (
                       <>
-                       <div className="overflow-x-auto">
-                        <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl min-w-[400px]">
-                          <span className="w-[100px]">Date</span>
-                          <span className="w-[100px]">Apartment</span>
-                          <span className="w-[100px]">Amount Paid</span>
-                          <span className="w-[100px]">Status</span>
-                          <span className="w-[50px]">Actions</span>
+                        <div className="overflow-x-auto">
+                          <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl min-w-[400px]">
+                            <span className="w-[100px]">Date</span>
+                            <span className="w-[100px]">Apartment</span>
+                            <span className="w-[100px]">Amount Paid</span>
+                            <span className="w-[100px]">Status</span>
+                            <span className="w-[50px]">Actions</span>
+                          </div>
                         </div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-8 text-center text-gray-500">
-                        No leases found
-                      </div>
+                        <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-8 text-center text-gray-500">
+                          No leases found
+                        </div>
                       </>
                     ) : (
                       leases?.items.map((lease: Lease, index: number) => (
@@ -601,7 +601,7 @@ export default function PropertyDetailPage({
                                 <p className="text-sm font-medium text-gray-900">{lease.property.name}</p>
                                 <p className="text-xs text-gray-500">{lease.property.address}</p>
                               </div>
-                              
+
                               <div className="w-[100px]">
                                 <p className="text-sm font-medium text-gray-900">{lease.rentalRate}</p>
                                 <p className="text-xs text-gray-500">{lease.paymentFrequency}</p>

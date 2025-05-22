@@ -34,9 +34,9 @@ export function MaintenanceTab({ propertyId, portfolioId, searchTerm }: Maintena
   });
 
   // Filter tickets based on search term
-  const filteredTickets = ticketsData?.items.filter((ticket: MaintenanceTicket) => 
+  const filteredTickets = ticketsData?.items.filter((ticket: MaintenanceTicket) =>
     ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.type.toLowerCase().includes(searchTerm.toLowerCase())
+    ticket.category.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   // Loading state
@@ -83,7 +83,7 @@ export function MaintenanceTab({ propertyId, portfolioId, searchTerm }: Maintena
             ? `No maintenance tickets found matching "${searchTerm}". Try a different search term.`
             : 'No maintenance tickets found for this portfolio.'}
         </p>
-        <button 
+        <button
           onClick={() => setIsAddTicketModalOpen(true)}
           className="hover:bg-opacity-90 mt-4 rounded-md bg-[#e36b37] px-4 py-2 text-white transition-all cursor-pointer"
         >
@@ -117,11 +117,11 @@ export function MaintenanceTab({ propertyId, portfolioId, searchTerm }: Maintena
               {/* Body */}
               <div className="divide-y divide-gray-200 bg-white">
                 {filteredTickets.map((ticket: MaintenanceTicket) => (
-                  <div 
-                    key={ticket._id} 
+                  <div
+                    key={ticket._id}
                     className="grid grid-cols-5 gap-4 px-4 py-4 hover:bg-gray-50"
                   >
-                    <div 
+                    <div
                       className="text-sm font-medium text-gray-900 cursor-pointer hover:text-[#e36b37]"
                       onClick={() => {
                         setSelectedTicket(ticket);
@@ -134,7 +134,7 @@ export function MaintenanceTab({ propertyId, portfolioId, searchTerm }: Maintena
                     <div className="text-sm text-gray-500">
                       {format(new Date(ticket.createdAt), 'MMMM d, yyyy')}
                     </div>
-                    <div className="text-sm text-gray-500">{ticket.type}</div>
+                    <div className="text-sm text-gray-500">{ticket.category}</div>
                     <div className="text-sm">
                       <StatusBadge status={ticket.status} />
                     </div>
@@ -161,7 +161,7 @@ export function MaintenanceTab({ propertyId, portfolioId, searchTerm }: Maintena
             id: selectedTicket._id,
             description: selectedTicket.description,
             dateOfCreation: selectedTicket.createdAt,
-            requestType: selectedTicket.type,
+            requestType: selectedTicket.category,
             status: selectedTicket.status,
             ticketNumber: selectedTicket.ticketNumber
           } : undefined}

@@ -46,7 +46,7 @@ export const useCreateLease = () => {
       const errorMessage = Array.isArray(error.response?.data?.message)
         ? error.response?.data?.message[0]
         : error.response?.data?.message || error.message || 'Failed to create lease';
-      
+
       toast.error(errorMessage);
     },
     onSuccess: () => {
@@ -86,7 +86,7 @@ export const useRenewLease = () => {
       const errorMessage = Array.isArray(error.response?.data?.message)
         ? error.response?.data?.message[0]
         : error.response?.data?.message || error.message || 'Failed to renew lease';
-      
+
       toast.error(errorMessage);
     },
     onSuccess: () => {
@@ -110,7 +110,7 @@ export const useUpdateLease = () => {
       const errorMessage = Array.isArray(error.response?.data?.message)
         ? error.response?.data?.message[0]
         : error.response?.data?.message || error.message || 'Failed to update lease';
-      
+
       toast.error(errorMessage);
     },
     onSuccess: () => {

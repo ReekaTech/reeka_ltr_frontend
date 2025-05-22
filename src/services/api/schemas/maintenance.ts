@@ -19,7 +19,7 @@ export interface MaintenanceTicket {
   description: string;
   title: string;
   priority: string;
-  type: RequestType;
+  category: RequestType;
   ticketNumber?: string;
   status: MaintenanceStatus;
   createdAt: string;
@@ -56,4 +56,3 @@ export interface GetMaintenanceTicketsParams {
   search?: string;
   status?: MaintenanceStatus;
 }
-  

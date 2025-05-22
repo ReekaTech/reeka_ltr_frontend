@@ -23,7 +23,7 @@ interface TicketFormData {
   title: string;
   description: string;
   propertyId: string;
-  type: RequestType;
+  category: RequestType;
   priority: string;
   attachments: File[];
   attachmentPreviews: string[];
@@ -41,12 +41,12 @@ export function AddTicketModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createTicketMutation = useCreateMaintenanceTicket();
   const uploadMutation = useUploadSignedUrl();
-  
+
   const initialValues: TicketFormData = {
     title: '',
     description: '',
     propertyId: propertyId || '',
-    type: MAINTENANCE_TYPES[0].key as RequestType,
+    category: MAINTENANCE_TYPES[0].key as RequestType,
     priority: '',
     attachments: [],
     attachmentPreviews: [],
@@ -59,7 +59,7 @@ export function AddTicketModal({
       const groupedAttachments = values.attachments.reduce((acc, file) => {
         const extension = file.name.split('.').pop()?.toLowerCase();
         if (!extension) return acc;
-        
+
         if (!acc[extension]) {
           acc[extension] = [];
         }
@@ -75,7 +75,7 @@ export function AddTicketModal({
             type: 'single',
             extension
           });
-          
+
           // Upload all files of this extension
           return Promise.all(
             files.map(async (file) => {
@@ -91,7 +91,7 @@ export function AddTicketModal({
         ...(portfolioId && { portfolioId }),
         title: values.title,
         description: values.description,
-        type: values.type as RequestType,
+        category: values.category as RequestType,
         priority: values.priority,
         status: 'open' as MaintenanceStatus,
         attachments: attachmentUrls,
@@ -116,14 +116,14 @@ export function AddTicketModal({
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, handleChange, handleBlur, setFieldValue, isSubmitting }) => {
-           
+
             const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               const files = e.target.files;
               if (!files) return;
 
               const newFiles = Array.from(files);
               const updatedAttachments = [...values.attachments, ...newFiles];
-              
+
               // Create preview URLs for new files
               const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
               const updatedPreviews = [...values.attachmentPreviews, ...newPreviewUrls];
@@ -157,7 +157,7 @@ export function AddTicketModal({
 
               const newFiles = Array.from(files);
               const updatedAttachments = [...values.attachments, ...newFiles];
-              
+
               // Create preview URLs for new files
               const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
               const updatedPreviews = [...values.attachmentPreviews, ...newPreviewUrls];
@@ -183,11 +183,10 @@ export function AddTicketModal({
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="Brief title of the issue"
-                    className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
-                      touched.title && errors.title
+                    className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${touched.title && errors.title
                         ? 'border-red-300 focus:border-red-500'
                         : 'border-gray-200 focus:border-[#e36b37]'
-                    }`}
+                      }`}
                   />
                   {touched.title && errors.title && (
                     <p className="mt-1 text-sm text-red-600">{errors.title}</p>
@@ -205,14 +204,13 @@ export function AddTicketModal({
                     <select
                       id="type"
                       name="type"
-                      value={values.type}
+                      value={values.category}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className={`w-full appearance-none rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
-                        touched.type && errors.type
+                      className={`w-full appearance-none rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${touched.category && errors.category
                           ? 'border-red-300 focus:border-red-500'
                           : 'border-gray-200 focus:border-[#e36b37]'
-                      }`}
+                        }`}
                     >
                       {MAINTENANCE_TYPES.map(type => (
                         <option key={type.key} value={type.key}>
@@ -224,8 +222,8 @@ export function AddTicketModal({
                       <ChevronDown className="h-4 w-4 text-gray-500" />
                     </div>
                   </div>
-                  {touched.type && errors.type && (
-                    <p className="mt-1 text-sm text-red-600">{errors.type}</p>
+                  {touched.category && errors.category && (
+                    <p className="mt-1 text-sm text-red-600">{errors.category}</p>
                   )}
                 </div>
 
@@ -243,11 +241,10 @@ export function AddTicketModal({
                       value={values.priority}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className={`w-full appearance-none rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
-                        touched.priority && errors.priority
+                      className={`w-full appearance-none rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${touched.priority && errors.priority
                           ? 'border-red-300 focus:border-red-500'
                           : 'border-gray-200 focus:border-[#e36b37]'
-                      }`}
+                        }`}
                     >
                       <option value="">Select priority</option>
                       {priorities.map(priority => (
@@ -280,11 +277,10 @@ export function AddTicketModal({
                     onBlur={handleBlur}
                     placeholder="Describe the issue in detail"
                     rows={4}
-                    className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${
-                      touched.description && errors.description
+                    className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${touched.description && errors.description
                         ? 'border-red-300 focus:border-red-500'
                         : 'border-gray-200 focus:border-[#e36b37]'
-                    }`}
+                      }`}
                   />
                   {touched.description && errors.description && (
                     <p className="mt-1 text-sm text-red-600">{errors.description}</p>
@@ -296,11 +292,10 @@ export function AddTicketModal({
                     Attachments
                   </label>
                   <div
-                    className={`mt-1 flex justify-center rounded-md border-2 border-dashed px-6 pt-5 pb-6 ${
-                      touched.attachments && errors.attachments
+                    className={`mt-1 flex justify-center rounded-md border-2 border-dashed px-6 pt-5 pb-6 ${touched.attachments && errors.attachments
                         ? 'border-red-300'
                         : 'border-gray-300'
-                    }`}
+                      }`}
                     onClick={() => fileInputRef.current?.click()}
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}

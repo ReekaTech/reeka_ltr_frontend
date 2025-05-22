@@ -159,7 +159,7 @@ export function MaintenanceList() {
                     {formatDate(ticket.createdAt)}
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis text-gray-500">
-                    {ticket.type}
+                    {ticket.category}
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis">
                     <StatusBadge status={ticket.status} />
