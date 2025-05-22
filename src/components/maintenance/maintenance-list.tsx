@@ -98,9 +98,9 @@ export function MaintenanceList() {
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <div className="min-w-[1000px]">
+        <div className="w-full">
           {/* Header */}
-          <div className="grid grid-cols-7 bg-[#f6f6f6] rounded-t-lg" style={{ gridTemplateColumns: '100px 300px 200px 150px 150px 120px 80px' }}>
+          <div className="grid grid-cols-7 bg-[#f6f6f6] rounded-t-lg">
             <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Ticket No</div>
             <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Description</div>
             <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Property</div>
@@ -115,7 +115,7 @@ export function MaintenanceList() {
             {isLoading ? (
               // Skeleton Loading State
               Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="grid grid-cols-7 animate-pulse" style={{ gridTemplateColumns: '100px 300px 200px 150px 150px 120px 80px' }}>
+                <div key={index} className="grid grid-cols-7 animate-pulse">
                   <div className="px-4 py-4">
                     <div className="h-4 w-14 rounded bg-gray-200"></div>
                   </div>
@@ -141,7 +141,7 @@ export function MaintenanceList() {
               ))
             ) : maintenanceData?.items && maintenanceData.items.length > 0 ? (
               maintenanceData.items.map((ticket: MaintenanceTicket) => (
-                <div key={ticket._id} className="grid grid-cols-7 hover:bg-gray-50" style={{ gridTemplateColumns: '100px 300px 200px 150px 150px 120px 80px' }}>
+                <div key={ticket._id} className="grid grid-cols-7 hover:bg-gray-50">
                   <div className="px-4 py-4 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
                     <a href="#" className="text-[#e36b37] hover:underline">
                       {ticket.ticketNumber}

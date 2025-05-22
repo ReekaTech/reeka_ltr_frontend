@@ -24,6 +24,17 @@ api.interceptors.request.use(async config => {
   return config;
 });
 
+// Response interceptor for handling 401 errors
+api.interceptors.response.use(
+  response => response,
+  async (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      await signOut({ redirect: true, callbackUrl: '/auth/signin' });
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Response interceptor for refresh token
 // api.interceptors.response.use(
 //   response => response,

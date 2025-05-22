@@ -36,13 +36,13 @@ export default function Portfolio() {
         {/* Left Column */}
         <div className="flex flex-col gap-6">
           <RenewalsCard items={data.renewals} />
-          <PropertiesCard properties={data.propertyList} />
+          <PropertiesCard properties={data.properties} />
         </div>
 
         {/* Right Column */}
         <div className="flex flex-col gap-6">
-          <UnitsCard totalValue={100} data={data.unitStats} />
-          <MaintenanceCard items={data.maintenanceData} />
+          <UnitsCard totalValue={100} data={data.units} />
+          <MaintenanceCard items={data.maintenance} />
         </div>
       </div>
     </>

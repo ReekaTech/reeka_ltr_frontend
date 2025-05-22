@@ -1,8 +1,19 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from 'next-auth/middleware';
+import { signOut } from 'next-auth/react';
+import { allowedRoles } from '@/app/constants/roles';
 
 export default withAuth(
   function middleware(req) {
+    const token = req.nextauth.token;
+
+    if (!token?.user?.role || !allowedRoles.includes(token?.user?.role)) {
+      signOut();
+      return NextResponse.redirect(new URL('/auth/signin?error=unauthorized', req.url));
+    }
+
+
+
     return NextResponse.next();
   },
   {

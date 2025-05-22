@@ -23,9 +23,9 @@ export interface UnitStat {
 }
 
 export interface MaintenanceIssue {
-  issue: string;
-  tenant: string;
-  property: string;
+  issueTitle: string;
+  tenantName: string;
+  propertyName: string;
   timeAgo: string;
 }
 
@@ -70,15 +70,15 @@ export interface OverviewData {
 export interface PortfolioData {
   metrics: DashboardMetrics[];
   renewals: Renewal[];
-  unitStats: UnitStat[];
-  maintenanceData: MaintenanceIssue[];
-  propertyList: DashboardProperty[];
+  units: UnitStat[];
+  maintenance: MaintenanceIssue[];
+  properties: DashboardProperty[];
 }
 
 export interface PropertyData {
   metrics: DashboardMetrics[];
-  maintenanceData: MaintenanceIssue[];
-  tenantList: DashboardTenant[];
+  maintenance: MaintenanceIssue[];
+  tenants: DashboardTenant[];
 }
 
 export interface DashboardParams {

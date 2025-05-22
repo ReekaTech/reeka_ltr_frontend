@@ -1,6 +1,8 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { NextAuthOptions } from 'next-auth';
 import { signin } from '@/services/api/auth';
+import { signOut } from 'next-auth/react';
+import { allowedRoles } from '@/app/constants/roles';
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -17,6 +19,10 @@ export const authOptions: NextAuthOptions = {
             email: credentials?.email || '',
             password: credentials?.password || '',
           });
+
+          if (typeof response.user.role !== 'string' || !allowedRoles.includes(response?.user?.role)) {
+            throw new Error('You are not authorized to access this application');
+          }
 
           if (response) {
             return {

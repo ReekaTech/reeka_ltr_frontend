@@ -72,9 +72,9 @@ export function TenantList() {
         </div>
 
         <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <div className="min-w-[1000px]">
+          <div className="w-full">
             {/* Header */}
-            <div className="grid grid-cols-6 bg-[#f6f6f6] rounded-t-lg" style={{ gridTemplateColumns: '250px 150px 150px 150px 150px 120px' }}>
+            <div className="grid grid-cols-6 bg-[#f6f6f6] rounded-t-lg">
               <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Name</div>
               <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Start Date</div>
               <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">End Date</div>
@@ -88,7 +88,7 @@ export function TenantList() {
               {isLoading ? (
                 // Skeleton Loading State
                 Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="grid grid-cols-6 animate-pulse" style={{ gridTemplateColumns: '250px 150px 150px 150px 150px 120px' }}>
+                  <div key={index} className="grid grid-cols-6 animate-pulse">
                     <div className="px-4 py-4">
                       <div className="h-4 w-32 rounded bg-gray-200"></div>
                     </div>
@@ -111,7 +111,7 @@ export function TenantList() {
                 ))
               ) : tenantsData?.items && tenantsData.items.length > 0 ? (
                 tenantsData.items.map((lease: Lease) => (
-                  <div key={lease._id} className="grid grid-cols-6 hover:bg-gray-50" style={{ gridTemplateColumns: '250px 150px 150px 150px 150px 120px' }}>
+                  <div key={lease._id} className="grid grid-cols-6 hover:bg-gray-50">
                     <div className="px-4 py-4 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
                       <a href="#" className="text-[#e36b37] hover:underline">
                         {lease.tenant?.firstName} {lease.tenant?.lastName}

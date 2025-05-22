@@ -36,12 +36,12 @@ export default function Properties() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Left Column */}
         <div className="flex flex-col gap-6">
-          <MaintenanceCard items={data.maintenanceData} />
+          <MaintenanceCard items={data.maintenance} />
         </div>
 
         {/* Right Column */}
         <div className="flex flex-col gap-6">
-          <TenantsCard tenants={data.tenantList} />
+          <TenantsCard tenants={data.tenants} />
         </div>
       </div>
     </>

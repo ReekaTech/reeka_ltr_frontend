@@ -22,34 +22,33 @@ function PropertyItem({ name, location, imageUrl }: PropertyItemProps) {
 
 
 interface Property {
-    name: string;
-    location: string;
-    imageUrl: string;
-  }
-  
-  interface PropertiesCardProps {
-    title?: string;
-    properties: Property[];
-  }
-  
-  export function PropertiesCard({ title = "Properties", properties }: PropertiesCardProps) {
-    return (
-      <div className="rounded-lg border border-[#dcdcdc] bg-white shadow-sm">
-        <div className="border-b-1 border-[#eaeaea] shadow-sm p-4">
-          <h2 className="font-medium text-[#808080] text-base">{title}</h2>
-        </div>
-  
-        <div className="p-4">
-          {properties.map((property, index) => (
-            <PropertyItem
-              key={index}
-              name={property.name}
-              location={property.location}
-              imageUrl={property.imageUrl}
-            />
-          ))}
-        </div>
+  name: string;
+  location: string;
+  imageUrl: string;
+}
+
+interface PropertiesCardProps {
+  title?: string;
+  properties: Property[];
+}
+
+export function PropertiesCard({ title = "Properties", properties }: PropertiesCardProps) {
+  return (
+    <div className="rounded-lg border border-[#dcdcdc] bg-white shadow-sm">
+      <div className="border-b-1 border-[#eaeaea] shadow-sm p-4">
+        <h2 className="font-medium text-[#808080] text-base">{title}</h2>
       </div>
-    );
-  }
-  
+
+      <div className="p-4 h-[400px] overflow-y-auto">
+        {properties.map((property, index) => (
+          <PropertyItem
+            key={index}
+            name={property.name}
+            location={property.location}
+            imageUrl={property.imageUrl}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

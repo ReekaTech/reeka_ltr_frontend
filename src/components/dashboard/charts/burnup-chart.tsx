@@ -217,23 +217,32 @@ export default function BurnupChart({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 grid grid-cols-3 gap-4">
-          <div className="rounded-lg p-3" style={{ backgroundColor: THEME_COLOR_LIGHT }}>
-            <p className="text-xs" style={{ color: THEME_COLOR }}>Current Progress</p>
-            <p className="text-xl font-bold" style={{ color: THEME_COLOR }}>{formatCurrency(currentValue)}</p>
+        {(!data.actual.length || !data.ideal.length) ? (
+          <div className="flex h-[350px] flex-col items-center justify-center text-center">
+            <div className="mb-2 text-[#6d6d6d]">No data available</div>
+            <div className="text-sm text-[#808080]">Revenue data will appear here once available</div>
           </div>
-          <div className="rounded-lg bg-gray-50 p-3">
-            <p className="text-xs text-gray-500">Target</p>
-            <p className="text-xl font-bold text-gray-700">{formatCurrency(target)}</p>
-          </div>
-          <div className="rounded-lg bg-gray-50 p-3">
-            <p className="text-xs text-gray-500">Completion</p>
-            <p className="text-xl font-bold text-gray-700">{completionPercentage}%</p>
-          </div>
-        </div>
-        <div className="h-[350px]">
-          <Line ref={chartRef} data={chartData} options={options} plugins={[customPlugin]} />
-        </div>
+        ) : (
+          <>
+            <div className="mb-4 grid grid-cols-3 gap-4">
+              <div className="rounded-lg p-3" style={{ backgroundColor: THEME_COLOR_LIGHT }}>
+                <p className="text-xs" style={{ color: THEME_COLOR }}>Current Progress</p>
+                <p className="text-xl font-bold" style={{ color: THEME_COLOR }}>{formatCurrency(currentValue)}</p>
+              </div>
+              <div className="rounded-lg bg-gray-50 p-3">
+                <p className="text-xs text-gray-500">Target</p>
+                <p className="text-xl font-bold text-gray-700">{formatCurrency(target)}</p>
+              </div>
+              <div className="rounded-lg bg-gray-50 p-3">
+                <p className="text-xs text-gray-500">Completion</p>
+                <p className="text-xl font-bold text-gray-700">{completionPercentage}%</p>
+              </div>
+            </div>
+            <div className="h-[350px]">
+              <Line ref={chartRef} data={chartData} options={options} plugins={[customPlugin]} />
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   )
