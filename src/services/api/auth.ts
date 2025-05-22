@@ -14,7 +14,7 @@ import { api } from './api-service';
 import axios from 'axios';
 
 const baseURL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:30000/api/v1';
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
 
 export async function signup(payload: SignupPayload): Promise<AuthResponse> {
   const response = await api.post<AuthResponse>('/auth/register', payload);

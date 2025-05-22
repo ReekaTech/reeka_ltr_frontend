@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 
-export default function ErrorPage({
+export default function Error({
   error,
   reset,
 }: {
-  error?: Error & { digest?: string };
-  reset?: () => void;
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-4 text-center">
@@ -27,18 +27,16 @@ export default function ErrorPage({
 
       <h1 className="text-2xl font-semibold">Something went wrong!</h1>
       <p className="text-sm text-[#808080]">
-        {error?.message || 'An unexpected error occurred'}
+        {error.message || 'An unexpected error occurred'}
       </p>
 
       <div className="flex gap-4">
-        {reset && (
-          <button
-            onClick={reset}
-            className="hover:bg-opacity-90 rounded-md bg-[#e36b37] px-4 py-2 text-sm text-white"
-          >
-            Try again
-          </button>
-        )}
+        <button
+          onClick={reset}
+          className="hover:bg-opacity-90 rounded-md bg-[#e36b37] px-4 py-2 text-sm text-white"
+        >
+          Try again
+        </button>
         <Link
           href="/"
           className="hover:bg-opacity-90 rounded-md bg-[#e36b37] px-4 py-2 text-sm text-white"

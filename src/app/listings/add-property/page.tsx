@@ -1,9 +1,9 @@
 'use client';
 
-import { AddPropertyForm, PropertyFormProvider } from '@/components/property';
-
+import AddPropertyForm from '@/components/property/add-property-form';
 import { ArrowLeft } from 'lucide-react';
 import { Layout } from '@/components/ui';
+import { PropertyFormProvider } from '@/components/property';
 import { useRouter } from 'next/navigation';
 
 export default function AddPropertyPage() {

@@ -4,58 +4,47 @@ import { MaintenanceCard, MetricsCard, MiniBarChartCard, RenewalsCard, UnitsCard
 
 import BurnupChart from './charts/burnup-chart';
 import { DashboardMetrics } from '@/services/api/schemas/dashboard';
+import OverviewClient from './OverviewClient';
+import { Suspense } from 'react';
 import { useOverviewData } from '@/services/queries/hooks/useDashboard';
 import { useSearchParams } from 'next/navigation';
 
-export default function Overview() {
-  const searchParams = useSearchParams();
-  const startDate = searchParams.get('startDate') || new Date().toISOString().split('T')[0];
-  const endDate = searchParams.get('endDate') || new Date().toISOString().split('T')[0];
-
-  const { data, isLoading } = useOverviewData({ startDate, endDate });
-
-  if (isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#e36b37]"></div>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return null;
-  }
-
-  // Extract the numeric value from the string (remove currency symbol and commas)
-  const totalUnits = parseInt(data.metrics[3]?.value.replace(/[^0-9]/g, '') || '0');
-
+function LoadingState() {
   return (
     <>
+      {/* Metrics grid skeleton */}
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {data.metrics.map((metric: DashboardMetrics, index: number) => (
-          <MetricsCard key={index} {...metric} />
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-32 animate-pulse rounded-lg bg-gray-200" />
         ))}
       </div>
+
+      {/* Charts and cards grid skeleton */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Left Column */}
         <div className="flex flex-col gap-6">
-          <BurnupChart
-            title="Revenue Progress"
-            description="Track progress toward your annual revenue target"
-            data={data.revenue.chartData}
-            target={data.revenue.target}
-            summary={data.revenue.summary}
-            showDeclines={true}
-          />
-          <RenewalsCard items={data.renewals} />
+          {/* Burnup Chart skeleton */}
+          <div className="h-80 animate-pulse rounded-lg bg-gray-200" />
+          {/* Renewals Card skeleton */}
+          <div className="h-64 animate-pulse rounded-lg bg-gray-200" />
         </div>
 
         {/* Right Column */}
         <div className="flex flex-col gap-6">
-          <UnitsCard totalValue={totalUnits} data={data.units} />
-          <MaintenanceCard items={data.maintenance} />
+          {/* Units Card skeleton */}
+          <div className="h-64 animate-pulse rounded-lg bg-gray-200" />
+          {/* Maintenance Card skeleton */}
+          <div className="h-64 animate-pulse rounded-lg bg-gray-200" />
         </div>
       </div>
     </>
+  );
+}
+
+export default function Overview() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <OverviewClient />
+    </Suspense>
   );
 }

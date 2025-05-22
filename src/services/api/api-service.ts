@@ -4,7 +4,7 @@ import { getSession, signOut } from 'next-auth/react';
 import { Session } from 'next-auth';
 
 const baseURL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:30000/api/v1';
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
 
 export const api = axios.create({
   baseURL,
