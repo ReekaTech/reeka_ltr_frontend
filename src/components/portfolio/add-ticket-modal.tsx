@@ -184,8 +184,8 @@ export function AddTicketModal({
                     onBlur={handleBlur}
                     placeholder="Brief title of the issue"
                     className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${touched.title && errors.title
-                        ? 'border-red-300 focus:border-red-500'
-                        : 'border-gray-200 focus:border-[#e36b37]'
+                      ? 'border-red-300 focus:border-red-500'
+                      : 'border-gray-200 focus:border-[#e36b37]'
                       }`}
                   />
                   {touched.title && errors.title && (
@@ -202,14 +202,14 @@ export function AddTicketModal({
                   </label>
                   <div className="relative">
                     <select
-                      id="type"
-                      name="type"
+                      id="category"
+                      name="category"
                       value={values.category}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       className={`w-full appearance-none rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${touched.category && errors.category
-                          ? 'border-red-300 focus:border-red-500'
-                          : 'border-gray-200 focus:border-[#e36b37]'
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-200 focus:border-[#e36b37]'
                         }`}
                     >
                       {MAINTENANCE_TYPES.map(type => (
@@ -242,8 +242,8 @@ export function AddTicketModal({
                       onChange={handleChange}
                       onBlur={handleBlur}
                       className={`w-full appearance-none rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${touched.priority && errors.priority
-                          ? 'border-red-300 focus:border-red-500'
-                          : 'border-gray-200 focus:border-[#e36b37]'
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-200 focus:border-[#e36b37]'
                         }`}
                     >
                       <option value="">Select priority</option>
@@ -278,8 +278,8 @@ export function AddTicketModal({
                     placeholder="Describe the issue in detail"
                     rows={4}
                     className={`w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none ${touched.description && errors.description
-                        ? 'border-red-300 focus:border-red-500'
-                        : 'border-gray-200 focus:border-[#e36b37]'
+                      ? 'border-red-300 focus:border-red-500'
+                      : 'border-gray-200 focus:border-[#e36b37]'
                       }`}
                   />
                   {touched.description && errors.description && (
@@ -293,8 +293,8 @@ export function AddTicketModal({
                   </label>
                   <div
                     className={`mt-1 flex justify-center rounded-md border-2 border-dashed px-6 pt-5 pb-6 ${touched.attachments && errors.attachments
-                        ? 'border-red-300'
-                        : 'border-gray-300'
+                      ? 'border-red-300'
+                      : 'border-gray-300'
                       }`}
                     onClick={() => fileInputRef.current?.click()}
                     onDragOver={handleDragOver}

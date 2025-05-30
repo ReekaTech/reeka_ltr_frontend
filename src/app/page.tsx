@@ -9,5 +9,5 @@ export default async function Home() {
     redirect('/auth/signin');
   }
 
-  redirect('/dashboard');
+  redirect('/dashboard?startDate=2023-10-31&endDate=2026-01-31');
 }

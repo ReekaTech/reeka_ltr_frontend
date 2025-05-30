@@ -1,6 +1,6 @@
 'use client';
 
-import 'react-day-picker/dist/style.css';
+import 'react-datepicker/dist/react-datepicker.css';
 
 import { Layout, Tabs, TabsContent } from '@/components/ui';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui';
@@ -9,8 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/ui';
 import { Calendar } from 'lucide-react';
-import { DateRange } from 'react-day-picker';
-import { DayPicker } from 'react-day-picker';
+import DatePicker from 'react-datepicker';
 import Overview from '@/components/dashboard/overview';
 import Portfolio from '@/components/dashboard/portfolio';
 import Properties from '@/components/dashboard/properties';
@@ -40,33 +39,27 @@ export default function DashboardClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(),
-    to: new Date(),
-  });
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [endDate, setEndDate] = useState<Date>(new Date());
 
   const { data: session, status } = useSession();
 
   // Update URL when date range changes
-  const updateDateRange = useCallback((range: DateRange | undefined) => {
-    if (range?.from && range?.to) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('startDate', format(range.from, 'yyyy-MM-dd'));
-      params.set('endDate', format(range.to, 'yyyy-MM-dd'));
-      router.push(`?${params.toString()}`);
-    }
+  const updateDateRange = useCallback((start: Date, end: Date) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('startDate', format(start, 'yyyy-MM-dd'));
+    params.set('endDate', format(end, 'yyyy-MM-dd'));
+    router.push(`?${params.toString()}`);
   }, [router, searchParams]);
 
   // Initialize date range from URL params
   useEffect(() => {
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
-    
-    if (startDate && endDate) {
-      setDateRange({
-        from: new Date(startDate),
-        to: new Date(endDate),
-      });
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+
+    if (startDateParam && endDateParam) {
+      setStartDate(new Date(startDateParam));
+      setEndDate(new Date(endDateParam));
     }
   }, [searchParams]);
 
@@ -79,13 +72,13 @@ export default function DashboardClient() {
             className="flex items-center gap-2 border-[#dcdcdc] bg-white text-[#6d6d6d] hover:bg-gray-50"
           >
             <Calendar className="h-4 w-4" />
-            {dateRange?.from ? (
-              dateRange.to ? (
+            {startDate ? (
+              endDate ? (
                 <>
-                  {format(dateRange.from, 'MMM d')} - {format(dateRange.to, 'MMM d')}
+                  {format(startDate, 'MMM d')} - {format(endDate, 'MMM d')}
                 </>
               ) : (
-                format(dateRange.from, 'MMM d')
+                format(startDate, 'MMM d')
               )
             ) : (
               'Select date range'
@@ -93,23 +86,25 @@ export default function DashboardClient() {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0 z-[100] bg-white" align="end">
-          <DayPicker
-            mode="range"
-            selected={dateRange}
-            onSelect={(range) => {
-              setDateRange(range);
-              updateDateRange(range);
+          <DatePicker
+            selected={startDate}
+            onChange={(dates) => {
+              const [start, end] = dates as [Date, Date];
+              setStartDate(start);
+              setEndDate(end);
+              if (start && end) {
+                updateDateRange(start, end);
+              }
             }}
-            numberOfMonths={2}
-            defaultMonth={dateRange?.from}
-            classNames={{
-              months: 'flex flex-row gap-4',
-              day_selected: 'bg-[#e36b37] text-white hover:bg-[#e36b37] hover:text-white',
-              day_today: 'text-[#e36b37]',
-              day_outside: 'text-gray-400',
-              day_disabled: 'text-gray-400',
-              day_range_middle: 'bg-[#e36b37]/20 text-[#e36b37]',
-            }}
+            startDate={startDate}
+            endDate={endDate}
+            selectsRange
+            monthsShown={2}
+            inline
+            className="border-none"
+            calendarClassName="border-none"
+            popperPlacement="bottom-end"
+            popperClassName="react-datepicker-left"
           />
         </PopoverContent>
       </Popover>
@@ -141,7 +136,7 @@ export default function DashboardClient() {
         />
 
         <TabsContent value="overview" activeValue={activeTab}>
-            <Overview  />
+          <Overview />
         </TabsContent>
 
         <TabsContent value="portfolio" activeValue={activeTab}>
@@ -149,7 +144,7 @@ export default function DashboardClient() {
         </TabsContent>
 
         <TabsContent value="properties" activeValue={activeTab}>
-            <Properties />
+          <Properties />
         </TabsContent>
       </div>
     </Layout>
