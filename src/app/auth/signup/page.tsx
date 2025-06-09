@@ -104,26 +104,6 @@ export default function SignUp() {
                   <Form className="space-y-4">
                     <div>
                       <label
-                        htmlFor="lastName"
-                        className="mb-2 block text-[15px] text-[#3a3a3a]"
-                      >
-                        Last Name
-                      </label>
-                      <Field
-                        name="lastName"
-                        type="text"
-                        className="w-full rounded-md border border-[#d0d5dd] bg-white px-4 py-3 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
-                        placeholder="Enter your last name"
-                      />
-                      {errors.lastName && touched.lastName && (
-                        <div className="mt-1 text-sm text-red-500">
-                          {errors.lastName}
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <label
                         htmlFor="firstName"
                         className="mb-2 block text-[15px] text-[#3a3a3a]"
                       >
@@ -138,6 +118,26 @@ export default function SignUp() {
                       {errors.firstName && touched.firstName && (
                         <div className="mt-1 text-sm text-red-500">
                           {errors.firstName}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="lastName"
+                        className="mb-2 block text-[15px] text-[#3a3a3a]"
+                      >
+                        Last Name
+                      </label>
+                      <Field
+                        name="lastName"
+                        type="text"
+                        className="w-full rounded-md border border-[#d0d5dd] bg-white px-4 py-3 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+                        placeholder="Enter your last name"
+                      />
+                      {errors.lastName && touched.lastName && (
+                        <div className="mt-1 text-sm text-red-500">
+                          {errors.lastName}
                         </div>
                       )}
                     </div>
@@ -396,25 +396,6 @@ export default function SignUp() {
                       {errors.company && touched.company && (
                         <div className="mt-1 text-sm text-red-500">
                           {errors.company}
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="contactPerson"
-                        className="mb-2 block text-[15px] text-[#3a3a3a]"
-                      >
-                        Contact Person
-                      </label>
-                      <Field
-                        name="contactPerson"
-                        type="text"
-                        className="w-full rounded-md border border-[#d0d5dd] bg-white px-4 py-3 focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
-                        placeholder="Enter contact person name"
-                      />
-                      {errors.contactPerson && touched.contactPerson && (
-                        <div className="mt-1 text-sm text-red-500">
-                          {errors.contactPerson}
                         </div>
                       )}
                     </div>

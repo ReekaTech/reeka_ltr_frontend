@@ -1,6 +1,10 @@
+'use client';
+
 import DashboardClient from './DashboardClient';
 import { Layout } from '@/components/ui';
 import { Suspense } from 'react';
+import { usePortfolios } from '@/services/queries/hooks/usePortfolios';
+import { useProperties } from '@/services/queries/hooks/useProperties';
 
 function LoadingState() {
   return (
@@ -46,9 +50,14 @@ function LoadingState() {
 }
 
 export default function Page() {
+  const { data: properties } = useProperties({ limit: 5000 });
+  const { data: portfolios } = usePortfolios({ limit: 5000 });
+
+  // if (!properties || !portfolios) return <LoadingState />;
+
   return (
     <Suspense fallback={<LoadingState />}>
-      <DashboardClient />
+      <DashboardClient properties={properties || { items: [], total: 0, page: 1, limit: 10, pages: 1 }} portfolios={portfolios || []} />
     </Suspense>
   );
 }

@@ -25,6 +25,10 @@ export function AmenitiesSection({
     updateFormData('rooms', { ...formData.rooms, bathrooms: Math.max(1, value) });
   };
 
+  const handleStudioChange = (value: number) => {
+    updateFormData('rooms', { ...formData.rooms, studios: Math.max(0, value) });
+  };
+
   const handleRemoveAmenity = (amenity: string) => {
     const { [amenity]: _, ...rest } = formData.amenities;
     updateFormData('amenities', rest);
@@ -105,6 +109,34 @@ export function AmenitiesSection({
                 onClick={() => handleBathroomChange(formData.rooms.bathrooms + 1)}
                 className="flex h-8 w-8 items-center justify-center rounded-r-md border border-gray-300 bg-gray-50 text-gray-600"
                 aria-label="Increase bathrooms"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Studios */}
+          <div className="flex items-center justify-between mb-6 ">
+            <label htmlFor="studios" className="text-sm">
+              Studios
+            </label>
+            <div className="flex items-center">
+              <button
+                type="button"
+                onClick={() => handleStudioChange(formData.rooms.studios - 1)}
+                className="flex h-8 w-8 items-center justify-center rounded-l-md border border-gray-300 bg-gray-50 text-gray-600"
+                aria-label="Decrease studios"
+              >
+                -
+              </button>
+              <span className="flex h-8 w-8 items-center justify-center border-t border-b border-gray-300 bg-white text-sm">
+                {formData.rooms.studios}
+              </span>
+              <button
+                type="button"
+                onClick={() => handleStudioChange(formData.rooms.studios + 1)}
+                className="flex h-8 w-8 items-center justify-center rounded-r-md border border-gray-300 bg-gray-50 text-gray-600"
+                aria-label="Increase studios"
               >
                 +
               </button>

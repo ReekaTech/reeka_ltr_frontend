@@ -48,9 +48,8 @@ export async function getPortfolios(
   // Add search parameter
   if (params.search) queryParams.append('search', params.search);
 
-  const response = await api.get<Portfolio[]>(`/organizations/${organizationId}/portfolios ${queryParams.toString() ? `?search=${queryParams.toString()}` : ''}`);
+  const response = await api.get<Portfolio[]>(`/organizations/${organizationId}/portfolios${queryParams.toString() ? `?${queryParams.toString()}` : ''}`);
   return response.data;
-
 }
 
 /**

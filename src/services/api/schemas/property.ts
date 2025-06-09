@@ -102,6 +102,7 @@ export interface PropertyFormData {
   rooms: {
     bedrooms: number;
     bathrooms: number;
+    studios: number;
   };
   amenities: {
     [key: string]: {

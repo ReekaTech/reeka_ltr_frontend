@@ -99,6 +99,7 @@ export default function AddPropertyFormClient() {
     rooms: {
       bedrooms: 1,
       bathrooms: 1,
+      studios: 0,
     },
     amenities: {},
     images: [],
