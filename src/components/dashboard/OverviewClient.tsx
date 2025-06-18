@@ -13,8 +13,10 @@ export default function OverviewClient() {
   const searchParams = useSearchParams();
   const startDate = searchParams.get('startDate') || new Date().toISOString().split('T')[0];
   const endDate = searchParams.get('endDate') || new Date().toISOString().split('T')[0];
+  const portfolioId = searchParams.get('portfolio') || undefined;
+  const propertyId = searchParams.get('property') || undefined;
 
-  const { data, isLoading } = useOverviewData({ startDate, endDate });
+  const { data, isLoading } = useOverviewData({ startDate, endDate, portfolioId, propertyId });
 
   if (isLoading) {
     return (

@@ -11,8 +11,15 @@ export async function getOverviewData(params: DashboardParams): Promise<Overview
     throw new Error('Organization ID is required');
   }
 
+  // Remove undefined or empty string filters
+  const queryParams = new URLSearchParams();
+  if (params.startDate) queryParams.append('startDate', params.startDate);
+  if (params.endDate) queryParams.append('endDate', params.endDate);
+  if (params.portfolioId) queryParams.append('portfolioId', params.portfolioId);
+  if (params.propertyId) queryParams.append('propertyId', params.propertyId);
+
   const response = await api.get(`/dashboard/overview/${organizationId}`, {
-    params
+    params: Object.fromEntries(queryParams)
   });
 
   // Ensure all required data structures are properly initialized
@@ -68,8 +75,15 @@ export async function getPortfolioData(params: DashboardParams): Promise<Portfol
     throw new Error('Organization ID is required');
   }
 
+  // Remove undefined or empty string filters
+  const queryParams = new URLSearchParams();
+  if (params.startDate) queryParams.append('startDate', params.startDate);
+  if (params.endDate) queryParams.append('endDate', params.endDate);
+  if (params.portfolioId) queryParams.append('portfolioId', params.portfolioId);
+  if (params.propertyId) queryParams.append('propertyId', params.propertyId);
+
   const response = await api.get(`/dashboard/portfolio/${organizationId}`, {
-    params
+    params: Object.fromEntries(queryParams)
   });
 
   // Ensure all required data structures are properly initialized
@@ -111,8 +125,15 @@ export async function getPropertyData(params: DashboardParams): Promise<Property
     throw new Error('Organization ID is required');
   }
 
+  // Remove undefined or empty string filters
+  const queryParams = new URLSearchParams();
+  if (params.startDate) queryParams.append('startDate', params.startDate);
+  if (params.endDate) queryParams.append('endDate', params.endDate);
+  if (params.portfolioId) queryParams.append('portfolioId', params.portfolioId);
+  if (params.propertyId) queryParams.append('propertyId', params.propertyId);
+
   const response = await api.get(`/dashboard/property/${organizationId}`, {
-    params
+    params: Object.fromEntries(queryParams)
   });
 
   // Ensure all required data structures are properly initialized

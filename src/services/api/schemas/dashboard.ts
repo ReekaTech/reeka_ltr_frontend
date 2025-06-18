@@ -84,4 +84,13 @@ export interface PropertyData {
 export interface DashboardParams {
   startDate: string;
   endDate: string;
+  portfolioId?: string;
+  propertyId?: string;
+}
+
+export interface DashboardParams {
+  startDate: string;
+  endDate: string;
+  portfolioId?: string;
+  propertyId?: string;
 } 

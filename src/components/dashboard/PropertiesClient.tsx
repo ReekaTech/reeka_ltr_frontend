@@ -11,9 +11,9 @@ export default function PropertiesClient() {
   const searchParams = useSearchParams();
   const startDate = searchParams.get('startDate') || new Date().toISOString().split('T')[0];
   const endDate = searchParams.get('endDate') || new Date().toISOString().split('T')[0];
-  const propertyId = searchParams.get('id') || '';
+  const propertyId = searchParams.get('property') || undefined;
 
-  const { data, isLoading } = usePropertyData(propertyId, { startDate, endDate });
+  const { data, isLoading } = usePropertyData('', { startDate, endDate, propertyId });
 
   if (isLoading) {
     return (

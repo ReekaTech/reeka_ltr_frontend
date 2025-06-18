@@ -45,15 +45,38 @@ export default function DashboardClient({ properties, portfolios }: { properties
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [portfolioSearch, setPortfolioSearch] = useState('');
   const [propertiesSearch, setPropertiesSearch] = useState('');
+  
+  // Store selected filters
+  const [selectedPortfolio, setSelectedPortfolio] = useState<string | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
 
   const { data: session, status } = useSession();
 
-  // Clear portfolio and property selections on mount
+  // Update URL parameters based on active tab
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete('portfolioId');
-    params.delete('propertyId');
+    
+    // Clear both filters first
+    params.delete('portfolio');
+    params.delete('property');
+    
+    // Add the appropriate filter based on active tab
+    if (activeTab === 'portfolio' && selectedPortfolio) {
+      params.set('portfolio', selectedPortfolio);
+    } else if (activeTab === 'properties' && selectedProperty) {
+      params.set('property', selectedProperty);
+    }
+    
     router.push(`?${params.toString()}`);
+  }, [activeTab, selectedPortfolio, selectedProperty]);
+
+  // Initialize filters from URL params
+  useEffect(() => {
+    const portfolioId = searchParams.get('portfolio');
+    const propertyId = searchParams.get('property');
+    
+    if (portfolioId) setSelectedPortfolio(portfolioId);
+    if (propertyId) setSelectedProperty(propertyId);
   }, []);
 
   // Update URL when date range changes
@@ -154,9 +177,9 @@ export default function DashboardClient({ properties, portfolios }: { properties
                       className="flex items-center gap-2 border-[#dcdcdc] bg-white text-[#6d6d6d] hover:bg-gray-50"
                     >
                       <span>
-                        {searchParams.get('portfolio') 
-                          ? portfolios.find(p => p._id === searchParams.get('portfolio'))?.name || 'Select Portfolio'
-                          : 'Select Portfolio'}
+                        {selectedPortfolio
+                          ? portfolios.find(p => p._id === selectedPortfolio)?.name || 'Select Portfolio'
+                          : 'All Portfolios'}
                       </span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
@@ -172,6 +195,14 @@ export default function DashboardClient({ properties, portfolios }: { properties
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
+                      <button
+                        className={`flex w-full items-center px-4 py-2 text-left hover:bg-gray-100 ${
+                          !selectedPortfolio ? 'bg-gray-50 text-[#e36b37]' : ''
+                        }`}
+                        onClick={() => setSelectedPortfolio(null)}
+                      >
+                        View All Portfolios
+                      </button>
                       {portfolios
                         .filter(portfolio => 
                           portfolio.name.toLowerCase().includes(portfolioSearch.toLowerCase())
@@ -180,13 +211,9 @@ export default function DashboardClient({ properties, portfolios }: { properties
                           <button
                             key={portfolio._id}
                             className={`flex w-full items-center px-4 py-2 text-left hover:bg-gray-100 ${
-                              portfolio._id === searchParams.get('portfolio') ? 'bg-gray-50 text-[#e36b37]' : ''
+                              portfolio._id === selectedPortfolio ? 'bg-gray-50 text-[#e36b37]' : ''
                             }`}
-                            onClick={() => {
-                              const params = new URLSearchParams(searchParams.toString());
-                              params.set('portfolio', portfolio._id);
-                              router.push(`?${params.toString()}`);
-                            }}
+                            onClick={() => setSelectedPortfolio(portfolio._id)}
                           >
                             {portfolio.name}
                           </button>
@@ -203,9 +230,9 @@ export default function DashboardClient({ properties, portfolios }: { properties
                       className="flex items-center gap-2 border-[#dcdcdc] bg-white text-[#6d6d6d] hover:bg-gray-50"
                     >
                       <span>
-                        {searchParams.get('property')
-                          ? properties.items.find(p => p._id === searchParams.get('property'))?.name || 'Select Property'
-                          : 'Select Property'}
+                        {selectedProperty
+                          ? properties.items.find(p => p._id === selectedProperty)?.name || 'Select Property'
+                          : 'All Properties'}
                       </span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
@@ -221,6 +248,14 @@ export default function DashboardClient({ properties, portfolios }: { properties
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
+                      <button
+                        className={`flex w-full items-center px-4 py-2 text-left hover:bg-gray-100 ${
+                          !selectedProperty ? 'bg-gray-50 text-[#e36b37]' : ''
+                        }`}
+                        onClick={() => setSelectedProperty(null)}
+                      >
+                        View All Properties
+                      </button>
                       {properties.items
                         .filter(property => 
                           property.name.toLowerCase().includes(propertiesSearch.toLowerCase())
@@ -229,13 +264,9 @@ export default function DashboardClient({ properties, portfolios }: { properties
                           <button
                             key={property._id}
                             className={`flex w-full items-center px-4 py-2 text-left hover:bg-gray-100 ${
-                              property._id === searchParams.get('property') ? 'bg-gray-50 text-[#e36b37]' : ''
+                              property._id === selectedProperty ? 'bg-gray-50 text-[#e36b37]' : ''
                             }`}
-                            onClick={() => {
-                              const params = new URLSearchParams(searchParams.toString());
-                              params.set('property', property._id);
-                              router.push(`?${params.toString()}`);
-                            }}
+                            onClick={() => setSelectedProperty(property._id)}
                           >
                             {property.name}
                           </button>
