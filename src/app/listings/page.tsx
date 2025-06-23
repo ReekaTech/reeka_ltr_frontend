@@ -6,6 +6,7 @@ import { ContextPortfolioManagement } from '@/components/portfolio/context-portf
 import {
   EnhancedPropertyListings,
 } from '@/components/listings';
+import { RoleProtection } from '@/components/hocs/with-role-protection';
 import { useState } from 'react';
 
 export default function ListingsPage() {
@@ -19,37 +20,39 @@ export default function ListingsPage() {
   ];
 
   return (
-    <Layout title="Listings" description="Manage your listings with ease.">
-      <div className="space-y-4">
-        <Tabs
-          items={tabs}
-          value={activeTab}
-          onValueChange={setActiveTab}
-          rightSlot={
-            activeTab === 'properties' ? (
-              <div className="text-xs font-light text-gray-500">
-                {propertyCount}{' '}
-                {propertyCount === 1 ? 'Property' : 'Properties'}
-              </div>
-            ) : (
-              <div className="text-xs font-light text-gray-500">
-                {portfolioCount}{' '}
-                {portfolioCount === 1 ? 'Portfolio' : 'Portfolios'}
-              </div>
-            )
-          }
-        />
+    <RoleProtection requiredModule="listings">
+      <Layout title="Listings" description="Manage your listings with ease.">
+        <div className="space-y-4">
+          <Tabs
+            items={tabs}
+            value={activeTab}
+            onValueChange={setActiveTab}
+            rightSlot={
+              activeTab === 'properties' ? (
+                <div className="text-xs font-light text-gray-500">
+                  {propertyCount}{' '}
+                  {propertyCount === 1 ? 'Property' : 'Properties'}
+                </div>
+              ) : (
+                <div className="text-xs font-light text-gray-500">
+                  {portfolioCount}{' '}
+                  {portfolioCount === 1 ? 'Portfolio' : 'Portfolios'}
+                </div>
+              )
+            }
+          />
 
-        <TabsContent value="properties" activeValue={activeTab}>
-            <EnhancedPropertyListings onTotalCountChange={setPropertyCount} />
-        </TabsContent>
+          <TabsContent value="properties" activeValue={activeTab}>
+              <EnhancedPropertyListings onTotalCountChange={setPropertyCount} />
+          </TabsContent>
 
-        <TabsContent value="portfolios" activeValue={activeTab}>
-            <ContextPortfolioManagement
-              onTotalCountChange={setPortfolioCount}
-            />
-        </TabsContent>
-      </div>
-    </Layout>
+          <TabsContent value="portfolios" activeValue={activeTab}>
+              <ContextPortfolioManagement
+                onTotalCountChange={setPortfolioCount}
+              />
+          </TabsContent>
+        </div>
+      </Layout>
+    </RoleProtection>
   );
 }

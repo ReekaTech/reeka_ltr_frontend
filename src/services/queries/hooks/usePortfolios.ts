@@ -5,11 +5,13 @@ import {
 } from '@/services/api/schemas';
 import {
   GetPortfoliosParams,
+  addPropertiesToPortfolio,
   createPortfolio,
   deletePortfolio,
   getPortfolioById,
   getPortfolios,
   getUnassignedProperties,
+  removePropertiesFromPortfolio,
   updatePortfolio
 } from '@/services/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -93,10 +95,6 @@ export const useDeletePortfolio = () => {
   });
 };
 
-
-
-
-
 export const useUnassignedProperties = () => {
   const { data: session } = useSession();
   const organizationId = session?.user?.organizationId;
@@ -111,4 +109,50 @@ export const useUnassignedProperties = () => {
     },
     enabled: !!organizationId,
   });
-}; 
+};
+
+export const useAddPropertiesToPortfolio = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ portfolioId, propertyIds }: { portfolioId: string; propertyIds: string[] }) =>
+      addPropertiesToPortfolio(portfolioId, propertyIds),
+    onError: (error: any) => {
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to add properties to portfolio';
+      
+      toast.error(errorMessage);
+    },
+    onSuccess: (_, variables) => {
+      toast.success('Properties added successfully');
+      queryClient.invalidateQueries({ queryKey: ['portfolios'] });
+      queryClient.invalidateQueries({ queryKey: ['portfolio', variables.portfolioId] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['unassignedProperties'] });
+    },
+  });
+};
+
+export const useRemovePropertiesFromPortfolio = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ portfolioId, propertyIds }: { portfolioId: string; propertyIds: string[] }) =>
+      removePropertiesFromPortfolio(portfolioId, propertyIds),
+    onError: (error: any) => {
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to remove properties from portfolio';
+      
+      toast.error(errorMessage);
+    },
+    onSuccess: (_, variables) => {
+      toast.success('Properties removed successfully');
+      queryClient.invalidateQueries({ queryKey: ['portfolios'] });
+      queryClient.invalidateQueries({ queryKey: ['portfolio', variables.portfolioId] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['unassignedProperties'] });
+    },
+  }); 
+};

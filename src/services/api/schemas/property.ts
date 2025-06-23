@@ -8,6 +8,7 @@ export interface Property {
   type: string;
   countryId: string;
   address: string;
+  targetAmount?: number;
   rooms: {
     bedrooms: number;
     bathrooms: number;
@@ -37,9 +38,11 @@ export interface CreatePropertyPayload {
   countryId: string;
   contactPerson?: string;
   portfolioId?: string;
+  targetAmount?: number;
   rooms: {
     bedrooms: number;
     bathrooms: number;
+    studios?: number;
   };
   amenities: {
     [key: string]: {
@@ -62,6 +65,7 @@ export interface UpdatePropertyPayload {
   currency?: string;
   address?: string;
   imageUrls?: string[];
+  targetAmount?: number;
   amenities?: {
     [key: string]: {
       available: boolean;
@@ -99,6 +103,7 @@ export interface PropertyFormData {
   type: string;
   countryId: string;
   address: string;
+  targetAmount?: number;
   rooms: {
     bedrooms: number;
     bathrooms: number;

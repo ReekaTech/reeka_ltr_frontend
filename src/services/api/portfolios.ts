@@ -112,7 +112,13 @@ export async function addPropertiesToPortfolio(
   portfolioId: string,
   propertyIds: string[],
 ): Promise<Portfolio> {
-  const response = await api.post(`/portfolios/${portfolioId}/properties`, {
+  const session = await getSession();
+  const organizationId = session?.user?.organizationId;
+
+  if (!organizationId) {
+    throw new Error('Organization ID is required');
+  }
+  const response = await api.post(`/organizations/${organizationId}/portfolios/${portfolioId}/properties`, {
     propertyIds,
   });
   return response.data;
@@ -125,7 +131,13 @@ export async function removePropertiesFromPortfolio(
   portfolioId: string,
   propertyIds: string[],
 ): Promise<Portfolio> {
-  const response = await api.delete(`/portfolios/${portfolioId}/properties`, {
+  const session = await getSession();
+  const organizationId = session?.user?.organizationId;
+
+  if (!organizationId) {
+    throw new Error('Organization ID is required');
+  }
+  const response = await api.delete(`/organizations/${organizationId}/portfolios/${portfolioId}/properties`, {
     data: { propertyIds },
   });
   return response.data;

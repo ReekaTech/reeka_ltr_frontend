@@ -1,6 +1,12 @@
 'use client';
 
-import { AddExpenseModal, AddTicketModal } from '@/components/portfolio';
+import {
+  AddExpenseModal,
+  AddPropertyToPortfolioModal,
+  AddTicketModal,
+  EditPortfolioModal,
+  RemovePropertyFromPortfolioModal
+} from '@/components/portfolio';
 import { ArrowLeft, LayoutGrid, List, Search } from 'lucide-react';
 import { ExpensesTab, MaintenanceTab, PropertiesTab } from '@/components/tabs';
 import { Pagination, Tabs, TabsContent } from '@/components/ui';
@@ -11,6 +17,7 @@ import { usePortfolio, useProperties } from '@/services/queries/hooks';
 
 import { Layout } from '@/components/ui';
 import Link from 'next/link';
+import { RoleProtection } from '@/components/hocs/with-role-protection';
 import { cn } from '@/lib/utils';
 
 // Filter options
@@ -33,6 +40,9 @@ export default function PortfolioDetail() {
   const [activeTab, setActiveTab] = useState('properties');
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [isEditPortfolioModalOpen, setIsEditPortfolioModalOpen] = useState(false);
+  const [isAddPropertyModalOpen, setIsAddPropertyModalOpen] = useState(false);
+  const [isRemovePropertyModalOpen, setIsRemovePropertyModalOpen] = useState(false);
 
 
   const handleGoBack = () => {
@@ -84,7 +94,8 @@ export default function PortfolioDetail() {
  
 
   return (
-    <Layout title={portfolio?.name} description="This is the portfolio details page">
+    <RoleProtection requiredModule="listings">
+      <Layout title={portfolio?.name} description="This is the portfolio details page">
       <div className="flex flex-col min-h-[calc(100vh-200px)]">
         <div className="flex-1">
           {/* Back button */}
@@ -194,13 +205,15 @@ export default function PortfolioDetail() {
                     </button>
                   </div>
 
-                  {/* Add property button */}
-                  <Link
-                    href="/listings/add-property"
-                    className="hover:bg-opacity-90 rounded-md bg-[#e36b37] px-4 py-2 whitespace-nowrap text-white transition-all"
-                  >
-                    Add Property
-                  </Link>
+                  {/* Property action buttons */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setIsEditPortfolioModalOpen(true)}
+                      className="hover:bg-opacity-90 rounded-md bg-[#e36b37] px-4 py-2 whitespace-nowrap text-white transition-all cursor-pointer"
+                    >
+                      Edit Portfolio
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -241,12 +254,12 @@ export default function PortfolioDetail() {
                       ? 'No properties found matching your filters. Try adjusting your search or filters.'
                       : 'No properties found. Add a new property to get started.'}
                   </p>
-                  <Link
-                    href="/listings/add-property"
+                  <button
+                    onClick={() => setIsAddPropertyModalOpen(true)}
                     className="hover:bg-opacity-90 mt-4 inline-block rounded-md bg-[#e36b37] px-4 py-2 text-white transition-all"
                   >
                     Add Property
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>
@@ -271,6 +284,21 @@ export default function PortfolioDetail() {
             onClose={() => setIsTicketModalOpen(false)}
             portfolioId={id}
           />
+          <EditPortfolioModal
+            isOpen={isEditPortfolioModalOpen}
+            onClose={() => setIsEditPortfolioModalOpen(false)}
+            portfolioId={id}
+          />
+          <AddPropertyToPortfolioModal
+            isOpen={isAddPropertyModalOpen}
+            onClose={() => setIsAddPropertyModalOpen(false)}
+            portfolioId={id}
+          />
+          <RemovePropertyFromPortfolioModal
+            isOpen={isRemovePropertyModalOpen}
+            onClose={() => setIsRemovePropertyModalOpen(false)}
+            portfolioId={id}
+          />
         </div>
 
         {/* Pagination - fixed at bottom */}
@@ -283,5 +311,6 @@ export default function PortfolioDetail() {
         </div>
       </div>
     </Layout>
+    </RoleProtection>
   );
 }

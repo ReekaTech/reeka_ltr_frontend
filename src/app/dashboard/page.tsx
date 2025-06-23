@@ -2,6 +2,7 @@
 
 import DashboardClient from './DashboardClient';
 import { Layout } from '@/components/ui';
+import { RoleProtection } from '@/components/hocs/with-role-protection';
 import { Suspense } from 'react';
 import { usePortfolios } from '@/services/queries/hooks/usePortfolios';
 import { useProperties } from '@/services/queries/hooks/useProperties';
@@ -56,8 +57,10 @@ export default function Page() {
   // if (!properties || !portfolios) return <LoadingState />;
 
   return (
-    <Suspense fallback={<LoadingState />}>
-      <DashboardClient properties={properties || { items: [], total: 0, page: 1, limit: 10, pages: 1 }} portfolios={portfolios || []} />
-    </Suspense>
+    <RoleProtection requiredModule="dashboard">
+      <Suspense fallback={<LoadingState />}>
+        <DashboardClient properties={properties || { items: [], total: 0, page: 1, limit: 10, pages: 1 }} portfolios={portfolios || []} />
+      </Suspense>
+    </RoleProtection>
   );
 }

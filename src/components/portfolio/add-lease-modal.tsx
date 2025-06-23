@@ -65,7 +65,7 @@ export function AddLeaseModal({
       firstName: '',
       lastName: '',
       email: '',
-      currentAddress: '',
+      address: '',
       gender: '',
       phoneCountryCode: '+234',
       phone: '',
@@ -224,17 +224,17 @@ export function AddLeaseModal({
 
                     {/* Current Address */}
                     <div>
-                      <label htmlFor="currentAddress" className="mb-2 block text-sm">
+                      <label htmlFor="address" className="mb-2 block text-sm">
                         Current Address
                       </label>
                       <Field
-                        id="currentAddress"
-                        name="tenant.currentAddress"
+                        id="address"
+                        name="tenant.address"
                         type="text"
                         className="w-full rounded-md border border-[#e5e5e5] px-3 py-2.5"
                       />
                       <ErrorMessage
-                        name="tenant.currentAddress"
+                        name="tenant.address"
                         component="div"
                         className="mt-1 text-sm text-red-500"
                       />
@@ -496,7 +496,7 @@ export function AddLeaseModal({
                         className="mt-1 text-sm text-red-500"
                       />
                     </div>
-                   
+
 
                     {/* Notes */}
                     <div>

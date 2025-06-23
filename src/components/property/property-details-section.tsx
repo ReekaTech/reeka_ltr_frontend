@@ -29,7 +29,7 @@ export function PropertyDetailsSection({
   const contactDropdownRef = useRef<HTMLDivElement>(null);
   const { data: countries, isLoading: isCountriesLoading } = useCountries();
   const { data: session } = useSession();
-  const { data: users, isLoading: isUsersLoading } = useUsers({organizationId: session?.user?.organizationId});
+  const { data: users, isLoading: isUsersLoading } = useUsers({ organizationId: session?.user?.organizationId });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -80,6 +80,26 @@ export function PropertyDetailsSection({
           <div className="mt-1 text-sm text-red-500">{errors.name}</div>
         )}
       </div>
+      <div>
+        <label
+          htmlFor="property-target-amount"
+          className="mb-1 block text-xs font-medium text-gray-700"
+        >
+          Target Amount
+        </label>
+        <input
+          type="text"
+          id="property-target-amount"
+          value={formData.targetAmount}
+          onChange={e => updateFormData('targetAmount', e.target.value)}
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+          placeholder="Target Amount"
+          required
+        />
+        {errors.targetAmount && touched.targetAmount && (
+          <div className="mt-1 text-sm text-red-500">{errors.targetAmount}</div>
+        )}
+      </div>
 
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -118,9 +138,8 @@ export function PropertyDetailsSection({
                       key={key}
                       role="option"
                       aria-selected={formData.type === key}
-                      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 ${
-                        formData.type === key ? 'bg-gray-100' : ''
-                      }`}
+                      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 ${formData.type === key ? 'bg-gray-100' : ''
+                        }`}
                       onClick={() => {
                         updateFormData('type', key);
                         setShowTypeDropdown(false);
@@ -135,7 +154,7 @@ export function PropertyDetailsSection({
           </div>
         </div>
 
-         {/* Contact Person */}
+        {/* Contact Person */}
         <div className="!overflow-visible" ref={contactDropdownRef}>
           <label
             htmlFor="contact-person"
@@ -179,9 +198,8 @@ export function PropertyDetailsSection({
                       key={user.id}
                       role="option"
                       aria-selected={formData.contactPerson === user.id}
-                      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 ${
-                        formData.contactPerson === user.id ? 'bg-gray-100' : ''
-                      }`}
+                      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 ${formData.contactPerson === user.id ? 'bg-gray-100' : ''
+                        }`}
                       onClick={() => {
                         updateFormData('contactPerson', user.id);
                         setShowContactDropdown(false);
@@ -239,9 +257,8 @@ export function PropertyDetailsSection({
                       key={country.id}
                       role="option"
                       aria-selected={formData.countryId === country.id}
-                      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 ${
-                        formData.countryId === country.id ? 'bg-gray-100' : ''
-                      }`}
+                      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 ${formData.countryId === country.id ? 'bg-gray-100' : ''
+                        }`}
                       onClick={() => {
                         updateFormData('countryId', country.id);
                         setShowCountryDropdown(false);
@@ -278,7 +295,7 @@ export function PropertyDetailsSection({
         </div>
       </div>
 
-     
+
     </div>
   );
 }

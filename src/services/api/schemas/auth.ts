@@ -1,11 +1,7 @@
 export enum UserRole {
-  VENDOR = 'Vendor',
-  TENANT = 'Tenant',
-  OWNER = 'Owner',
   PROPERTY_MANAGER = 'Property Manager',
-  BUILDING = 'Building and Maintenance',
-  ADMIN = 'Administrator',
-  FRONT_DESK = 'Front Desk',
+  MAINTENANCE = 'Maintenance',
+  ADMIN = 'Admin',
   ASSOCIATE_MANAGER = 'Associate Manager',
 }
 

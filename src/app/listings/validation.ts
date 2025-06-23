@@ -21,7 +21,7 @@ export const leaseValidationSchema = Yup.object().shape({
     firstName: Yup.string().required('First name is required'),
     lastName: Yup.string().required('Last name is required'),
     email: Yup.string().email('Invalid email').required('Email is required'),
-    currentAddress: Yup.string().required('Current address is required'),
+    address: Yup.string().required('Current address is required'),
     gender: Yup.string().required('Gender is required'),
     phoneCountryCode: Yup.string().required('Phone country code is required'),
     phone: Yup.string().required('Phone number is required'),

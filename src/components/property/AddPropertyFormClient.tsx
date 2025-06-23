@@ -25,11 +25,11 @@ type AccordionSection = 'details' | 'amenities' | 'images' | 'price';
 export default function AddPropertyFormClient() {
   const searchParams = useSearchParams();
   const portfolioId = searchParams.get('portfolioId');
-  
+
   const [expandedSection, setExpandedSection] = useState<AccordionSection | null>('details');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const uploadMutation = useUploadSignedUrl();
   const createPropertyMutation = useCreateProperty();
 
@@ -41,7 +41,7 @@ export default function AddPropertyFormClient() {
       const groupedImages = values.images.reduce((acc, file) => {
         const extension = file.name.split('.').pop()?.toLowerCase();
         if (!extension) return acc;
-        
+
         if (!acc[extension]) {
           acc[extension] = [];
         }
@@ -57,7 +57,7 @@ export default function AddPropertyFormClient() {
             type: 'single',
             extension
           });
-          
+
           // Upload all files of this extension
           return Promise.all(
             files.map(async (file) => {
@@ -78,10 +78,11 @@ export default function AddPropertyFormClient() {
         rooms: values.rooms,
         amenities: values.amenities,
         imageUrls: imageUrls,
+        targetAmount: Number(values.targetAmount),
         ...(values.contactPerson && { contactPerson: values.contactPerson }),
         ...(values.portfolioId && { portfolioId: values.portfolioId }),
       });
-      
+
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Failed to create property:', error);
@@ -101,6 +102,7 @@ export default function AddPropertyFormClient() {
       bathrooms: 1,
       studios: 0,
     },
+    targetAmount: 0,
     amenities: {},
     images: [],
     imagePreviews: [],

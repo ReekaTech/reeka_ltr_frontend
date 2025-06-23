@@ -47,7 +47,10 @@ export function PropertiesTab({ searchTerm, viewMode, portfolioId }: PropertiesT
             : 'No properties found in this portfolio.'}
         </p>
         <Link
-          href="/listings/add-property"
+          href={{
+            pathname: '/listings/add-property',
+            query: portfolioId ? { portfolioId } : undefined,
+          }}
           className="hover:bg-opacity-90 mt-4 inline-block rounded-md bg-[#e36b37] px-4 py-2 text-white transition-all"
         >
           Add Property to Portfolio

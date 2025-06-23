@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   MoreVertical,
+  Plus,
   Search,
 } from 'lucide-react';
 import { ExpensesTab, MaintenanceTab } from '@/components/tabs';
@@ -18,9 +19,11 @@ import { Badge } from "@/components/ui/badge";
 import { EditAmenitiesModal } from '@/components/property/edit-amenities-modal';
 import { EditImagesModal } from '@/components/property/edit-images-modal';
 import type { Lease } from '@/services/api/schemas';
+import { LeasesTab } from '@/components/tabs/leases';
 import { PromptModal } from '@/components/ui/prompt-modal';
 import { PropertyDetailHeadCard } from '@/components/property';
 import { RenewLeaseModal } from '@/components/portfolio/renew-lease-modal';
+import { RoleProtection } from '@/components/hocs/with-role-protection';
 import { ShoppingCart } from "lucide-react";
 import { UpdateLeaseModal } from '@/components/portfolio/update-lease-modal';
 import { cn } from "@/lib/utils";
@@ -218,6 +221,7 @@ export default function PropertyDetailPage({
 
   // Form state
   const [propertyName, setPropertyName] = useState("");
+  const [targetAmount, setTargetAmount] = useState(0);
   const [propertyType, setPropertyType] = useState("");
   const [country, setCountry] = useState("");
   const [address, setAddress] = useState("");
@@ -230,6 +234,7 @@ export default function PropertyDetailPage({
       setPropertyType(property.type);
       setCountry(property.countryId);
       setAddress(property.address);
+      setTargetAmount(property.targetAmount || 0);
     }
   }, [property]);
 
@@ -243,6 +248,7 @@ export default function PropertyDetailPage({
         id,
         data: {
           name: propertyName,
+          targetAmount: targetAmount,
           address: address,
           status: property?.status || 'listed',
           location: address,
@@ -335,15 +341,17 @@ export default function PropertyDetailPage({
 
   const tabs = [
     { label: 'Details', value: 'details' },
+    { label: 'Leases', value: 'leases' },
     { label: 'Expenses', value: 'expenses' },
     { label: 'Maintenance', value: 'maintenance' },
   ];
 
   return (
-    <Layout
-      title={property.name}
-      description={`Created on ${format(new Date(property.createdAt), 'do MMMM yyyy')}`}
-    >
+    <RoleProtection requiredModule="listings">
+      <Layout
+        title={property.name}
+        description={`Created on ${format(new Date(property.createdAt), 'do MMMM yyyy')}`}
+      >
       {/* Back button */}
       <div className="mb-6">
         <button
@@ -374,6 +382,15 @@ export default function PropertyDetailPage({
                 onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
+
+            {activeTab === 'leases' && (
+              <button
+                onClick={() => setIsAddLeaseModalOpen(true)}
+                className="flex items-center gap-2 hover:bg-opacity-90 rounded-md cursor-pointer bg-[#e36b37] px-4 py-2 whitespace-nowrap text-white transition-all"
+              >
+                <Plus className="w-4 h-4 mr-2" /> Add Lease
+              </button>
+            )}
 
             {activeTab === 'expenses' && (
               <button
@@ -424,6 +441,17 @@ export default function PropertyDetailPage({
                     placeholder="Enter property name"
                     value={propertyName}
                     onChange={(e) => setPropertyName(e.target.value)}
+                    disabled={!isEditing}
+                    className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37] disabled:bg-gray-50"
+                  />
+                </FormField>
+
+                <FormField label="Target Amount">
+                  <input
+                    type="text"
+                    placeholder="Enter property target amount"
+                    value={targetAmount || 0}
+                    onChange={(e) => setTargetAmount(+e.target.value)}
                     disabled={!isEditing}
                     className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37] disabled:bg-gray-50"
                   />
@@ -633,6 +661,10 @@ export default function PropertyDetailPage({
           </div>
         </TabsContent>
 
+        <TabsContent value="leases" activeValue={activeTab}>
+          <LeasesTab searchTerm={searchTerm} propertyId={id} />
+        </TabsContent>
+
         <TabsContent value="expenses" activeValue={activeTab}>
           <ExpensesTab searchTerm={searchTerm} propertyId={id} />
         </TabsContent>
@@ -677,5 +709,6 @@ export default function PropertyDetailPage({
         onSave={handleUpdateAmenities}
       />
     </Layout>
+    </RoleProtection>
   );
 }

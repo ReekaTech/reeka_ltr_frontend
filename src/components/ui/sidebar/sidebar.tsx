@@ -17,48 +17,57 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useEffect, useState } from 'react';
+import { useRoleNavigation, type NavItem } from '@/hooks/use-role-navigation';
 
 import Link from 'next/link';
 import type React from 'react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
-type NavItem = {
-  title: string;
-  href: string;
-  icon: React.ElementType;
-};
-
-const navItems: NavItem[] = [
+// Define all navigation items with their required modules
+const allNavItems: NavItem[] = [
   {
     title: 'Dashboard',
-    href: '/#',
+    href: '/dashboard',
     icon: LayoutDashboard,
+    module: 'dashboard',
+    requiresAuth: true,
   },
   {
     title: 'Listing Management',
     href: '/listings',
     icon: Codesandbox,
+    module: 'listings',
+    requiresAuth: true,
   },
   {
     title: 'Tenants',
     href: '/tenants',
     icon: Calendar1,
+    module: 'tenants',
+    requiresAuth: true,
   },
   {
     title: 'Maintenance',
     href: '/maintenance',
     icon: Drill,
+    module: 'maintenance',
+    requiresAuth: true,
   },
   {
     title: 'Report Center',
-    href: '/#',
+    href: '/reports',
     icon: FileBarChart,
+    module: 'reports',
+    requiresAuth: true,
   },
   {
     title: 'Settings',
     href: '/settings',
     icon: Settings,
+    module: 'settings',
+    requiresAuth: true,
   },
 ];
 
@@ -70,29 +79,33 @@ export function Sidebar({
   setIsCollapsed: (value: boolean) => void;
 }) {
   const pathname = usePathname();
-  // const [isMobileOpen, setIsMobileOpen] = useState(true);
-  // const [isMobile, setIsMobile] = useState(false);
+  const { data: session } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState<string | null>(null);
 
-  // Load collapsed state from localStorage on mount
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     setIsMobile(window.innerWidth < 768);
-  //   };
+  // Get filtered navigation items based on user role
+  const { navItems, isLoading, userRole, name } = useRoleNavigation(allNavItems);
 
-  //   handleResize();
-  //   window.addEventListener('resize', handleResize);
-
-  //   return () => {
-  //     window.removeEventListener('resize', handleResize);
-  //   };
-  // }, []);
-
-  // Close mobile sidebar when route changes
-  // useEffect(() => {
-  //   setIsMobileOpen(false);
-  // }, [pathname]);
+  // Show loading skeleton while checking permissions
+  if (isLoading) {
+    return (
+      <aside
+        className={cn(
+          'fixed top-0 left-0 z-[40] h-full border-r border-gray-100 bg-[#f6f6f6] transition-all duration-300 ease-in-out',
+          isCollapsed ? 'w-[70px]' : 'w-[240px]',
+        )}
+      >
+        <div className="flex h-16 items-center justify-center border-b border-gray-100 px-4">
+          <div className="h-8 w-8 animate-pulse rounded bg-gray-300"></div>
+        </div>
+        <div className="px-3 py-4 space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-10 animate-pulse rounded bg-gray-300"></div>
+          ))}
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside
@@ -110,28 +123,23 @@ export function Sidebar({
 
             {/* User profile with dropdown icon */}
             <div className="flex h-full items-center gap-2">
-              {/* <img
-                src="/avatar.png"
-                alt="User avatar"
-                className="h-8 w-8 rounded-full"
-              /> */}
-              <h1 className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold text-gray-500 shadow-sm shadow-black">
-                RW
-              </h1>
+              <div className="flex flex-col items-end">
+                <h1 className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold text-gray-500 shadow-sm shadow-black">
+                  {name?.charAt(0) || 'U'}
+                </h1>
+                {userRole && (
+                  <span className="text-[10px] text-gray-400 font-medium">
+                    {name.length > 8 ? name.substring(0, 8) + '...' : name}
+                  </span>
+                )}
+              </div>
               <div className="relative flex items-center">
                 <button
-                  // onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="cursor-pointer text-gray-500"
                 >
                   <ChevronsUpDown size={20} className="text-[#141B34]" />
                 </button>
-                {/* {isDropdownOpen && (
-                  <div className="absolute top-full right-0 mt-1 w-40 origin-top-right rounded-md border border-gray-100 bg-white py-1 shadow-lg transition-all duration-200 ease-in-out">
-                    <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
-                      Edit Profile
-                    </button>
-                  </div>
-                )} */}
               </div>
             </div>
           </div>
@@ -198,19 +206,35 @@ export function Sidebar({
               );
             })}
           </ul>
-          {/* Logout button */}
-          <div className="mt-auto border-t border-t-gray-100 px-4 py-3">
-            <Link
-              href="/auth/logout"
-              className="flex items-center gap-2 text-[#6D6D6D] hover:text-gray-700"
-            >
-              <LogOut size={16} className="text-[#e36b37]" />
-              {!isCollapsed && (
-                <span className="font-sans text-xs font-medium text-[#141B34]">
+
+          {/* Logout button at the bottom */}
+          <div className="mt-auto px-3 pb-4">
+            <Tooltip open={isCollapsed && tooltipOpen === 'logout'}>
+              <TooltipTrigger asChild>
+                <button
+                  onMouseEnter={() => setTooltipOpen('logout')}
+                  onMouseLeave={() => setTooltipOpen(null)}
+                  className="group flex w-full items-center rounded-md px-3 py-2 text-[#6D6D6D] transition-colors hover:bg-white hover:text-gray-700"
+                  onClick={() => {
+                    // Handle logout
+                    window.location.href = '/auth/logout';
+                  }}
+                >
+                  <LogOut
+                    size={20}
+                    className="shrink-0 text-[#6D6D6D] group-hover:text-gray-700"
+                  />
+                  {!isCollapsed && (
+                    <span className="ml-3 text-xs font-medium">Logout</span>
+                  )}
+                </button>
+              </TooltipTrigger>
+              {isCollapsed && (
+                <TooltipContent side="right" className="flex items-center">
                   Logout
-                </span>
+                </TooltipContent>
               )}
-            </Link>
+            </Tooltip>
           </div>
         </nav>
       </TooltipProvider>
