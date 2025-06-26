@@ -12,7 +12,6 @@ import { uploadToS3 } from '@/services/api/upload';
 import { useCountries } from '@/services/queries/hooks/useCountries';
 import { useUpdateLease } from '@/services/queries/hooks/useLease';
 import { useUploadSignedUrl } from '@/services/queries/hooks/useUploadSignedUrl';
-import { id } from 'date-fns/locale';
 
 const MAX_SIZE_MB = 10;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
@@ -541,27 +540,56 @@ export function UpdateLeaseModal({
                   <div>
                     <div className="mb-4 text-base font-medium">Lease Agreement</div>
                     <div
-                      className="cursor-pointer rounded-md border-2 border-dashed border-gray-300 p-6 text-center"
+                      className="cursor-pointer rounded-md border-2 border-dashed border-gray-300 p-6 text-center min-h-[88px] flex items-center justify-center"
                       onClick={() => fileInputRef.current?.click()}
                     >
                       {leaseAgreementFile ? (
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between w-full">
                           <span className="text-sm text-gray-600">{leaseAgreementFile.name}</span>
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               setLeaseAgreementFile(null);
-                              setLeaseAgreementUrl('');
+                              setLeaseAgreementUrl(lease.leaseAgreementUrl || '');
                             }}
                             className="text-gray-400 hover:text-gray-500"
                           >
                             <X className="h-5 w-5" />
                           </button>
                         </div>
+                      ) : leaseAgreementUrl ? (
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center">
+                            <Upload className="mr-2 h-5 w-5 text-gray-500" />
+                            <span className="text-sm text-gray-600">Lease Agreement Uploaded</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={leaseAgreementUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-sm text-blue-600 hover:text-blue-800"
+                            >
+                              View
+                            </a>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLeaseAgreementFile(null);
+                                setLeaseAgreementUrl('');
+                              }}
+                              className="text-gray-400 hover:text-gray-500"
+                            >
+                              <X className="h-5 w-5" />
+                            </button>
+                          </div>
+                        </div>
                       ) : (
                         <div className="flex flex-col items-center">
-                          <Upload className="mb-2 h-8 w-8 text-gray-400" />
+                          <Upload className="mb-2 h-5 w-5 text-gray-400" />
                           <p className="text-sm text-gray-500">Click here to upload lease agreement (PDF)</p>
                         </div>
                       )}
