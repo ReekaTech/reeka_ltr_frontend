@@ -10,7 +10,7 @@ export interface User {
   phoneCountryCode: string;
   country: string;
   role: UserRole;
-  invitationStatus: 'ACCEPTED' | 'PENDING' | 'OWNER' | 'EXPIRED' | null;
+  invitationStatus: 'ACCEPTED' | 'PENDING' | 'ADMIN' | 'EXPIRED' | null;
   lastInvitationSentAt: string | null;
   invitationAttempts: number;
   isEmailVerified: boolean;

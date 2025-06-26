@@ -173,7 +173,7 @@ export function RolesForm() {
                       {user.phone}
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap">
-                      <StatusBadge status={user?.invitationStatus || user.role === 'Owner' ? 'OWNER' : 'ACCEPTED'} />
+                      <StatusBadge status={user?.invitationStatus || user.role === 'Admin' ? 'ADMIN' : 'ACCEPTED'} />
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap">
                       <div className="relative">
@@ -294,9 +294,6 @@ function RoleBadge({ role }: { role: string }) {
     case 'Admin':
       color = 'text-[#e36b37] bg-orange-50';
       break;
-    case 'Owner':
-      color = 'text-blue-600 bg-blue-50';
-      break;
     case 'Tenant':
       color = 'text-green-600 bg-green-50';
       break;
@@ -329,7 +326,7 @@ function StatusBadge({ status }: { status: string }) {
     case 'REJECTED':
       color = 'text-red-600 bg-red-50';
       break;
-    case 'OWNER':
+    case 'ADMIN':
       color = 'text-blue-600 bg-blue-50';
       break;
     default:
