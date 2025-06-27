@@ -47,7 +47,9 @@ export default function DashboardClient({ properties, portfolios }: { properties
   const [propertiesSearch, setPropertiesSearch] = useState('');
   
   // Store selected filters
-  const [selectedPortfolio, setSelectedPortfolio] = useState<string | null>(null);
+  const [selectedPortfolio, setSelectedPortfolio] = useState<string | null>(
+    portfolios.length > 0 ? portfolios[0]._id : null
+  );
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
 
   const { data: session, status } = useSession();

@@ -1,5 +1,6 @@
 'use client';
 
+import BurnupChart from '@/components/dashboard/charts/burnup-chart';
 import type { DashboardMetrics } from '@/services/api/schemas/dashboard';
 import { MaintenanceCard } from '@/components/dashboard/charts';
 import { MetricsCard } from '@/components/dashboard/charts';
@@ -39,13 +40,21 @@ export default function PortfolioClient() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Left Column */}
         <div className="flex flex-col gap-6">
-          <RenewalsCard items={data.renewals} />
+        <BurnupChart
+            title="Revenue Progress"
+            description="Track progress toward your annual revenue target"
+            data={data.revenue.chartData}
+            target={data.revenue.target}
+            summary={data.revenue.summary}
+            showDeclines={true}
+          />
           <PropertiesCard properties={data.properties} />
         </div>
 
         {/* Right Column */}
         <div className="flex flex-col gap-6">
           <UnitsCard totalValue={100} data={data.units} />
+          <RenewalsCard items={data.renewals} />
           <MaintenanceCard items={data.maintenance} />
         </div>
       </div>

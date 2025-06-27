@@ -69,6 +69,7 @@ export interface OverviewData {
 
 export interface PortfolioData {
   metrics: DashboardMetrics[];
+  revenue: Revenue;
   renewals: Renewal[];
   units: UnitStat[];
   maintenance: MaintenanceIssue[];
