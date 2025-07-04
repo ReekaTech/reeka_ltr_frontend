@@ -5,5 +5,6 @@ export * from './properties';
 export * from './users';
 export * from './api-service';
 export * from './maintenance';
-export * from './expense'
+export * from './expense';
 export * from './organizations';
+export * from './report';

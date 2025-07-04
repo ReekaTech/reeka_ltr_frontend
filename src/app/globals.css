@@ -2,9 +2,9 @@
 @import 'tw-animate-css';
 @import 'react-day-picker/dist/style.css';
 
-{{/* @tailwind base;
+@tailwind base;
 @tailwind components;
-@tailwind utilities; */}}
+@tailwind utilities;
 
 @layer base {
   :root {
@@ -142,4 +142,79 @@ body {
 
 html {
   background-color: transparent;
+}
+
+/* Custom styles for react-datepicker */
+.react-datepicker {
+  font-family: inherit;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.react-datepicker__header {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.react-datepicker__current-month {
+  color: #111827;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.react-datepicker__day-name {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.react-datepicker__day {
+  color: #111827;
+  border-radius: 0.25rem;
+  margin: 0.125rem;
+  width: 2rem;
+  height: 2rem;
+  line-height: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.react-datepicker__day:hover {
+  background-color: #f3f4f6;
+}
+
+.react-datepicker__day--selected {
+  background-color: #111827;
+  color: white;
+}
+
+.react-datepicker__day--in-range {
+  background-color: #d1d5db;
+  color: #111827;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background-color: #e5e7eb;
+  color: #111827;
+}
+
+.react-datepicker__day--disabled {
+  color: #d1d5db;
+}
+
+.react-datepicker__navigation {
+  top: 0.75rem;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: #6b7280;
+}
+
+.react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  border-color: #111827;
 }

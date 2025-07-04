@@ -9,3 +9,4 @@ export * from './expense';
 export * from './tenant';
 export * from './organization';
 export * from './dashboard';
+export * from './report';
