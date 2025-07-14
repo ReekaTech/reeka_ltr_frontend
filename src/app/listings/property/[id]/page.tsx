@@ -420,6 +420,7 @@ export default function PropertyDetailPage({
             price={property.rentalPrice}
             status={property.status}
             imageUrl={property.imageUrls[0]}
+            rooms={property.rooms}
           />
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 p-4 lg:p-6 w-full">
             {/* Left Column - Property Details */}
@@ -591,10 +592,10 @@ export default function PropertyDetailPage({
                     {leases?.items.length === 0 ? (
                       <>
                         <div className="overflow-x-auto">
-                          <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl min-w-[400px]">
-                            <span className="w-[100px]">Date</span>
+                          <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl min-w-[500px]">
+                            <span className="w-[120px]">Date</span>
                             <span className="w-[100px]">Apartment</span>
-                            <span className="w-[100px]">Amount Paid</span>
+                            <span className="w-[120px]">Amount Paid</span>
                             <span className="w-[100px]">Status</span>
                             <span className="w-[50px]">Actions</span>
                           </div>
@@ -607,22 +608,22 @@ export default function PropertyDetailPage({
                       leases?.items.map((lease: Lease, index: number) => (
                         <div key={index} className="space-y-1">
                           <div className="overflow-x-auto">
-                            <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl min-w-[400px]">
-                              <span className="w-[100px]">Date</span>
+                            <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl min-w-[500px]">
+                              <span className="w-[120px]">Date</span>
                               <span className="w-[100px]">Apartment</span>
-                              <span className="w-[100px]">Amount Paid</span>
+                              <span className="w-[120px]">Amount Paid</span>
                               <span className="w-[100px]">Status</span>
                               <span className="w-[50px]">Actions</span>
                             </div>
                           </div>
                           <div className="overflow-x-auto">
-                            <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-3 flex items-center justify-between min-w-[400px]">
-                              <div className="w-[100px]">
+                            <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-3 flex items-center gap-4 min-w-[500px]">
+                              <div className="w-[120px]">
                                 <p className="text-sm font-medium text-gray-900">
-                                  {format(parseISO(lease.startDate), 'MMMM yyyy')}
+                                  {format(parseISO(lease.startDate), 'MMM dd, yyyy')}
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                  {format(parseISO(lease.startDate), 'h:mm a')}
+                                  to {format(parseISO(lease.endDate), 'MMM dd, yyyy')}
                                 </p>
                               </div>
                               <div className="w-[100px]">
@@ -630,8 +631,8 @@ export default function PropertyDetailPage({
                                 <p className="text-xs text-gray-500">{lease.property.address}</p>
                               </div>
 
-                              <div className="w-[100px]">
-                                <p className="text-sm font-medium text-gray-900">{lease.rentalRate}</p>
+                              <div className="w-[120px]">
+                                <p className="text-sm font-medium text-gray-900">₦{lease.rentalRate.toLocaleString()}</p>
                                 <p className="text-xs text-gray-500">{lease.paymentFrequency}</p>
                               </div>
                               <div className="w-[100px]">

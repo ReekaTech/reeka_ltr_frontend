@@ -301,14 +301,16 @@ export default function PortfolioDetail() {
           />
         </div>
 
-        {/* Pagination - fixed at bottom */}
-        <div className="mt-auto pt-8">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
+        {/* Pagination - only show for properties tab */}
+        {activeTab === 'properties' && (
+          <div className="mt-auto pt-8">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </div>
     </Layout>
     </RoleProtection>

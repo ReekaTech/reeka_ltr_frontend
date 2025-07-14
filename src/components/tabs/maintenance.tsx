@@ -130,7 +130,7 @@ export function MaintenanceTab({ propertyId, portfolioId, searchTerm }: Maintena
                     >
                       #{ticket.ticketNumber}
                     </div>
-                    <div className="text-sm text-gray-500">{ticket.description}</div>
+                    <div className="text-sm text-gray-500">{ticket?.title || ticket?.description}</div>
                     <div className="text-sm text-gray-500">
                       {format(new Date(ticket.createdAt), 'MMMM d, yyyy')}
                     </div>
@@ -204,7 +204,7 @@ function StatusBadge({ status }: { status: string }) {
     <span
       className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status === 'in_progress' ? 'In Progress' : status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
     </span>
   );
 }

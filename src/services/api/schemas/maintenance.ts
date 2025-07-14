@@ -29,6 +29,9 @@ export interface MaintenanceTicket {
   property?: {
     name: string;
   };
+  portfolio?: {
+    name: string;
+  };
 }
 
 export interface UpdateMaintenanceStatusPayload {

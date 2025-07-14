@@ -98,16 +98,17 @@ export function MaintenanceList() {
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <div className="w-full">
+        <div className="min-w-[1400px] w-full">
           {/* Header */}
-          <div className="grid grid-cols-7 bg-[#f6f6f6] rounded-t-lg">
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Ticket No</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Description</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Property</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Date of Creation</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Request Type</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Status</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500">Actions</div>
+          <div className="grid grid-cols-8 bg-[#f6f6f6] rounded-t-lg">
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-28">Ticket No</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 min-w-[250px]">Description</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-36">Property</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-32">Portfolio</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-36">Date of Creation</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-32">Request Type</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-32">Status</div>
+            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-24">Actions</div>
           </div>
 
           {/* Content */}
@@ -115,56 +116,70 @@ export function MaintenanceList() {
             {isLoading ? (
               // Skeleton Loading State
               Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="grid grid-cols-7 animate-pulse">
-                  <div className="px-4 py-4">
-                    <div className="h-4 w-14 rounded bg-gray-200"></div>
+                <div key={index} className="grid grid-cols-8 animate-pulse">
+                  <div className="px-4 py-4 w-28">
+                    <div className="h-4 w-16 rounded bg-gray-200"></div>
                   </div>
-                  <div className="px-4 py-4">
+                  <div className="px-4 py-4 min-w-[250px]">
                     <div className="h-4 w-full max-w-[250px] rounded bg-gray-200"></div>
                   </div>
-                  <div className="px-4 py-4">
-                    <div className="h-4 w-32 rounded bg-gray-200"></div>
+                  <div className="px-4 py-4 w-36">
+                    <div className="h-4 w-28 rounded bg-gray-200"></div>
                   </div>
-                  <div className="px-4 py-4">
+                  <div className="px-4 py-4 w-32">
                     <div className="h-4 w-24 rounded bg-gray-200"></div>
                   </div>
-                  <div className="px-4 py-4">
+                  <div className="px-4 py-4 w-36">
+                    <div className="h-4 w-28 rounded bg-gray-200"></div>
+                  </div>
+                  <div className="px-4 py-4 w-32">
                     <div className="h-4 w-24 rounded bg-gray-200"></div>
                   </div>
-                  <div className="px-4 py-4">
+                  <div className="px-4 py-4 w-32">
                     <div className="h-5 w-20 rounded-full bg-gray-200"></div>
                   </div>
-                  <div className="px-4 py-4">
+                  <div className="px-4 py-4 w-24">
                     <div className="h-4 w-8 rounded bg-gray-200"></div>
                   </div>
                 </div>
               ))
             ) : maintenanceData?.items && maintenanceData.items.length > 0 ? (
               maintenanceData.items.map((ticket: MaintenanceTicket) => (
-                <div key={ticket._id} className="grid grid-cols-7 hover:bg-gray-50">
-                  <div className="px-4 py-4 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                    <a href="#" className="text-[#e36b37] hover:underline">
+                <div key={ticket._id} className="grid grid-cols-8 hover:bg-gray-50">
+                  <div className="px-4 py-4 text-sm font-medium w-28">
+                    <a href="#" className="text-[#e36b37] hover:underline truncate block">
                       {ticket.ticketNumber}
                     </a>
                   </div>
-                  <div className="px-4 py-4 text-sm text-gray-500">
-                    <div className="truncate" title={ticket.description}>
-                      {ticket.description}
+                  <div className="px-4 py-4 text-sm text-gray-500 min-w-[250px]">
+                    <div className="truncate max-w-[250px]" title={ticket?.title || ticket?.description}>
+                      {ticket?.title || ticket?.description}
                     </div>
                   </div>
-                  <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis text-gray-500">
-                    {ticket.property?.name || 'N/A'}
+                  <div className="px-4 py-4 text-sm text-gray-500 w-36">
+                    <div className="truncate" title={ticket.property?.name}>
+                      {ticket.property?.name || 'N/A'}
+                    </div>
                   </div>
-                  <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis text-gray-500">
-                    {formatDate(ticket.createdAt)}
+                  <div className="px-4 py-4 text-sm text-gray-500 w-32">
+                    <div className="truncate" title={ticket.portfolio?.name}>
+                      {ticket.portfolio?.name || 'N/A'}
+                    </div>
                   </div>
-                  <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis text-gray-500">
-                    {ticket.category}
+                  <div className="px-4 py-4 text-sm text-gray-500 w-36">
+                    <div className="truncate" title={formatDate(ticket.createdAt)}>
+                      {formatDate(ticket.createdAt)}
+                    </div>
                   </div>
-                  <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                  <div className="px-4 py-4 text-sm text-gray-500 w-32">
+                    <div className="truncate" title={ticket.category}>
+                      {ticket.category}
+                    </div>
+                  </div>
+                  <div className="px-4 py-4 text-sm w-32">
                     <StatusBadge status={ticket.status} />
                   </div>
-                  <div className="px-4 py-4 text-sm whitespace-nowrap">
+                  <div className="px-4 py-4 text-sm w-24">
                     <div className="relative">
                       <button
                         className="text-gray-400 hover:text-gray-600"
@@ -240,7 +255,7 @@ function StatusBadge({ status }: { status: MaintenanceStatus }) {
 
   return (
     <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}>
-      {status.charAt(0) + status.slice(1).toLowerCase().replace('_', ' ')}
+      {status === 'in_progress' ? 'In Progress' : status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
     </span>
   );
 } 

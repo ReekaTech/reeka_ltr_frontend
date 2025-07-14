@@ -29,7 +29,7 @@ const initialFormData: PropertyFormData = {
   type: '',
   country: '',
   address: '',
-  bedrooms: 1,
+  bedrooms: 0,
   bathrooms: 1,
   amenities: [],
   images: [],

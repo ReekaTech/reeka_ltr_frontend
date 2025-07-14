@@ -11,7 +11,7 @@ export const propertyValidationSchema = Yup.object().shape({
   contactPerson: Yup.string().required('Contact person is required'),
   address: Yup.string().required('Address is required'),
   rooms: Yup.object().shape({
-    bedrooms: Yup.number().min(1, 'Must have at least 1 bedroom').required('Number of bedrooms is required'),
+    bedrooms: Yup.number().min(0, 'Bedrooms cannot be negative').required('Number of bedrooms is required'),
     bathrooms: Yup.number().min(1, 'Must have at least 1 bathroom').required('Number of bathrooms is required')
   }),
 });
@@ -56,7 +56,7 @@ export const expenseValidationSchema = Yup.object().shape({
 
 export const maintenanceValidationSchema = Yup.object().shape({
   title: Yup.string().required('Title is required'),
-  description: Yup.string().required('Description is required'),
-  type: Yup.string().required('Request type is required'),
+  description: Yup.string(),
+  category: Yup.string().required('Request type is required'),
   priority: Yup.string().required('Priority is required'),
 }); 

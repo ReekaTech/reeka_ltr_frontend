@@ -12,6 +12,10 @@ interface PropertyCardProps {
   price: number;
   status: string;
   imageUrl?: string;
+  rooms?: {
+    bedrooms: number;
+    bathrooms: number;
+  };
 }
 
 export const PropertyDetailHeadCard = ({
@@ -21,7 +25,19 @@ export const PropertyDetailHeadCard = ({
   price,
   status,
   imageUrl,
+  rooms,
 }: PropertyCardProps) => {
+  // Helper function to get room display text
+  const getRoomDisplayText = () => {
+    if (!rooms) return null;
+    
+    if (rooms.bedrooms === 0) {
+      return `Studio Apartment | ${rooms.bathrooms} ${rooms.bathrooms === 1 ? 'Bath' : 'Baths'}`;
+    } else {
+      return `${rooms.bedrooms} ${rooms.bedrooms === 1 ? 'Bedroom' : 'Bedrooms'} | ${rooms.bathrooms} ${rooms.bathrooms === 1 ? 'Bath' : 'Baths'}`;
+    }
+  };
+
   return (
     <div className="flex items-center gap-4 p-4 w-full border-b-1 border-gray-200">
       <div className="w-[148px] h-[121px] rounded-lg bg-gray-200 overflow-hidden shrink-0">
@@ -47,6 +63,11 @@ export const PropertyDetailHeadCard = ({
         <p className="text-sm text-gray-500">
           {propertyTypes[type as keyof typeof propertyTypes]}
         </p>
+        {rooms && (
+          <p className="text-sm text-gray-600 font-medium">
+            {getRoomDisplayText()}
+          </p>
+        )}
       </div>
     </div>
   );

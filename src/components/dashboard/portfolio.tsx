@@ -5,8 +5,6 @@ import { MaintenanceCard, MetricsCard, PropertiesCard, RenewalsCard, UnitsCard }
 import { DashboardMetrics } from '@/services/api/schemas/dashboard';
 import PortfolioClient from './PortfolioClient';
 import { Suspense } from 'react';
-import { usePortfolioData } from '@/services/queries/hooks/useDashboard';
-import { useSearchParams } from 'next/navigation';
 
 function LoadingState() {
   return (

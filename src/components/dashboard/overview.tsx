@@ -6,8 +6,6 @@ import BurnupChart from './charts/burnup-chart';
 import { DashboardMetrics } from '@/services/api/schemas/dashboard';
 import OverviewClient from './OverviewClient';
 import { Suspense } from 'react';
-import { useOverviewData } from '@/services/queries/hooks/useDashboard';
-import { useSearchParams } from 'next/navigation';
 
 function LoadingState() {
   return (

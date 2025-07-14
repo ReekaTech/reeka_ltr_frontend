@@ -116,7 +116,7 @@ export function AddTicketModal({
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, handleChange, handleBlur, setFieldValue, isSubmitting }) => {
-
+            console.log(errors);
             const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               const files = e.target.files;
               if (!files) return;

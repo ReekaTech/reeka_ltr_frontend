@@ -98,9 +98,8 @@ export default function AddPropertyFormClient() {
     countryId: '',
     address: '',
     rooms: {
-      bedrooms: 1,
+      bedrooms: 0,
       bathrooms: 1,
-      studios: 0,
     },
     targetAmount: 0,
     amenities: {},

@@ -218,3 +218,80 @@ html {
 .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
   border-color: #111827;
 }
+
+/* Ant Design RangePicker custom styles */
+.ant-picker-range {
+  border: none !important;
+  background: transparent !important;
+}
+
+.ant-picker-range .ant-picker-input > input {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  font-size: 0.875rem !important;
+  color: #6d6d6d !important;
+}
+
+.ant-picker-range {
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  padding: 0 !important;
+  line-height: 24px !important;
+}
+
+.ant-picker-range .ant-picker-input {
+  height: 24px !important;
+  line-height: 24px !important;
+}
+
+.ant-picker-range .ant-picker-input > input {
+  height: 24px !important;
+  line-height: 24px !important;
+  padding: 0 !important;
+}
+
+.ant-picker-range .ant-picker-separator {
+  color: #6d6d6d !important;
+}
+
+.ant-picker-range .ant-picker-suffix {
+  display: none !important;
+}
+
+/* Hide the default border and background */
+.ant-picker-range:hover,
+.ant-picker-range:focus,
+.ant-picker-range.ant-picker-focused {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Custom select styles for date range options */
+.date-range-select {
+  outline: none;
+  color: #6d6d6d;
+  font-size: 0.875rem;
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding-right: 1.5rem;
+}
+
+.date-range-select:focus {
+  outline: none;
+}
+
+/* Switch button styles */
+.switch-to-predefined {
+  color: #e36b37;
+  font-size: 0.625rem;
+  white-space: nowrap;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.switch-to-predefined:hover {
+  color: #d55a2b;
+}

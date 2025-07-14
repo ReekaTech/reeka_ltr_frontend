@@ -2,6 +2,7 @@
 
 import {
   Calendar1,
+  Users,
   ChevronsUpDown,
   Codesandbox,
   Drill,
@@ -44,7 +45,7 @@ const allNavItems: NavItem[] = [
   {
     title: 'Tenants',
     href: '/tenants',
-    icon: Calendar1,
+    icon: Users,
     module: 'tenants',
     requiresAuth: true,
   },
@@ -82,6 +83,8 @@ export function Sidebar({
   const { data: session } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState<string | null>(null);
+
+
 
   // Get filtered navigation items based on user role
   const { navItems, isLoading, userRole, name } = useRoleNavigation(allNavItems);
@@ -155,7 +158,7 @@ export function Sidebar({
 
       {/* Navigation */}
       <TooltipProvider delayDuration={100}>
-        <nav className="flex h-[calc(100%-4rem)] flex-col">
+        <nav className="flex h-[calc(100%-4rem)] flex-col pt-12">
           <ul className="space-y-1 px-3 py-4">
             {navItems.map(item => {
               const isActive =
@@ -214,7 +217,7 @@ export function Sidebar({
                 <button
                   onMouseEnter={() => setTooltipOpen('logout')}
                   onMouseLeave={() => setTooltipOpen(null)}
-                  className="group flex w-full items-center rounded-md px-3 py-2 text-[#6D6D6D] transition-colors hover:bg-white hover:text-gray-700"
+                  className="group flex w-full items-center rounded-md px-3 py-2 text-[#6D6D6D] transition-colors hover:bg-white hover:text-gray-700 cursor-pointer"
                   onClick={() => {
                     // Handle logout
                     window.location.href = '/auth/logout';

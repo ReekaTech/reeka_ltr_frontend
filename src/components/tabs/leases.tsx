@@ -31,7 +31,6 @@ export function LeasesTab({ propertyId, searchTerm }: LeasesTabProps) {
 
   // Debounce search term
 
-
   // Fetch leases based on active tab and search
   const { data: leasesData, isLoading } = useLeases({
     page,
@@ -60,7 +59,6 @@ export function LeasesTab({ propertyId, searchTerm }: LeasesTabProps) {
     setSelectedLease(lease);
     setIsUpdateLeaseModalOpen(true);
   };
-
 
   const handleAddModalClose = () => {
     setIsAddLeaseModalOpen(false);
@@ -160,10 +158,10 @@ export function LeasesTab({ propertyId, searchTerm }: LeasesTabProps) {
                   <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-3 flex items-center justify-between min-w-[600px]">
                     <div className="w-[100px]">
                       <p className="text-sm font-medium text-gray-900">
-                        {format(parseISO(lease.startDate), 'MMM d')}
+                        {format(parseISO(lease.startDate), 'MMM dd, yyyy')}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {format(parseISO(lease.startDate), 'h:mm a')}
+                        to {format(parseISO(lease.endDate), 'MMM dd, yyyy')}
                       </p>
                     </div>
                     <div className="w-[100px]">
@@ -241,10 +239,10 @@ export function LeasesTab({ propertyId, searchTerm }: LeasesTabProps) {
                   <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-3 flex items-center justify-between min-w-[600px]">
                     <div className="w-[100px]">
                       <p className="text-sm font-medium text-gray-900">
-                        {format(parseISO(lease.startDate), 'MMM d')}
+                        {format(parseISO(lease.startDate), 'MMM dd, yyyy')}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {format(parseISO(lease.startDate), 'h:mm a')}
+                        to {format(parseISO(lease.endDate), 'MMM dd, yyyy')}
                       </p>
                     </div>
                     <div className="w-[100px]">
@@ -322,10 +320,10 @@ export function LeasesTab({ propertyId, searchTerm }: LeasesTabProps) {
                   <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-3 flex items-center justify-between min-w-[600px]">
                     <div className="w-[100px]">
                       <p className="text-sm font-medium text-gray-900">
-                        {format(parseISO(lease.startDate), 'MMM d')}
+                        {format(parseISO(lease.startDate), 'MMM dd, yyyy')}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {format(parseISO(lease.startDate), 'h:mm a')}
+                        to {format(parseISO(lease.endDate), 'MMM dd, yyyy')}
                       </p>
                     </div>
                     <div className="w-[100px]">

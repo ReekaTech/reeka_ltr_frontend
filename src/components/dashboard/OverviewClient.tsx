@@ -6,13 +6,27 @@ import { MaintenanceCard } from '@/components/dashboard/charts';
 import { MetricsCard } from '@/components/dashboard/charts';
 import { RenewalsCard } from '@/components/dashboard/charts';
 import { UnitsCard } from '@/components/dashboard/charts';
+import { getDateRangeOption } from '@/lib/utils';
 import { useOverviewData } from '@/services/queries/hooks/useDashboard';
 import { useSearchParams } from 'next/navigation';
 
 export default function OverviewClient() {
   const searchParams = useSearchParams();
-  const startDate = searchParams.get('startDate') || new Date().toISOString().split('T')[0];
-  const endDate = searchParams.get('endDate') || new Date().toISOString().split('T')[0];
+  
+  // Get date range from URL or use default "this year" range
+  const startDateParam = searchParams.get('startDate');
+  const endDateParam = searchParams.get('endDate');
+  
+  const { startDate, endDate } = startDateParam && endDateParam 
+    ? { startDate: startDateParam, endDate: endDateParam }
+    : (() => {
+        const { startDate: defaultStartDate, endDate: defaultEndDate } = getDateRangeOption('this_year');
+        return {
+          startDate: defaultStartDate.toISOString().split('T')[0],
+          endDate: defaultEndDate.toISOString().split('T')[0]
+        };
+      })();
+  
   const portfolioId = searchParams.get('portfolio') || undefined;
   const propertyId = searchParams.get('property') || undefined;
 

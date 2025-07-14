@@ -1,22 +1,21 @@
 'use client';
 
-import 'react-datepicker/dist/react-datepicker.css';
-
-import { Calendar, ChevronDown } from 'lucide-react';
 import { Layout, Tabs, TabsContent } from '@/components/ui';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui';
-import { useCallback, useEffect, useState } from 'react';
+import { formatDate, getDateRangeOption } from '@/lib/utils';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/ui';
-import DatePicker from 'react-datepicker';
+import { ChevronDown } from 'lucide-react';
+import type { DateRangeOption } from '@/lib/utils';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 import Overview from '@/components/dashboard/overview';
 import type { Portfolio as PaginatedPortfolio } from '@/services/api/schemas';
 import { PaginatedProperties } from '@/services/api/schemas/property';
 import Portfolio from '@/components/dashboard/portfolio';
 import Properties from '@/components/dashboard/properties';
 import { format } from 'date-fns';
-import { formatDate } from '@/lib/utils';
 import { useSession } from 'next-auth/react';
 
 const tabs = [
@@ -45,11 +44,11 @@ export default function DashboardClient({ properties, portfolios }: { properties
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [portfolioSearch, setPortfolioSearch] = useState('');
   const [propertiesSearch, setPropertiesSearch] = useState('');
+  const [filterType, setFilterType] = useState<DateRangeOption>('this_year');
+  const initializedRef = useRef(false);
   
   // Store selected filters
-  const [selectedPortfolio, setSelectedPortfolio] = useState<string | null>(
-    portfolios.length > 0 ? portfolios[0]._id : null
-  );
+  const [selectedPortfolio, setSelectedPortfolio] = useState<string | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
 
   const { data: session, status } = useSession();
@@ -79,73 +78,70 @@ export default function DashboardClient({ properties, portfolios }: { properties
     
     if (portfolioId) setSelectedPortfolio(portfolioId);
     if (propertyId) setSelectedProperty(propertyId);
-  }, []);
+  }, [searchParams]);
+
+  // Set default selections when data becomes available
+  useEffect(() => {
+    if (portfolios.length > 0 && !selectedPortfolio) {
+      setSelectedPortfolio(portfolios[0]._id);
+    }
+  }, [portfolios, selectedPortfolio]);
+
+  useEffect(() => {
+    if (properties.items.length > 0 && !selectedProperty) {
+      setSelectedProperty(properties.items[0]._id);
+    }
+  }, [properties.items, selectedProperty]);
+
+
 
   // Update URL when date range changes
   const updateDateRange = useCallback((start: Date, end: Date) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('startDate', format(start, 'yyyy-MM-dd'));
     params.set('endDate', format(end, 'yyyy-MM-dd'));
+    params.set('filterType', filterType);
     router.push(`?${params.toString()}`);
-  }, [router, searchParams]);
+  }, [router, searchParams, filterType]);
 
-  // Initialize date range from URL params
+  // Initialize date range from URL params or set default
   useEffect(() => {
+    if (initializedRef.current) return;
+    
     const startDateParam = searchParams.get('startDate');
     const endDateParam = searchParams.get('endDate');
+    const filterTypeParam = searchParams.get('filterType');
+
+    if (filterTypeParam) {
+      setFilterType(filterTypeParam as DateRangeOption);
+    }
 
     if (startDateParam && endDateParam) {
       setStartDate(new Date(startDateParam));
       setEndDate(new Date(endDateParam));
+    } else {
+      // If no URL params, set default date range and update URL immediately
+      const { startDate: defaultStartDate, endDate: defaultEndDate } = getDateRangeOption('this_year');
+      setStartDate(defaultStartDate);
+      setEndDate(defaultEndDate);
+      setFilterType('this_year');
+      
+      // Update URL with default date range immediately
+      const params = new URLSearchParams();
+      params.set('startDate', format(defaultStartDate, 'yyyy-MM-dd'));
+      params.set('endDate', format(defaultEndDate, 'yyyy-MM-dd'));
+      params.set('filterType', 'this_year');
+      router.replace(`?${params.toString()}`, { scroll: false });
     }
-  }, [searchParams]);
+    
+    initializedRef.current = true;
+  }, [searchParams, router]);
 
-  const DateRangePicker = () => {
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 border-[#dcdcdc] bg-white text-[#6d6d6d] hover:bg-gray-50"
-          >
-            <Calendar className="h-4 w-4" />
-            {startDate ? (
-              endDate ? (
-                <>
-                  {format(startDate, 'MMM d')} - {format(endDate, 'MMM d')}
-                </>
-              ) : (
-                format(startDate, 'MMM d')
-              )
-            ) : (
-              'Select date range'
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 z-[100] bg-white" align="end">
-          <DatePicker
-            selected={startDate}
-            onChange={(dates) => {
-              const [start, end] = dates as [Date, Date];
-              setStartDate(start);
-              setEndDate(end);
-              if (start && end) {
-                updateDateRange(start, end);
-              }
-            }}
-            startDate={startDate}
-            endDate={endDate}
-            selectsRange
-            monthsShown={2}
-            inline
-            className="border-none"
-            calendarClassName="border-none"
-            popperPlacement="bottom-end"
-            popperClassName="react-datepicker-left"
-          />
-        </PopoverContent>
-      </Popover>
-    );
+  const handleDateRangeChange = (startDate: Date, endDate: Date, filterType: DateRangeOption) => {
+    setStartDate(startDate);
+    setEndDate(endDate);
+    setFilterType(filterType);
+    updateDateRange(startDate, endDate);
   };
 
   useEffect(() => {
@@ -176,12 +172,14 @@ export default function DashboardClient({ properties, portfolios }: { properties
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="flex items-center gap-2 border-[#dcdcdc] bg-white text-[#6d6d6d] hover:bg-gray-50"
+                      className="flex items-center gap-2 border border-solid bg-white text-[#6d6d6d] hover:bg-gray-50 h-auto py-2 px-3"
                     >
                       <span>
                         {selectedPortfolio
                           ? portfolios.find(p => p._id === selectedPortfolio)?.name || 'Select Portfolio'
-                          : 'All Portfolios'}
+                          : portfolios.length > 0 
+                            ? 'Select Portfolio'
+                            : 'No Portfolios'}
                       </span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
@@ -197,14 +195,6 @@ export default function DashboardClient({ properties, portfolios }: { properties
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
-                      <button
-                        className={`flex w-full items-center px-4 py-2 text-left hover:bg-gray-100 ${
-                          !selectedPortfolio ? 'bg-gray-50 text-[#e36b37]' : ''
-                        }`}
-                        onClick={() => setSelectedPortfolio(null)}
-                      >
-                        View All Portfolios
-                      </button>
                       {portfolios
                         .filter(portfolio => 
                           portfolio.name.toLowerCase().includes(portfolioSearch.toLowerCase())
@@ -229,12 +219,14 @@ export default function DashboardClient({ properties, portfolios }: { properties
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="flex items-center gap-2 border-[#dcdcdc] bg-white text-[#6d6d6d] hover:bg-gray-50"
+                      className="flex items-center gap-2 border border-solid bg-white text-[#6d6d6d] hover:bg-gray-50 h-auto py-2 px-3"
                     >
                       <span>
                         {selectedProperty
                           ? properties.items.find(p => p._id === selectedProperty)?.name || 'Select Property'
-                          : 'All Properties'}
+                          : properties.items.length > 0 
+                            ? 'Select Property'
+                            : 'No Properties'}
                       </span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
@@ -250,14 +242,6 @@ export default function DashboardClient({ properties, portfolios }: { properties
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
-                      <button
-                        className={`flex w-full items-center px-4 py-2 text-left hover:bg-gray-100 ${
-                          !selectedProperty ? 'bg-gray-50 text-[#e36b37]' : ''
-                        }`}
-                        onClick={() => setSelectedProperty(null)}
-                      >
-                        View All Properties
-                      </button>
                       {properties.items
                         .filter(property => 
                           property.name.toLowerCase().includes(propertiesSearch.toLowerCase())
@@ -277,7 +261,11 @@ export default function DashboardClient({ properties, portfolios }: { properties
                   </PopoverContent>
                 </Popover>
               )}
-              <DateRangePicker />
+              <DateRangePicker
+                showPredefinedOptions={true}
+                defaultFilterType={filterType}
+                onDateRangeChange={handleDateRangeChange}
+              />
             </div>
           }
         />
