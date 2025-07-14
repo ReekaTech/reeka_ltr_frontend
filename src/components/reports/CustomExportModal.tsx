@@ -99,6 +99,13 @@ export default function CustomExportModal({ isOpen, onClose }: CustomExportModal
     }
   };
 
+  const handleDateRangeChange = (startDate: Date, endDate: Date, filterType: string) => {
+    setDateRange({
+      from: startDate.toISOString().split('T')[0],
+      to: endDate.toISOString().split('T')[0],
+    });
+  };
+
   const handleQuickRange = (range: 'thisMonth' | 'lastMonth' | 'thisQuarter' | 'thisYear') => {
     const now = new Date();
     let from, to;
@@ -199,9 +206,8 @@ export default function CustomExportModal({ isOpen, onClose }: CustomExportModal
               <div className="font-semibold text-lg text-gray-900 mb-3">Date Range</div>
               <div className="mb-3">
                 <DateRangePicker
-                  value={dateRange}
-                  onChange={setDateRange}
-                  requiredEndDate
+                  onDateRangeChange={handleDateRangeChange}
+                  showPredefinedOptions={false}
                 />
               </div>
               <div className="mb-2 text-gray-500 text-sm">Quick Ranges:</div>
