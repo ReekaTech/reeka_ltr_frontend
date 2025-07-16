@@ -123,7 +123,7 @@ export default function AddPropertyFormClient() {
         {({ values, setFieldValue, validateForm, errors }: FormikProps<typeof initialValues>) => {
           return (
             <Form>
-              <div className="space-y-4 rounded-t-2xl bg-gray-50 px-1 pt-1 pb-6 shadow">
+              <div className="space-y-2 rounded-t-2xl bg-gray-50 p-1 shadow">
                 {/* Property Details Section */}
                 <AccordionItem
                   title="Property Details"

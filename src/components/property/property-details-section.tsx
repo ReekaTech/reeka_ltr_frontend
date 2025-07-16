@@ -87,15 +87,22 @@ export function PropertyDetailsSection({
         >
           Target Amount
         </label>
-        <input
-          type="text"
-          id="property-target-amount"
-          value={formData.targetAmount}
-          onChange={e => updateFormData('targetAmount', e.target.value)}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
-          placeholder="Target Amount"
-          required
-        />
+        <div className="relative">
+          <input
+            type="text"
+            id="property-target-amount"
+            value={formData.targetAmount ? `₦${Number(formData.targetAmount).toLocaleString()}` : ''}
+            onChange={e => {
+              const value = e.target.value.replace(/[₦,\s]/g, '');
+              if (value === '' || /^\d+$/.test(value)) {
+                updateFormData('targetAmount', value);
+              }
+            }}
+            className="w-full rounded-md border border-gray-300 pl-3 pr-3 py-2 text-sm focus:ring-2 focus:ring-[#e36b37]/50 focus:outline-none"
+            placeholder="0"
+            required
+          />
+        </div>
         {errors.targetAmount && touched.targetAmount && (
           <div className="mt-1 text-sm text-red-500">{errors.targetAmount}</div>
         )}

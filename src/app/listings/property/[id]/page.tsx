@@ -244,17 +244,23 @@ export default function PropertyDetailPage({
 
   const handleSave = async () => {
     try {
-      await updateProperty.mutateAsync({
+      const updateData = {
         id,
         data: {
           name: propertyName,
           targetAmount: targetAmount,
+          type: propertyType,
+          countryId: country,
           address: address,
           status: property?.status || 'listed',
           location: address,
           description: '',
         },
-      });
+      };
+      
+      console.log('Sending update data:', updateData);
+      
+      await updateProperty.mutateAsync(updateData);
       setIsEditing(false);
     } catch (error) {
       console.error('Failed to update property:', error);
@@ -421,6 +427,19 @@ export default function PropertyDetailPage({
             status={property.status}
             imageUrl={property.imageUrls[0]}
             rooms={property.rooms}
+            onStatusToggle={async () => {
+              const newStatus = property.status === 'listed' ? 'unlisted' : 'listed';
+              try {
+                await updateProperty.mutateAsync({
+                  id,
+                  data: {
+                    status: newStatus,
+                  },
+                });
+              } catch (error) {
+                console.error('Failed to update property status:', error);
+              }
+            }}
           />
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 p-4 lg:p-6 w-full">
             {/* Left Column - Property Details */}
@@ -448,14 +467,21 @@ export default function PropertyDetailPage({
                 </FormField>
 
                 <FormField label="Target Amount">
-                  <input
-                    type="text"
-                    placeholder="Enter property target amount"
-                    value={targetAmount || 0}
-                    onChange={(e) => setTargetAmount(+e.target.value)}
-                    disabled={!isEditing}
-                    className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37] disabled:bg-gray-50"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="0"
+                      value={targetAmount ? `₦${Number(targetAmount).toLocaleString()}` : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[₦,\s]/g, '');
+                        if (value === '' || /^\d+$/.test(value)) {
+                          setTargetAmount(value === '' ? 0 : +value);
+                        }
+                      }}
+                      disabled={!isEditing}
+                      className="w-full rounded-md border border-gray-200 pl-3 pr-4 py-2 text-sm focus:border-[#e36b37] focus:ring-1 focus:ring-[#e36b37] disabled:bg-gray-50"
+                    />
+                  </div>
                 </FormField>
 
                 <FormField label="Type">

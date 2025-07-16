@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, Plus, X } from 'lucide-react';
+import { ChevronDown, Minus, Plus, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { AmenitiesModal } from './amenities-modal';
@@ -46,7 +46,25 @@ export function AmenitiesSection({
     setShowBathroomDropdown(false);
   };
 
+  const incrementBedroom = () => {
+    const newValue = Math.min(formData.rooms.bedrooms + 1, 10);
+    updateFormData('rooms', { ...formData.rooms, bedrooms: newValue });
+  };
 
+  const decrementBedroom = () => {
+    const newValue = Math.max(formData.rooms.bedrooms - 1, 0);
+    updateFormData('rooms', { ...formData.rooms, bedrooms: newValue });
+  };
+
+  const incrementBathroom = () => {
+    const newValue = Math.min(formData.rooms.bathrooms + 1, 10);
+    updateFormData('rooms', { ...formData.rooms, bathrooms: newValue });
+  };
+
+  const decrementBathroom = () => {
+    const newValue = Math.max(formData.rooms.bathrooms - 1, 1);
+    updateFormData('rooms', { ...formData.rooms, bathrooms: newValue });
+  };
 
   const handleRemoveAmenity = (amenity: string) => {
     const { [amenity]: _, ...rest } = formData.amenities;
@@ -68,94 +86,89 @@ export function AmenitiesSection({
     });
   };
 
+  // Dynamic header and label based on bedroom count
+  const headerText = formData.rooms.bedrooms === 0 ? 'Studio and Bath' : 'BedRoom and Bath';
+  const bedroomLabel = formData.rooms.bedrooms === 0 ? 'Studio' : 'BedRoom';
+
   return (
     <div className="">
       <div className="rounded-m">
         {/* Bedroom and Bath Section */}
         <div className="">
-          <h3 className="mb-1 text-sm font-medium">Bed Room and Bath</h3>
+          <h3 className="mb-1 text-sm font-medium">{headerText}</h3>
           <p className="mb-5 text-xs font-light text-gray-500">
             Type in the amenities you have or select from the options below
           </p>
 
           {/* Bedrooms */}
           <div className="mb-4 flex items-center justify-between">
-            <div>
-              <label htmlFor="bedrooms" className="text-sm">
-                Bed Room
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">
+                {bedroomLabel}
               </label>
-              <p className="text-xs text-gray-500">Select number of bedrooms</p>
             </div>
-            <div className="relative" ref={bedroomDropdownRef}>
+            <div className="flex items-center bg-gray-100 rounded-full px-1 py-1">
               <button
                 type="button"
-                onClick={() => setShowBedroomDropdown(!showBedroomDropdown)}
-                className="flex items-center justify-between w-32 px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onClick={decrementBedroom}
+                style={{ width: '20px', height: '20px', borderRadius: '50%' }}
+                className={`flex items-center justify-center text-gray-600 transition-colors cursor-pointer ${
+                  formData.rooms.bedrooms === 0 
+                    ? 'bg-gray-100' 
+                    : 'bg-white shadow-sm hover:bg-gray-50'
+                }`}
+                disabled={formData.rooms.bedrooms === 0}
               >
-                <span>
-                  {formData.rooms.bedrooms === 0 ? 'Studio' : `${formData.rooms.bedrooms} Bedroom${formData.rooms.bedrooms > 1 ? 's' : ''}`}
-                </span>
-                <ChevronDown className="h-4 w-4 text-gray-500" />
+                <Minus className="h-2.5 w-2.5" />
               </button>
-              
-              {showBedroomDropdown && (
-                <div className="absolute right-0 z-10 mt-1 w-32 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                  <button
-                    onClick={() => handleBedroomChange(0)}
-                    className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-b border-gray-100"
-                  >
-                    Studio
-                  </button>
-                  {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => handleBedroomChange(num)}
-                      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
-                    >
-                      {num} Bedroom{num > 1 ? 's' : ''}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <span className="mx-3 text-xs font-medium min-w-[1rem] text-center">
+                {formData.rooms.bedrooms}
+              </span>
+              <button
+                type="button"
+                onClick={incrementBedroom}
+                style={{ width: '20px', height: '20px', borderRadius: '50%' }}
+                className="flex items-center justify-center text-gray-600 shadow-sm hover:bg-gray-50 transition-colors bg-white cursor-pointer"
+                disabled={formData.rooms.bedrooms === 10}
+              >
+                <Plus className="h-2.5 w-2.5" />
+              </button>
             </div>
           </div>
-
-         
 
           {/* Bathrooms */}
           <div className="flex items-center justify-between mb-6">
-            <label htmlFor="bathrooms" className="text-sm">
+            <label className="text-sm font-medium">
               Baths
             </label>
-            <div className="relative" ref={bathroomDropdownRef}>
+            <div className="flex items-center bg-gray-100 rounded-full px-1 py-1">
               <button
                 type="button"
-                onClick={() => setShowBathroomDropdown(!showBathroomDropdown)}
-                className="flex items-center justify-between w-32 px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onClick={decrementBathroom}
+                style={{ width: '20px', height: '20px', borderRadius: '50%' }}
+                className={`flex items-center justify-center text-gray-600 transition-colors cursor-pointer ${
+                  formData.rooms.bathrooms === 1 
+                    ? 'bg-gray-100' 
+                    : 'bg-white shadow-sm hover:bg-gray-50'
+                }`}
+                disabled={formData.rooms.bathrooms === 1}
               >
-                <span>
-                  {formData.rooms.bathrooms} Bathroom{formData.rooms.bathrooms > 1 ? 's' : ''}
-                </span>
-                <ChevronDown className="h-4 w-4 text-gray-500" />
+                <Minus className="h-2.5 w-2.5" />
               </button>
-              
-              {showBathroomDropdown && (
-                <div className="absolute right-0 z-10 mt-1 w-32 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                  {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => handleBathroomChange(num)}
-                      className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
-                    >
-                      {num} Bathroom{num > 1 ? 's' : ''}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <span className="mx-3 text-xs font-medium min-w-[1rem] text-center">
+                {formData.rooms.bathrooms}
+              </span>
+              <button
+                type="button"
+                onClick={incrementBathroom}
+                style={{ width: '20px', height: '20px', borderRadius: '50%' }}
+                className="flex items-center justify-center text-gray-600 shadow-sm hover:bg-gray-50 transition-colors bg-white cursor-pointer"
+                disabled={formData.rooms.bathrooms === 10}
+              >
+                <Plus className="h-2.5 w-2.5" />
+              </button>
             </div>
           </div>
-
-
         </div>
 
         {/* Amenities Selection */}
