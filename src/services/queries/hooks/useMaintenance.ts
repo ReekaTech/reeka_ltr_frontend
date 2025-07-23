@@ -1,6 +1,6 @@
 import type { MaintenanceFilters, UpdateMaintenanceStatusPayload } from '@/services/api/schemas/maintenance';
 import { createMaintenanceTicket, getMaintenanceTickets } from '@/services/api';
-import { getMaintenanceTickets as getMaintenanceTicketsApi, updateMaintenanceStatus } from '@/services/api/maintenance';
+import { getMaintenanceTickets as getMaintenanceTicketsApi, updateMaintenanceStatus, updateMaintenanceTicket } from '@/services/api/maintenance';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { GetMaintenanceTicketsParams } from '@/services/api/schemas';
@@ -64,6 +64,27 @@ export function useUpdateMaintenanceStatusMutation() {
       const errorMessage = Array.isArray(error.response?.data?.message)
         ? error.response?.data?.message[0]
         : error.response?.data?.message || error.message || 'Failed to update maintenance status';
+      
+      toast.error(errorMessage);
+    },
+  });
+} 
+
+export function useUpdateMaintenanceTicket() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateMaintenanceTicket>[1] }) =>
+      updateMaintenanceTicket(id, data),
+    onSuccess: () => {
+      toast.success('Maintenance ticket updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['maintenance'] });
+      queryClient.invalidateQueries({ queryKey: ['maintenanceTickets'] });
+    },
+    onError: (error: any) => {
+      const errorMessage = Array.isArray(error.response?.data?.message)
+        ? error.response?.data?.message[0]
+        : error.response?.data?.message || error.message || 'Failed to update maintenance ticket';
       
       toast.error(errorMessage);
     },

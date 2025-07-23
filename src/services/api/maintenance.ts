@@ -61,3 +61,18 @@ export async function updateMaintenanceStatus(
   const response = await api.patch(`/organizations/${organizationId}/maintenance/${ticketId}/status`, payload);
   return response.data;
 } 
+
+export async function updateMaintenanceTicket(
+  ticketId: string,
+  data: Partial<Omit<MaintenanceTicket, '_id' | 'createdAt' | 'updatedAt' | 'organizationId'>>
+): Promise<MaintenanceTicket> {
+  const session = await getSession();
+  const organizationId = session?.user?.organizationId;
+  
+  if (!organizationId) {
+    throw new Error('Organization ID is required');
+  }
+
+  const response = await api.put(`/organizations/${organizationId}/maintenance/${ticketId}`, data);
+  return response.data;
+} 

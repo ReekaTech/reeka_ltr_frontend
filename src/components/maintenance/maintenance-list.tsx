@@ -1,10 +1,12 @@
 'use client';
 
+import { Eye, MoreVertical, Pencil, Search } from 'lucide-react';
 import type { MaintenanceStatus, MaintenanceTicket } from '@/services/api/schemas/maintenance';
-import { MoreVertical, Search } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useMaintenanceQuery, useUpdateMaintenanceStatusMutation } from '@/services/queries/hooks/useMaintenance';
 
+import { EditMaintenanceTicketModal } from '@/components/maintenance/edit-maintenance-ticket-modal';
+import { MaintenanceTicketViewModal } from '@/components/portfolio/maintenance-ticket-view-modal';
 import { Pagination } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'react-toastify';
@@ -15,6 +17,9 @@ export function MaintenanceList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showPortfolioDropdown, setShowPortfolioDropdown] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<MaintenanceTicket | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const portfolioDropdownRef = useRef<HTMLDivElement>(null);
   const ITEMS_PER_PAGE = 10;
@@ -72,6 +77,18 @@ export function MaintenanceList() {
     setOpenMenuId(null);
   };
 
+  const handleViewTicket = (ticket: MaintenanceTicket) => {
+    setSelectedTicket(ticket);
+    setIsViewModalOpen(true);
+    setOpenMenuId(null);
+  };
+
+  const handleEditTicket = (ticket: MaintenanceTicket) => {
+    setSelectedTicket(ticket);
+    setIsEditModalOpen(true);
+    setOpenMenuId(null);
+  };
+
   if (isError) {
     toast.error('Error loading maintenance tickets. Please try again.');
   }
@@ -100,15 +117,15 @@ export function MaintenanceList() {
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <div className="min-w-[1400px] w-full">
           {/* Header */}
-          <div className="grid grid-cols-8 bg-[#f6f6f6] rounded-t-lg">
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-28">Ticket No</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 min-w-[250px]">Description</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-36">Property</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-32">Portfolio</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-36">Date of Creation</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-32">Request Type</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-32">Status</div>
-            <div className="px-4 py-3 text-left text-sm font-medium text-gray-500 w-24">Actions</div>
+          <div className="grid grid-cols-8 gap-4 bg-[#f6f6f6] rounded-t-lg px-4 py-3">
+            <div className="text-left text-sm font-medium text-gray-500">Ticket No</div>
+            <div className="text-left text-sm font-medium text-gray-500">Description</div>
+            <div className="text-left text-sm font-medium text-gray-500">Property</div>
+            <div className="text-left text-sm font-medium text-gray-500">Portfolio</div>
+            <div className="text-left text-sm font-medium text-gray-500">Date of Creation</div>
+            <div className="text-left text-sm font-medium text-gray-500">Request Type</div>
+            <div className="text-left text-sm font-medium text-gray-500">Status</div>
+            <div className="text-left text-sm font-medium text-gray-500">Actions</div>
           </div>
 
           {/* Content */}
@@ -116,70 +133,57 @@ export function MaintenanceList() {
             {isLoading ? (
               // Skeleton Loading State
               Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="grid grid-cols-8 animate-pulse">
-                  <div className="px-4 py-4 w-28">
-                    <div className="h-4 w-16 rounded bg-gray-200"></div>
-                  </div>
-                  <div className="px-4 py-4 min-w-[250px]">
-                    <div className="h-4 w-full max-w-[250px] rounded bg-gray-200"></div>
-                  </div>
-                  <div className="px-4 py-4 w-36">
-                    <div className="h-4 w-28 rounded bg-gray-200"></div>
-                  </div>
-                  <div className="px-4 py-4 w-32">
-                    <div className="h-4 w-24 rounded bg-gray-200"></div>
-                  </div>
-                  <div className="px-4 py-4 w-36">
-                    <div className="h-4 w-28 rounded bg-gray-200"></div>
-                  </div>
-                  <div className="px-4 py-4 w-32">
-                    <div className="h-4 w-24 rounded bg-gray-200"></div>
-                  </div>
-                  <div className="px-4 py-4 w-32">
-                    <div className="h-5 w-20 rounded-full bg-gray-200"></div>
-                  </div>
-                  <div className="px-4 py-4 w-24">
-                    <div className="h-4 w-8 rounded bg-gray-200"></div>
-                  </div>
+                <div key={index} className="grid grid-cols-8 gap-4 px-4 py-4 animate-pulse">
+                  <div className="h-4 w-16 rounded bg-gray-200"></div>
+                  <div className="h-4 w-full rounded bg-gray-200"></div>
+                  <div className="h-4 w-28 rounded bg-gray-200"></div>
+                  <div className="h-4 w-24 rounded bg-gray-200"></div>
+                  <div className="h-4 w-28 rounded bg-gray-200"></div>
+                  <div className="h-4 w-24 rounded bg-gray-200"></div>
+                  <div className="h-5 w-20 rounded-full bg-gray-200"></div>
+                  <div className="h-4 w-8 rounded bg-gray-200"></div>
                 </div>
               ))
             ) : maintenanceData?.items && maintenanceData.items.length > 0 ? (
               maintenanceData.items.map((ticket: MaintenanceTicket) => (
-                <div key={ticket._id} className="grid grid-cols-8 hover:bg-gray-50">
-                  <div className="px-4 py-4 text-sm font-medium w-28">
-                    <a href="#" className="text-[#e36b37] hover:underline truncate block">
+                <div key={ticket._id} className="grid grid-cols-8 gap-4 px-4 py-4 hover:bg-gray-50">
+                  <div className="text-sm font-medium">
+                    <button 
+                      onClick={() => handleViewTicket(ticket)}
+                      className="text-[#e36b37] hover:underline truncate block cursor-pointer"
+                    >
                       {ticket.ticketNumber}
-                    </a>
+                    </button>
                   </div>
-                  <div className="px-4 py-4 text-sm text-gray-500 min-w-[250px]">
-                    <div className="truncate max-w-[250px]" title={ticket?.title || ticket?.description}>
+                  <div className="text-sm text-gray-500">
+                    <div className="truncate" title={ticket?.title || ticket?.description}>
                       {ticket?.title || ticket?.description}
                     </div>
                   </div>
-                  <div className="px-4 py-4 text-sm text-gray-500 w-36">
+                  <div className="text-sm text-gray-500">
                     <div className="truncate" title={ticket.property?.name}>
                       {ticket.property?.name || 'N/A'}
                     </div>
                   </div>
-                  <div className="px-4 py-4 text-sm text-gray-500 w-32">
+                  <div className="text-sm text-gray-500">
                     <div className="truncate" title={ticket.portfolio?.name}>
                       {ticket.portfolio?.name || 'N/A'}
                     </div>
                   </div>
-                  <div className="px-4 py-4 text-sm text-gray-500 w-36">
+                  <div className="text-sm text-gray-500">
                     <div className="truncate" title={formatDate(ticket.createdAt)}>
                       {formatDate(ticket.createdAt)}
                     </div>
                   </div>
-                  <div className="px-4 py-4 text-sm text-gray-500 w-32">
+                  <div className="text-sm text-gray-500">
                     <div className="truncate" title={ticket.category}>
                       {ticket.category}
                     </div>
                   </div>
-                  <div className="px-4 py-4 text-sm w-32">
+                  <div className="text-sm">
                     <StatusBadge status={ticket.status} />
                   </div>
-                  <div className="px-4 py-4 text-sm w-24">
+                  <div className="text-sm">
                     <div className="relative">
                       <button
                         className="text-gray-400 hover:text-gray-600"
@@ -193,19 +197,34 @@ export function MaintenanceList() {
                       {openMenuId === ticket._id && (
                         <div
                           ref={dropdownRef}
-                          className="absolute right-0 z-10 mt-2 w-32 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+                          className="absolute right-0 z-10 mt-2 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
                         >
+                          <button
+                            className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => handleViewTicket(ticket)}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </button>
+                          <button
+                            className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => handleEditTicket(ticket)}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit Ticket
+                          </button>
+                          <div className="border-t border-gray-100 my-1"></div>
                           <button
                             className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                             onClick={() => handleStatusChange(ticket._id, 'completed')}
                           >
-                            Complete
+                            Mark as Complete
                           </button>
                           <button
                             className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                             onClick={() => handleStatusChange(ticket._id, 'in_progress')}
                           >
-                            In Progress
+                            Mark as In Progress
                           </button>
                         </div>
                       )}
@@ -232,6 +251,41 @@ export function MaintenanceList() {
           />
         </div>
       )}
+
+      {/* Modals */}
+      <MaintenanceTicketViewModal
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setSelectedTicket(null);
+        }}
+        ticket={selectedTicket ? {
+          id: selectedTicket._id,
+          description: selectedTicket.description,
+          dateOfCreation: formatDate(selectedTicket.createdAt),
+          requestType: selectedTicket.category,
+          status: selectedTicket.status,
+          ticketNumber: selectedTicket.ticketNumber || '',
+          title: selectedTicket.title,
+          priority: selectedTicket.priority,
+          attachments: selectedTicket.attachments,
+          property: selectedTicket.property,
+          portfolio: selectedTicket.portfolio
+        } : undefined}
+        onEdit={() => {
+          setIsViewModalOpen(false);
+          setIsEditModalOpen(true);
+        }}
+      />
+
+      <EditMaintenanceTicketModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedTicket(null);
+        }}
+        ticket={selectedTicket}
+      />
     </div>
   );
 }
