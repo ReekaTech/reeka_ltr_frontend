@@ -1,7 +1,7 @@
 'use client';
 
 import { AdditionalCharges, Lease } from '@/services/api/schemas/lease';
-import { ChevronDown, Plus, Upload, X } from 'lucide-react';
+import { ChevronDown, FileText, Plus, Upload, X } from 'lucide-react';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
 
@@ -27,6 +27,14 @@ interface ChargeInput {
   amount: number;
 }
 
+interface AdditionalDocument {
+  file?: File;
+  name: string;
+  url: string;
+  uploading?: boolean;
+  isExisting?: boolean;
+}
+
 export function UpdateLeaseModal({
   isOpen,
   onClose,
@@ -38,16 +46,59 @@ export function UpdateLeaseModal({
   const [showDialCodeDropdown, setShowDialCodeDropdown] = useState(false);
   const [dialCodeSearch, setDialCodeSearch] = useState('');
   const [additionalCharges, setAdditionalCharges] = useState<ChargeInput[]>([]);
+  
+  // Existing lease agreement functionality - unchanged
   const [leaseAgreementFile, setLeaseAgreementFile] = useState<File | null>(null);
   const [leaseAgreementUrl, setLeaseAgreementUrl] = useState<string>(lease.leaseAgreementUrl || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  console.log(lease)
+  
+  // New additional documents functionality
+  const [additionalDocuments, setAdditionalDocuments] = useState<AdditionalDocument[]>([]);
+  const [additionalDocumentUrls, setAdditionalDocumentUrls] = useState<string[]>([]);
+  const additionalFileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredDialCodes = countries?.filter(
     country =>
       country.name.toLowerCase().includes(dialCodeSearch.toLowerCase()) ||
       country.dial_code.includes(dialCodeSearch),
   );
+
+  // Initialize additional documents from existing lease if they exist
+  useEffect(() => {
+    console.log('Full lease object:', lease);
+    
+    // Check multiple possible fields where additional documents might be stored
+    const existingAdditionalDocs = (lease as any).additionalDocumentUrls || 
+                                   (lease as any).documentUrls || 
+                                   (lease as any).documents || 
+                                   [];
+    
+    
+    if (existingAdditionalDocs && Array.isArray(existingAdditionalDocs) && existingAdditionalDocs.length > 0) {
+      const existingDocs: AdditionalDocument[] = existingAdditionalDocs.map((urlOrDoc: string | any, index: number) => {
+        // Handle both string URLs and object documents
+        const url = typeof urlOrDoc === 'string' ? urlOrDoc : urlOrDoc.url || urlOrDoc.documentUrl;
+        const name = typeof urlOrDoc === 'object' && urlOrDoc.name ? 
+          urlOrDoc.name : 
+          (url ? (url.split('/').pop()?.split('?')[0] || `Document ${index + 1}`) : `Document ${index + 1}`);
+        
+        return {
+          name,
+          url,
+          isExisting: true
+        };
+      }).filter(doc => doc.url); // Filter out any documents without URLs
+      
+      console.log('Setting additional documents:', existingDocs);
+      setAdditionalDocuments(existingDocs);
+      setAdditionalDocumentUrls(existingDocs.map(doc => doc.url));
+    } else {
+      // Clear documents if no additional docs exist
+      console.log('No additional documents found, clearing state');
+      setAdditionalDocuments([]);
+      setAdditionalDocumentUrls([]);
+    }
+  }, [lease]);
 
   // Reset form when modal closes
   useEffect(() => {
@@ -56,8 +107,29 @@ export function UpdateLeaseModal({
       setAdditionalCharges([]);
       setLeaseAgreementFile(null);
       setLeaseAgreementUrl(lease.leaseAgreementUrl || '');
+      
+      // Reset additional documents to existing ones
+      const existingAdditionalDocs = (lease as any).additionalDocumentUrls;
+      if (existingAdditionalDocs && Array.isArray(existingAdditionalDocs) && existingAdditionalDocs.length > 0) {
+        const existingDocs: AdditionalDocument[] = existingAdditionalDocs.map((url: string, index: number) => {
+          // Extract filename from URL or use a default name
+          const filename = url.split('/').pop() || `Document ${index + 1}`;
+          const cleanName = filename.split('?')[0]; // Remove query parameters
+          
+          return {
+            name: cleanName,
+            url,
+            isExisting: true
+          };
+        });
+        setAdditionalDocuments(existingDocs);
+        setAdditionalDocumentUrls(existingAdditionalDocs);
+      } else {
+        setAdditionalDocuments([]);
+        setAdditionalDocumentUrls([]);
+      }
     }
-  }, [isOpen, lease.leaseAgreementUrl]);
+  }, [isOpen, lease]);
 
   // Convert additionalCharges from Record to array format
   useEffect(() => {
@@ -87,8 +159,6 @@ export function UpdateLeaseModal({
     rentalRate: lease.rentalRate.toString(),
     paymentFrequency: lease.paymentFrequency,
     notes: lease.notes || '',
-    leaseAgreementUrl: lease.leaseAgreementUrl || '',
-    additionalCharges: additionalCharges || [],
   };
 
   const validateFileSize = (file: File): boolean => {
@@ -99,6 +169,7 @@ export function UpdateLeaseModal({
     return true;
   };
 
+  // Existing lease agreement upload - unchanged
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -121,6 +192,68 @@ export function UpdateLeaseModal({
       console.error('Failed to upload file:', error);
       toast.error('Failed to upload file');
       setLeaseAgreementFile(null);
+    }
+  };
+
+  // New additional documents upload functionality
+  const handleAdditionalFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const validFiles = Array.from(files).filter(validateFileSize);
+    if (validFiles.length === 0) return;
+
+    // Add files to documents array with uploading state
+    const newDocuments: AdditionalDocument[] = validFiles.map(file => ({
+      file,
+      name: file.name,
+      url: '', // Will be set after upload
+      uploading: true
+    }));
+
+    setAdditionalDocuments(prev => [...prev, ...newDocuments]);
+
+    // Upload each file
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
+      try {
+        const extension = file.name.split('.').pop()?.toLowerCase() || 'pdf';
+        const { url, key } = await uploadMutation.mutateAsync({
+          type: 'single',
+          extension
+        });
+
+        await uploadToS3(url, file, key);
+        const fileUrl = `https://lasser-assets.s3.eu-west-1.amazonaws.com/${key}`;
+        
+        // Update document with URL and remove uploading state
+        setAdditionalDocuments(prev => prev.map(doc => 
+          doc.file === file 
+            ? { ...doc, url: fileUrl, uploading: false }
+            : doc
+        ));
+        
+        setAdditionalDocumentUrls(prev => [...prev, fileUrl]);
+      } catch (error) {
+        console.error('Failed to upload file:', error);
+        toast.error(`Failed to upload ${file.name}`);
+        // Remove failed upload from documents
+        setAdditionalDocuments(prev => prev.filter(doc => doc.file !== file));
+      }
+    }
+
+    // Clear file input
+    if (additionalFileInputRef.current) {
+      additionalFileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveAdditionalDocument = (index: number) => {
+    const documentToRemove = additionalDocuments[index];
+    setAdditionalDocuments(prev => prev.filter((_, i) => i !== index));
+    
+    if (documentToRemove.url) {
+      setAdditionalDocumentUrls(prev => prev.filter(url => url !== documentToRemove.url));
     }
   };
 
@@ -153,14 +286,24 @@ export function UpdateLeaseModal({
         data: {
           ...values,
           rentalRate: Number(values.rentalRate),
-          leaseAgreementUrl,
-          additionalCharges: formattedCharges
-        }
+          leaseAgreementUrl, // Keep existing functionality
+          additionalCharges: formattedCharges,
+          // Add additional document URLs as extra field
+          ...(additionalDocumentUrls.length > 0 && { additionalDocumentUrls: additionalDocumentUrls })
+        } as any
       });
       onClose();
     } catch (error) {
       console.error('Failed to update lease:', error);
     }
+  };
+
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    if (extension === 'pdf') {
+      return <FileText className="h-5 w-5 text-red-500" />;
+    }
+    return <FileText className="h-5 w-5 text-blue-500" />;
   };
 
   return (
@@ -177,7 +320,6 @@ export function UpdateLeaseModal({
           onSubmit={handleSubmit}
         >
           {({ values, errors, setFieldValue }) => {
-            console.log(errors)
             return (
               <Form>
                 <div className="space-y-6">
@@ -536,7 +678,7 @@ export function UpdateLeaseModal({
                     </div>
                   </div>
 
-                  {/* Lease Agreement Upload Section */}
+                  {/* Lease Agreement Upload Section - UNCHANGED */}
                   <div>
                     <div className="mb-4 text-base font-medium">Lease Agreement</div>
                     <div
@@ -604,6 +746,82 @@ export function UpdateLeaseModal({
                     </div>
                   </div>
 
+                  {/* NEW: Additional Documents Section */}
+                  <div>
+                    <div className="mb-4 flex items-center justify-between">
+                      <div className="text-base font-medium">Additional Documents</div>
+                      <div className="text-xs text-gray-500">
+                        {additionalDocuments.length > 0 ? `${additionalDocuments.length} document(s)` : 'No additional documents'}
+                      </div>
+                    </div>
+                    
+                    
+                    {/* Document List */}
+                    {additionalDocuments.length > 0 && (
+                      <div className="mb-4 space-y-2">
+                        {additionalDocuments.map((document, index) => (
+                          <div key={index} className="flex items-center justify-between rounded-md border border-gray-200 p-3">
+                            <div className="flex items-center gap-3">
+                              {getFileIcon(document.name)}
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-900">{document.name}</p>
+                                {document.uploading && (
+                                  <p className="text-xs text-blue-600">Uploading...</p>
+                                )}
+                                {document.url && !document.uploading && (
+                                  <p className="text-xs text-green-600">
+                                    {document.isExisting ? 'Existing document' : 'Uploaded successfully'}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {document.url && !document.uploading && (
+                                <a
+                                  href={document.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-blue-600 hover:text-blue-800"
+                                >
+                                  View
+                                </a>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveAdditionalDocument(index)}
+                                className="text-gray-400 hover:text-red-500"
+                                disabled={document.uploading}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Upload Area */}
+                    <div
+                      className="cursor-pointer rounded-md border-2 border-dashed border-gray-300 p-6 text-center"
+                      onClick={() => additionalFileInputRef.current?.click()}
+                    >
+                      <div className="flex flex-col items-center">
+                        <Upload className="mb-2 h-8 w-8 text-gray-400" />
+                        <p className="text-sm text-gray-500">Click here to upload additional documents</p>
+                        <p className="text-xs text-gray-400 mt-1">PDF, DOC, DOCX (Max {MAX_SIZE_MB}MB each)</p>
+                      </div>
+                      <input
+                        type="file"
+                        ref={additionalFileInputRef}
+                        onChange={handleAdditionalFileChange}
+                        accept=".pdf,.doc,.docx"
+                        multiple
+                        className="hidden"
+                        aria-label="Upload additional documents"
+                      />
+                    </div>
+                  </div>
+
                   {/* Additional Charges Section */}
                   <div>
                     <div className="mb-4 flex items-center justify-between">
@@ -657,12 +875,17 @@ export function UpdateLeaseModal({
                   <button
                     type="submit"
                     className="w-full rounded-md bg-[#e36b37] px-4 py-2.5 text-white"
-                    disabled={updateLeaseMutation.isPending}
+                    disabled={updateLeaseMutation.isPending || additionalDocuments.some(doc => doc.uploading)}
                   >
                     {updateLeaseMutation.isPending ? (
                       <div className="flex items-center justify-center">
                         <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                         <span>Processing...</span>
+                      </div>
+                    ) : additionalDocuments.some(doc => doc.uploading) ? (
+                      <div className="flex items-center justify-center">
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        <span>Uploading documents...</span>
                       </div>
                     ) : (
                       'Update Lease'

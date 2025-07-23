@@ -115,8 +115,11 @@ function LeaseActions({ lease }: { lease: Lease }) {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="text-gray-500 hover:text-gray-700"
-          disabled={lease.status === 'terminated'}
+                     className={cn(
+             "text-gray-500 cursor-pointer",
+             (lease.status === 'terminated' || lease.status === 'expired') && "cursor-not-allowed text-gray-300"
+           )}
+          disabled={lease.status === 'terminated' || lease.status === 'expired'}
         >
           <MoreVertical className="h-5 w-5" />
         </button>
@@ -608,43 +611,39 @@ export default function PropertyDetailPage({
                 />
               </div>
 
-              <div className="space-y-4">
-                {isLoadingLeases ? (
-                  <div className="flex justify-center py-8">
-                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#e36b37]"></div>
-                  </div>
-                ) : (
-                  <>
-                    {leases?.items.length === 0 ? (
-                      <>
-                        <div className="overflow-x-auto">
-                          <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl min-w-[500px]">
-                            <span className="w-[120px]">Date</span>
-                            <span className="w-[100px]">Apartment</span>
-                            <span className="w-[120px]">Amount Paid</span>
-                            <span className="w-[100px]">Status</span>
-                            <span className="w-[50px]">Actions</span>
+              <div className="overflow-x-auto">
+                <div className="min-w-[500px]">
+                  {isLoadingLeases ? (
+                    <div className="flex justify-center py-8">
+                      <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#e36b37]"></div>
+                    </div>
+                  ) : (
+                    <>
+                      {leases?.items.length === 0 ? (
+                        <>
+                          <div className="flex px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl gap-4">
+                            <span className="flex-1 min-w-[120px]">Date</span>
+                            <span className="flex-1 min-w-[100px]">Apartment</span>
+                            <span className="flex-1 min-w-[120px]">Amount Paid</span>
+                            <span className="flex-1 min-w-[100px]">Status</span>
+                            <span className="w-[80px]">Actions</span>
                           </div>
-                        </div>
-                        <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-8 text-center text-gray-500">
-                          No leases found
-                        </div>
-                      </>
-                    ) : (
-                      leases?.items.map((lease: Lease, index: number) => (
-                        <div key={index} className="space-y-1">
-                          <div className="overflow-x-auto">
-                            <div className="flex justify-between px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl min-w-[500px]">
-                              <span className="w-[120px]">Date</span>
-                              <span className="w-[100px]">Apartment</span>
-                              <span className="w-[120px]">Amount Paid</span>
-                              <span className="w-[100px]">Status</span>
-                              <span className="w-[50px]">Actions</span>
-                            </div>
+                          <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-8 text-center text-gray-500">
+                            No leases found
                           </div>
-                          <div className="overflow-x-auto">
-                            <div className="bg-white border border-gray-200 rounded-b-xl px-4 py-3 flex items-center gap-4 min-w-[500px]">
-                              <div className="w-[120px]">
+                        </>
+                      ) : (
+                        <div className="space-y-1">
+                          <div className="flex px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-xl gap-4">
+                            <span className="flex-1 min-w-[120px]">Date</span>
+                            <span className="flex-1 min-w-[100px]">Apartment</span>
+                            <span className="flex-1 min-w-[120px]">Amount Paid</span>
+                            <span className="flex-1 min-w-[100px]">Status</span>
+                            <span className="w-[80px]">Actions</span>
+                          </div>
+                          {leases?.items.map((lease: Lease, index: number) => (
+                            <div key={index} className="bg-white border border-gray-200 rounded-b-xl px-4 py-3 flex items-center gap-4">
+                              <div className="flex-1 min-w-[120px]">
                                 <p className="text-sm font-medium text-gray-900">
                                   {format(parseISO(lease.startDate), 'MMM dd, yyyy')}
                                 </p>
@@ -652,37 +651,37 @@ export default function PropertyDetailPage({
                                   to {format(parseISO(lease.endDate), 'MMM dd, yyyy')}
                                 </p>
                               </div>
-                              <div className="w-[100px]">
+                              <div className="flex-1 min-w-[100px]">
                                 <p className="text-sm font-medium text-gray-900">{lease.property.name}</p>
                                 <p className="text-xs text-gray-500">{lease.property.address}</p>
                               </div>
 
-                              <div className="w-[120px]">
+                              <div className="flex-1 min-w-[120px]">
                                 <p className="text-sm font-medium text-gray-900">₦{lease.rentalRate.toLocaleString()}</p>
                                 <p className="text-xs text-gray-500">{lease.paymentFrequency}</p>
                               </div>
-                              <div className="w-[100px]">
+                              <div className="flex-1 min-w-[100px]">
                                 <Badge
                                   className={cn(
                                     "text-xs font-medium px-3 py-1 rounded-full",
                                     lease.status === "active"
                                       ? "bg-green-100 text-green-700"
-                                      : "bg-blue-100 text-blue-700"
+                                      : "bg-red-100 text-red-700"
                                   )}
                                 >
                                   {lease.status}
                                 </Badge>
                               </div>
-                              <div className="w-[50px]">
+                              <div className="w-[80px]">
                                 <LeaseActions lease={lease} />
                               </div>
                             </div>
-                          </div>
+                          ))}
                         </div>
-                      ))
-                    )}
-                  </>
-                )}
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -1,11 +1,12 @@
 'use client';
 
-import type { Lease, Portfolio } from '@/services/api/schemas';
+import type { Lease, Portfolio, Tenant } from '@/services/api/schemas';
 import { MoreVertical, Plus, Search } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTenantsQuery, useUpdatePaymentStatusMutation } from '@/services/queries/hooks/useTenants';
 
 import { Pagination } from '@/components/ui';
+import { TenantDetailsModal } from './tenant-details-modal';
 import { formatDate } from '@/lib/utils';
 import { useDebounce } from '@/services/queries/hooks';
 
@@ -16,11 +17,29 @@ export function TenantList() {
   const [showPortfolioDropdown, setShowPortfolioDropdown] = useState(false);
   const [portfolioSearch, setPortfolioSearch] = useState('');
   const portfolioDropdownRef = useRef<HTMLDivElement>(null);
+  const [selectedLease, setSelectedLease] = useState<Lease | null>(null);
+  const [isTenantDetailsOpen, setIsTenantDetailsOpen] = useState(false);
   const ITEMS_PER_PAGE = 10;
 
   // Debounce search to avoid too many API calls
   const debouncedSearch = useDebounce(searchTerm, 500);
   const debouncedPortfolioSearch = useDebounce(portfolioSearch, 300);
+
+  const handleTenantClick = (lease: Lease) => {
+    setSelectedLease(lease);
+    setIsTenantDetailsOpen(true);
+  };
+
+  const handleTenantDetailsClose = () => {
+    setIsTenantDetailsOpen(false);
+    setSelectedLease(null);
+  };
+
+  const handleTenantSave = async (updatedLease: Partial<Lease>) => {
+    console.log('Updating lease with tenant data:', updatedLease);
+    // The update is handled by the modal, so we can just refresh the data
+    return Promise.resolve();
+  };
 
 
 
@@ -113,9 +132,12 @@ export function TenantList() {
                 tenantsData.items.map((lease: Lease) => (
                   <div key={lease._id} className="grid grid-cols-6 hover:bg-gray-50">
                     <div className="px-4 py-4 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                      <a href="#" className="text-[#e36b37] hover:underline">
+                      <button
+                        onClick={() => lease.tenant && handleTenantClick(lease)}
+                        className="text-[#e36b37] hover:underline focus:outline-none cursor-pointer"
+                      >
                         {lease.tenant?.firstName} {lease.tenant?.lastName}
-                      </a>
+                      </button>
                     </div>
                     <div className="px-4 py-4 text-sm whitespace-nowrap overflow-hidden text-ellipsis text-gray-500">
                       {formatDate(lease.startDate)}
@@ -154,6 +176,14 @@ export function TenantList() {
           </div>
         )}
       </div>
+
+      {/* Tenant Details Modal */}
+      <TenantDetailsModal
+        isOpen={isTenantDetailsOpen}
+        onClose={handleTenantDetailsClose}
+        lease={selectedLease}
+        onSave={handleTenantSave}
+      />
     </div>
   );
 }

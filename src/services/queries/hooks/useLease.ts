@@ -116,6 +116,7 @@ export const useUpdateLease = () => {
     onSuccess: () => {
       toast.success('Lease updated successfully');
       queryClient.invalidateQueries({ queryKey: ['leases'] });
+      queryClient.invalidateQueries({ queryKey: ['tenants'] });
     },
   });
 }; 
