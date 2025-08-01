@@ -14,3 +14,4 @@ export * from './button';
 export * from './date-range-picker';
 export * from './dropdown';
 export * from './checkbox';
+export * from './indeterminate-checkbox';

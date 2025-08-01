@@ -173,7 +173,7 @@ export function RolesForm() {
                       {user.phone}
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap">
-                      <StatusBadge status={user?.invitationStatus || user.role === 'Admin' ? 'ADMIN' : 'ACCEPTED'} />
+                      <StatusBadge status={user?.invitationStatus ? user.invitationStatus.toUpperCase() : 'ADMIN'} />
                   </div>
                   <div className="px-4 py-4 text-sm whitespace-nowrap">
                       <div className="relative">

@@ -10,6 +10,7 @@ import {
   deletePortfolio,
   getPortfolioById,
   getPortfolios,
+  getPortfoliosWithProperties,
   getUnassignedProperties,
   removePropertiesFromPortfolio,
   updatePortfolio
@@ -108,6 +109,14 @@ export const useUnassignedProperties = () => {
       return getUnassignedProperties(organizationId);
     },
     enabled: !!organizationId,
+  });
+};
+
+export const usePortfoliosWithProperties = () => {
+  return useQuery({
+    queryKey: ['portfoliosWithProperties'],
+    queryFn: () => getPortfoliosWithProperties(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 

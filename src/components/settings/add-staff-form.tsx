@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertCircle, ArrowLeft, ChevronDown } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ChevronDown, ChevronRight, FileText, Info } from 'lucide-react';
+import { Checkbox, IndeterminateCheckbox } from '@/components/ui';
 import { Field, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 
@@ -10,6 +11,7 @@ import { UserInvitePayload } from '@/services/api/schemas/user';
 import { UserRole } from '@/services/api/schemas';
 import { useCountries } from '@/services/queries/hooks';
 import { useInviteUser } from '@/services/queries/hooks/useUser';
+import { usePortfoliosWithProperties } from '@/services/queries/hooks';
 
 // Validation schema
 
@@ -20,11 +22,16 @@ interface AddStaffFormProps {
 export function AddStaffForm({ onBack }: AddStaffFormProps) {
   const { data: countries, isLoading: isCountriesLoading } = useCountries();
   const { mutate: inviteUser, isPending: isInviting } = useInviteUser();
+  const { data: portfoliosData, isLoading: isPortfoliosLoading } = usePortfoliosWithProperties();
 
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [showDialCodeDropdown, setShowDialCodeDropdown] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
   const [dialCodeSearch, setDialCodeSearch] = useState('');
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [selectedProperties, setSelectedProperties] = useState<Record<string, string[]>>({});
+
+
 
   const filteredCountries = countries?.filter(
     country =>
@@ -57,7 +64,30 @@ export function AddStaffForm({ onBack }: AddStaffFormProps) {
   };
 
   const handleSubmit = (values: UserInvitePayload, { setSubmitting }: any) => {
-    inviteUser(values, {
+    // Collect all selected property IDs from all portfolios and unassigned properties
+    const allSelectedPropertyIds: string[] = [];
+    
+    // Add selected properties from portfolios
+    Object.entries(selectedProperties).forEach(([portfolioId, propertyIds]) => {
+      if (portfolioId !== 'unassigned') {
+        allSelectedPropertyIds.push(...propertyIds);
+      }
+    });
+    
+    // Add selected unassigned properties
+    if (selectedProperties['unassigned']) {
+      allSelectedPropertyIds.push(...selectedProperties['unassigned']);
+    }
+    
+    // Create the payload with property assignments
+    const payloadWithProperties = {
+      ...values,
+      assignedPropertyIds: allSelectedPropertyIds
+    };
+    
+    console.log('Submitting with properties:', payloadWithProperties);
+    
+    inviteUser(payloadWithProperties, {
       onSuccess: () => {
         setSubmitting(false);
         onBack();
@@ -66,6 +96,113 @@ export function AddStaffForm({ onBack }: AddStaffFormProps) {
         setSubmitting(false);
       },
     });
+  };
+
+  // Property assignment functions
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
+
+  const handlePortfolioSelectAll = (portfolioId: string, properties: any[]) => {
+    const currentSelected = selectedProperties[portfolioId] || [];
+    const allPropertyIds = properties.map(p => p._id);
+    
+    if (currentSelected.length === allPropertyIds.length) {
+      // Deselect all
+      const newSelected = { ...selectedProperties };
+      delete newSelected[portfolioId];
+      setSelectedProperties(newSelected);
+    } else {
+      // Select all
+      setSelectedProperties(prev => ({
+        ...prev,
+        [portfolioId]: allPropertyIds
+      }));
+    }
+  };
+
+  const handlePropertySelect = (portfolioId: string, propertyId: string, properties: any[]) => {
+    const currentSelected = selectedProperties[portfolioId] || [];
+    const isSelected = currentSelected.includes(propertyId);
+    
+    if (isSelected) {
+      const newSelected = currentSelected.filter(id => id !== propertyId);
+      if (newSelected.length === 0) {
+        const newState = { ...selectedProperties };
+        delete newState[portfolioId];
+        setSelectedProperties(newState);
+      } else {
+        setSelectedProperties(prev => ({
+          ...prev,
+          [portfolioId]: newSelected
+        }));
+      }
+    } else {
+      setSelectedProperties(prev => ({
+        ...prev,
+        [portfolioId]: [...currentSelected, propertyId]
+      }));
+    }
+  };
+
+  const handleUnassignedSelectAll = (properties: any[]) => {
+    const currentSelected = selectedProperties['unassigned'] || [];
+    const allPropertyIds = properties.map(p => p._id);
+    
+    if (currentSelected.length === allPropertyIds.length) {
+      // Deselect all
+      const newSelected = { ...selectedProperties };
+      delete newSelected['unassigned'];
+      setSelectedProperties(newSelected);
+    } else {
+      // Select all
+      setSelectedProperties(prev => ({
+        ...prev,
+        unassigned: allPropertyIds
+      }));
+    }
+  };
+
+  const handleUnassignedPropertySelect = (propertyId: string, properties: any[]) => {
+    const currentSelected = selectedProperties['unassigned'] || [];
+    const isSelected = currentSelected.includes(propertyId);
+    
+    if (isSelected) {
+      const newSelected = currentSelected.filter(id => id !== propertyId);
+      if (newSelected.length === 0) {
+        const newState = { ...selectedProperties };
+        delete newState['unassigned'];
+        setSelectedProperties(newState);
+      } else {
+        setSelectedProperties(prev => ({
+          ...prev,
+          unassigned: newSelected
+        }));
+      }
+    } else {
+      setSelectedProperties(prev => ({
+        ...prev,
+        unassigned: [...currentSelected, propertyId]
+      }));
+    }
+  };
+
+  const getSelectedCount = (portfolioId: string, properties: any[]) => {
+    const selected = selectedProperties[portfolioId] || [];
+    return selected.length;
+  };
+
+  const isAllSelected = (portfolioId: string, properties: any[]) => {
+    const selected = selectedProperties[portfolioId] || [];
+    return selected.length === properties.length && properties.length > 0;
+  };
+
+  const isIndeterminate = (portfolioId: string, properties: any[]) => {
+    const selected = selectedProperties[portfolioId] || [];
+    return selected.length > 0 && selected.length < properties.length;
   };
 
   return (
@@ -348,6 +485,146 @@ export function AddStaffForm({ onBack }: AddStaffFormProps) {
                 </div>
               </div>
 
+              {/* Portfolios and Property Section */}
+              <div>
+                <h2 className="font-nunito mb-4 flex h-12 items-center rounded-t-lg border-gray-200 bg-[#f6f6f6] pl-4 text-sm font-medium">
+                  Portfolios and Property
+                </h2>
+                <div className="space-y-4 rounded-t-lg px-4 py-4">
+                  <p className="text-sm text-gray-600">
+                    Properties are categorised based on locations. You can either the locations or use the drop downs to select specific properties in that location.
+                  </p>
+                  
+                  {/* Info Box */}
+                  <div className="flex items-start space-x-2 rounded-md bg-blue-50 p-3">
+                    <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-blue-700">
+                      Personnels with the administrator role would automatically have all the properties selected.
+                    </p>
+                  </div>
+
+                  {/* Property Assignment */}
+                  {isPortfoliosLoading ? (
+                    <div className="space-y-4">
+                      {Array.from({ length: 4 }).map((_, index) => (
+                        <div key={index} className="animate-pulse">
+                          <div className="h-8 bg-gray-200 rounded mb-2"></div>
+                          <div className="space-y-2">
+                            {Array.from({ length: 3 }).map((_, propIndex) => (
+                              <div key={propIndex} className="h-6 bg-gray-200 rounded"></div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : portfoliosData ? (
+                    <div className="space-y-4">
+                      {/* Personnel Sections */}
+                      {portfoliosData.portfolios.map((portfolio, index) => {
+                        const personnelId = `P${index + 1}`;
+                        const isExpanded = expandedSections[personnelId];
+                        const selectedCount = getSelectedCount(portfolio._id, portfolio.properties);
+                        const allSelected = isAllSelected(portfolio._id, portfolio.properties);
+                        const indeterminate = isIndeterminate(portfolio._id, portfolio.properties);
+
+                        return (
+                          <div key={portfolio._id} className="border border-gray-200 rounded-lg">
+                            {/* Personnel Header */}
+                            <div 
+                              className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer hover:bg-gray-100"
+                              onClick={() => toggleSection(personnelId)}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <span className="font-medium text-gray-900">{personnelId}</span>
+                                <div className="flex items-center space-x-2">
+                                  <IndeterminateCheckbox
+                                    checked={allSelected}
+                                    indeterminate={indeterminate}
+                                    onCheckedChange={() => handlePortfolioSelectAll(portfolio._id, portfolio.properties)}
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                  <span className="text-sm text-gray-600">
+                                    Select All ({selectedCount}/{portfolio.properties.length})
+                                  </span>
+                                </div>
+                              </div>
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4 text-gray-500" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 text-gray-500" />
+                              )}
+                            </div>
+
+                            {/* Properties List */}
+                            {isExpanded && (
+                              <div className="p-3 space-y-2">
+                                {portfolio.properties.map((property) => (
+                                  <div key={property._id} className="flex items-center space-x-3">
+                                    <Checkbox
+                                      checked={selectedProperties[portfolio._id]?.includes(property._id) || false}
+                                      onCheckedChange={() => handlePropertySelect(portfolio._id, property._id, portfolio.properties)}
+                                    />
+                                    <span className="text-sm text-gray-700">{property.name}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {/* Unassigned Properties Section */}
+                      <div className="border border-gray-200 rounded-lg">
+                        <div 
+                          className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer hover:bg-gray-100"
+                          onClick={() => toggleSection('unassigned')}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <FileText className="h-4 w-4 text-gray-500" />
+                            <span className="font-medium text-gray-900">Unassigned Properties</span>
+                            <span className="text-sm text-gray-500">({portfoliosData.unassignedProperties.length})</span>
+                            <div className="flex items-center space-x-2">
+                              <IndeterminateCheckbox
+                                checked={isAllSelected('unassigned', portfoliosData.unassignedProperties)}
+                                indeterminate={isIndeterminate('unassigned', portfoliosData.unassignedProperties)}
+                                onCheckedChange={() => handleUnassignedSelectAll(portfoliosData.unassignedProperties)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              <span className="text-sm text-gray-600">
+                                Select All ({getSelectedCount('unassigned', portfoliosData.unassignedProperties)}/{portfoliosData.unassignedProperties.length})
+                              </span>
+                            </div>
+                          </div>
+                          {expandedSections['unassigned'] ? (
+                            <ChevronDown className="h-4 w-4 text-gray-500" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 text-gray-500" />
+                          )}
+                        </div>
+
+                        {expandedSections['unassigned'] && (
+                          <div className="p-3 space-y-2">
+                            {portfoliosData.unassignedProperties.map((property) => (
+                              <div key={property._id} className="flex items-center space-x-3">
+                                <Checkbox
+                                  checked={selectedProperties['unassigned']?.includes(property._id) || false}
+                                  onCheckedChange={() => handleUnassignedPropertySelect(property._id, portfoliosData.unassignedProperties)}
+                                />
+                                <span className="text-sm text-gray-700">{property.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No property data available</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={isSubmitting || isInviting}
@@ -356,7 +633,7 @@ export function AddStaffForm({ onBack }: AddStaffFormProps) {
                 {(isSubmitting || isInviting) && (
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                 )}
-                Add Staff
+                Add Personnel
               </button>
             </div>
           </Form>

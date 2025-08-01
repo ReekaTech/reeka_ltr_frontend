@@ -149,3 +149,32 @@ export async function getUnassignedProperties(organizationId: string): Promise<U
   );
   return response.data;
 }
+
+/**
+ * Get all portfolios with their properties
+ */
+export async function getPortfoliosWithProperties(): Promise<{
+  portfolios: Array<{
+    _id: string;
+    name: string;
+    organizationId: string;
+    properties: Array<{
+      _id: string;
+      name: string;
+    }>;
+  }>;
+  unassignedProperties: Array<{
+    _id: string;
+    name: string;
+  }>;
+}> {
+  const session = await getSession();
+  const organizationId = session?.user?.organizationId;
+
+  if (!organizationId) {
+    throw new Error('Organization ID is required');
+  }
+
+  const response = await api.get(`/organizations/${organizationId}/portfolios/with-properties/all`);
+  return response.data;
+}

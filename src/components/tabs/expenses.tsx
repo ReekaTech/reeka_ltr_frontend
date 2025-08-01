@@ -33,6 +33,31 @@ export function ExpensesTab({ propertyId, portfolioId, searchTerm }: ExpensesTab
     expense.category.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
+  // Group expenses with same title, date, and type by summing their amounts
+  // Feyi asked for this - group identical expenses and sum their amounts
+  const groupedExpenses = filteredExpenses.reduce((acc, expense) => {
+    const key = `${expense.name}-${expense.date}-${expense.category}`;
+    
+    if (acc[key]) {
+      // If expense with same title, date, and type exists, sum the amounts
+      acc[key].amount += expense.amount;
+      acc[key].count = (acc[key].count || 1) + 1;
+    } else {
+      // First occurrence of this expense combination
+      acc[key] = {
+        ...expense,
+        count: 1
+      };
+    }
+    
+    return acc;
+  }, {} as Record<string, any>);
+
+  // Convert grouped expenses back to array and sort by date (newest first)
+  const displayExpenses = Object.values(groupedExpenses).sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
   // Loading state
   if (isLoading) {
     return (
@@ -67,7 +92,7 @@ export function ExpensesTab({ propertyId, portfolioId, searchTerm }: ExpensesTab
   }
 
   // Empty state
-  if (!expensesData?.items || filteredExpenses.length === 0) {
+  if (!expensesData?.items || displayExpenses.length === 0) {
     return (
       <div className="py-12 text-center">
         <p className="text-gray-500">
@@ -107,7 +132,7 @@ export function ExpensesTab({ propertyId, portfolioId, searchTerm }: ExpensesTab
 
               {/* Body */}
               <div className="divide-y divide-gray-200 bg-white">
-                {filteredExpenses.map(expense => (
+                {displayExpenses.map(expense => (
                   <div key={expense._id} className="grid grid-cols-4 gap-4 px-4 py-4 hover:bg-gray-50">
                     <div className="text-sm font-medium text-gray-900">{expense.name}</div>
                     <div className="text-sm text-gray-500">
@@ -117,7 +142,7 @@ export function ExpensesTab({ propertyId, portfolioId, searchTerm }: ExpensesTab
                       <TypeBadge type={expense.category} />
                     </div>
                     <div className="text-sm font-medium text-gray-900">
-                      ₦{expense.amount.toLocaleString()}
+                      ₦{Math.ceil(expense.amount).toLocaleString()}
                     </div>
                   </div>
                 ))}

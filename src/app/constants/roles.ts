@@ -8,9 +8,17 @@ export const allowedRoles = [
 // Role-based module access definitions
 export const modulePermissions = {
   'Admin': ['dashboard', 'listings', 'tenants', 'maintenance', 'reports', 'settings'], // Alias
-  'Property Manager': ['dashboard', 'listings', 'tenants', 'maintenance', 'reports', 'settings'],
-  'Associate Manager': ['listings', 'tenants', 'maintenance', 'reports', 'settings'],
+  'Property Manager': ['listings', 'tenants', 'maintenance', 'reports'],
+  'Associate Manager': ['listings', 'tenants', 'maintenance', 'reports'],
   'Maintenance': ['maintenance', 'settings'],
+} as const;
+
+// Granular action permissions
+export const actionPermissions = {
+  'Admin': ['add-property', 'add-portfolio', 'edit-property', 'delete-property', 'view-property', 'add-tenant', 'edit-tenant', 'delete-tenant', 'view-tenant', 'add-maintenance', 'edit-maintenance', 'delete-maintenance', 'view-maintenance', 'view-reports', 'manage-settings'],
+  'Property Manager': ['edit-property', 'view-property', 'add-tenant', 'edit-tenant', 'view-tenant', 'add-maintenance', 'edit-maintenance', 'view-maintenance', 'view-reports'],
+  'Associate Manager': ['view-property', 'add-tenant', 'edit-tenant', 'view-tenant', 'add-maintenance', 'edit-maintenance', 'view-maintenance', 'view-reports'],
+  'Maintenance': ['view-maintenance', 'edit-maintenance'],
 } as const;
 
 // Route to module mapping
@@ -33,6 +41,17 @@ export function getAllowedModules(role: string): readonly string[] {
 export function hasModuleAccess(role: string, module: string): boolean {
   const allowedModules = getAllowedModules(role);
   return allowedModules.includes(module);
+}
+
+// Get allowed actions for a role
+export function getAllowedActions(role: string): readonly string[] {
+  return actionPermissions[role as keyof typeof actionPermissions] || [];
+}
+
+// Check if user has access to a specific action
+export function hasActionAccess(role: string, action: string): boolean {
+  const allowedActions = getAllowedActions(role);
+  return allowedActions.includes(action);
 }
 
 // Check if user has access to a specific route

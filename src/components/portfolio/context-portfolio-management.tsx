@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { CreatePortfolioModal } from './create-portfolio-modal';
 import { PortfolioCard } from '@/components/portfolio';
 import { cn } from '@/lib/utils';
+import { useRoleAccess } from '@/hooks/use-role-navigation';
 import { useRouter } from 'next/navigation';
 
 interface ContextPortfolioManagementProps {
@@ -17,6 +18,7 @@ interface ContextPortfolioManagementProps {
 export function ContextPortfolioManagement({
   onTotalCountChange,
 }: ContextPortfolioManagementProps = {}) {
+  const { hasAction } = useRoleAccess();
   const router = useRouter();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
@@ -140,13 +142,15 @@ export function ContextPortfolioManagement({
               </button>
             </div>
 
-            {/* Create Portfolio button */}
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="hover:bg-opacity-90 rounded-md bg-[#e36b37] px-4 py-2 whitespace-nowrap text-white transition-all"
-            >
-              Create Portfolio
-            </button>
+            {/* Create Portfolio button - only visible to users with add-portfolio permission */}
+            {hasAction('add-portfolio') && (
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="hover:bg-opacity-90 rounded-md bg-[#e36b37] px-4 py-2 whitespace-nowrap text-white transition-all"
+              >
+                Create Portfolio
+              </button>
+            )}
           </div>
         </div>
 
@@ -193,12 +197,14 @@ export function ContextPortfolioManagement({
                 ? `No portfolios found matching "${searchTerm}". Try a different search term or create a new portfolio.`
                 : 'No portfolios found. Create a new portfolio to get started.'}
             </p>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="hover:bg-opacity-90 mt-4 rounded-md bg-[#e36b37] px-4 py-2 text-white transition-all"
-            >
-              Create Portfolio
-            </button>
+            {hasAction('add-portfolio') && (
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="hover:bg-opacity-90 mt-4 rounded-md bg-[#e36b37] px-4 py-2 text-white transition-all"
+              >
+                Create Portfolio
+              </button>
+            )}
           </div>
         )}
       </div>

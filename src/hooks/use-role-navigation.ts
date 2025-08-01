@@ -1,6 +1,6 @@
 'use client';
 
-import { getAllowedModules, hasModuleAccess } from '@/app/constants/roles';
+import { getAllowedActions, getAllowedModules, hasActionAccess, hasModuleAccess } from '@/app/constants/roles';
 
 import { useMemo } from 'react';
 import { useSession } from 'next-auth/react';
@@ -95,14 +95,30 @@ export function useRoleAccess() {
     return hasModuleAccess(userRole, module);
   };
 
+  const hasAction = (action: string | string[]) => {
+    if (!userRole) return false;
+    
+    if (Array.isArray(action)) {
+      return action.some(a => hasActionAccess(userRole, a));
+    }
+    
+    return hasActionAccess(userRole, action);
+  };
+
   const getAllowed = () => {
     return userRole ? getAllowedModules(userRole) : [];
+  };
+
+  const getActions = () => {
+    return userRole ? getAllowedActions(userRole) : [];
   };
 
   return {
     userRole,
     hasAccess,
+    hasAction,
     getAllowed,
+    getActions,
     isAdmin: userRole === 'Admin',
     isPropertyManager: userRole === 'Property Manager',
     isAssociateManager: userRole === 'Associate Manager',

@@ -44,6 +44,7 @@ export interface UserInvitePayload {
   phoneCountryCode: string;
   country: string;
   role: string;
+  assignedPropertyIds?: string[];
 }
 
 export interface GetUsersParams {

@@ -9,6 +9,7 @@ import { Pagination } from '@/components/ui';
 import { Tabs } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { useProperties } from '@/services/queries/hooks';
+import { useRoleAccess } from '@/hooks/use-role-navigation';
 
 // Filter options
 const statusOptions = [
@@ -26,6 +27,7 @@ export function EnhancedPropertyListings({
   onTotalCountChange,
   portfolioId,
 }: EnhancedPropertyListingsProps = {}) {
+  const { hasAction } = useRoleAccess();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -140,13 +142,15 @@ export function EnhancedPropertyListings({
               </button>
             </div>
 
-            {/* Add property button */}
-            <Link
-              href="/listings/add-property"
-              className="hover:bg-opacity-90 rounded-md bg-[#e36b37] px-4 py-2 whitespace-nowrap text-white transition-all"
-            >
-              Add Property
-            </Link>
+            {/* Add property button - only visible to users with add-property permission */}
+            {hasAction('add-property') && (
+              <Link
+                href="/listings/add-property"
+                className="hover:bg-opacity-90 rounded-md bg-[#e36b37] px-4 py-2 whitespace-nowrap text-white transition-all"
+              >
+                Add Property
+              </Link>
+            )}
           </div>
         </div>
 
@@ -187,12 +191,14 @@ export function EnhancedPropertyListings({
                 ? 'No properties found matching your filters. Try adjusting your search or filters.'
                 : 'No properties found. Add a new property to get started.'}
             </p>
-            <Link
-              href="/listings/add-property"
-              className="hover:bg-opacity-90 mt-4 inline-block rounded-md bg-[#e36b37] px-4 py-2 text-white transition-all"
-            >
-              Add Property
-            </Link>
+            {hasAction('add-property') && (
+              <Link
+                href="/listings/add-property"
+                className="hover:bg-opacity-90 mt-4 inline-block rounded-md bg-[#e36b37] px-4 py-2 text-white transition-all"
+              >
+                Add Property
+              </Link>
+            )}
           </div>
         )}
       </div>
