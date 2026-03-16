@@ -1,6 +1,6 @@
 {
   "name": "reeka_ltr_frontend",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
