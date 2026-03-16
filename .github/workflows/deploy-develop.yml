@@ -1,0 +1,56 @@
+name: Deploy LTR Manager Develop to Vercel (Dev)
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "src/**"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.*"
+      - ".github/workflows/deploy*.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure Git identity for CI
+        run: |
+          git config user.name "reeka-tech"
+          git config user.email "engineering.reeka@gmail.com"
+
+      - name: Create local deployment commit (no push needed)
+        run: |
+          git add -A
+          git commit -m "CI: Deploy LTR manager to Vercel (dev)" --allow-empty || echo "No changes or commit exists"
+          echo "Latest commit author (for Vercel): $(git log -1 --format='%an <%ae>')"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Deploy to Vercel (dev)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "Deploying LTR manager (develop) with local Git state..."
+          vercel --prod --token "$VERCEL_TOKEN" --yes
+

@@ -3,6 +3,8 @@
 A modern property management system built with Next.js 15, TypeScript, and
 Tailwind CSS.
 
+> 📚 **For comprehensive documentation**, see [DOCUMENTATION.md](./DOCUMENTATION.md)
+
 ## 🚀 Features
 
 - Next.js 15 with App Router
@@ -93,7 +95,7 @@ yarn start
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
 - **Authentication:** NextAuth.js
-- **Form Handling:** React Hook Form
+- **Form Handling:** Formik with Yup validation
 - **Testing:** Playwright
 - **Code Quality:** ESLint, Prettier
 - **Git Hooks:** Husky
@@ -139,6 +141,10 @@ The application uses Tailwind CSS for styling with:
 2. Make your changes
 3. Run tests
 4. Submit a pull request
+
+## 📚 Documentation
+
+For detailed documentation covering architecture, API integration, component patterns, deployment, and more, see [DOCUMENTATION.md](./DOCUMENTATION.md).
 
 ## 📝 License
 
