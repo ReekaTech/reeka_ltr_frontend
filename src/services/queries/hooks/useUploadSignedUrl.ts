@@ -1,9 +1,9 @@
-import { SignedUrlRequest, SignedUrlResponse, getSignedUrl } from '@/services/api/upload';
-
 import { useMutation } from '@tanstack/react-query';
 
-export const useUploadSignedUrl = () => {
-  return useMutation<SignedUrlResponse, Error, SignedUrlRequest>({
-    mutationFn: getSignedUrl,
+import { uploadPropertyImages } from '@/services/api/upload';
+
+export const useUploadPropertyImages = () => {
+  return useMutation<string[], Error, File[]>({
+    mutationFn: uploadPropertyImages,
   });
-}; 
+};

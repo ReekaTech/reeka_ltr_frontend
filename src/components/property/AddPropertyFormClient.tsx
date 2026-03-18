@@ -14,11 +14,10 @@ import { PropertyFormData } from '@/services/api/schemas/property';
 import { SuccessModal } from './success-modal';
 import { propertyValidationSchema } from '@/app/listings/validation';
 import { toast } from 'react-toastify';
-import { uploadToS3 } from '@/services/api/upload';
 import { useCreateProperty } from '@/services/queries/hooks/useProperties';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { useUploadSignedUrl } from '@/services/queries/hooks/useUploadSignedUrl';
+import { useUploadPropertyImages } from '@/services/queries/hooks/useUploadSignedUrl';
 
 type AccordionSection = 'details' | 'amenities' | 'images' | 'price';
 
@@ -30,43 +29,15 @@ export default function AddPropertyFormClient() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const uploadMutation = useUploadSignedUrl();
+  const uploadMutation = useUploadPropertyImages();
   const createPropertyMutation = useCreateProperty();
 
   const handleSubmit = async (values: PropertyFormData) => {
     try {
       setIsSubmitting(true);
-
-      // Group images by extension
-      const groupedImages = values.images.reduce((acc, file) => {
-        const extension = file.name.split('.').pop()?.toLowerCase();
-        if (!extension) return acc;
-
-        if (!acc[extension]) {
-          acc[extension] = [];
-        }
-        acc[extension].push(file);
-        return acc;
-      }, {} as Record<string, File[]>);
-
-      // Upload images in batches by extension
-      const imageUrls = await Promise.all(
-        Object.entries(groupedImages).map(async ([extension, files]) => {
-          // Get signed URL for this extension type
-          const { url, key } = await uploadMutation.mutateAsync({
-            type: 'single',
-            extension
-          });
-
-          // Upload all files of this extension
-          return Promise.all(
-            files.map(async (file) => {
-              await uploadToS3(url, file, key);
-              return `https://lasser-assets.s3.eu-west-1.amazonaws.com/${key}`;
-            })
-          );
-        })
-      ).then(urls => urls.flat());
+      const imageUrls = values.images.length
+        ? await uploadMutation.mutateAsync(values.images)
+        : [];
 
       // Create property with uploaded image URLs
       await createPropertyMutation.mutateAsync({

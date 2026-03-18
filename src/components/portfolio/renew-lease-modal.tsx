@@ -7,9 +7,8 @@ import { AdditionalCharges } from '@/services/api/schemas/lease';
 import { Modal } from '@/components/ui/modal';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
-import { uploadToS3 } from '@/services/api/upload';
+import { uploadPropertyImages } from '@/services/api/upload';
 import { useRenewLease } from '@/services/queries/hooks';
-import { useUploadSignedUrl } from '@/services/queries/hooks/useUploadSignedUrl';
 
 const MAX_SIZE_MB = 10;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
@@ -37,7 +36,6 @@ interface ChargeInput {
 
 export function RenewLeaseModal({ isOpen, onClose, leaseId, currentLease }: RenewLeaseModalProps) {
   const renewLease = useRenewLease();
-  const uploadMutation = useUploadSignedUrl();
   const [additionalCharges, setAdditionalCharges] = useState<ChargeInput[]>([]);
   const [leaseAgreementFile, setLeaseAgreementFile] = useState<File | null>(null);
   const [leaseAgreementUrl, setLeaseAgreementUrl] = useState<string>(currentLease.leaseAgreementUrl || '');
@@ -78,15 +76,8 @@ export function RenewLeaseModal({ isOpen, onClose, leaseId, currentLease }: Rene
     setLeaseAgreementFile(file);
 
     try {
-      const extension = file.name.split('.').pop()?.toLowerCase() || 'pdf';
-      const { url, key } = await uploadMutation.mutateAsync({
-        type: 'single',
-        extension
-      });
-
-      await uploadToS3(url, file, key);
-      const fileUrl = `https://lasser-assets.s3.eu-west-1.amazonaws.com/${key}`;
-      setLeaseAgreementUrl(fileUrl);
+      const [fileUrl] = await uploadPropertyImages([file]);
+      if (fileUrl) setLeaseAgreementUrl(fileUrl);
     } catch (error) {
       console.error('Failed to upload file:', error);
       toast.error('Failed to upload file');

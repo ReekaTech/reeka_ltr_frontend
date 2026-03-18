@@ -8,10 +8,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { leaseValidationSchema } from '@/app/listings/validation';
 import { toast } from 'react-toastify';
-import { uploadToS3 } from '@/services/api/upload';
+import { uploadPropertyImages } from '@/services/api/upload';
 import { useCountries } from '@/services/queries/hooks/useCountries';
 import { useUpdateLease } from '@/services/queries/hooks/useLease';
-import { useUploadSignedUrl } from '@/services/queries/hooks/useUploadSignedUrl';
 
 const MAX_SIZE_MB = 10;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
@@ -42,7 +41,6 @@ export function UpdateLeaseModal({
 }: UpdateLeaseModalProps) {
   const { data: countries, isLoading: isCountriesLoading } = useCountries();
   const updateLeaseMutation = useUpdateLease();
-  const uploadMutation = useUploadSignedUrl();
   const [showDialCodeDropdown, setShowDialCodeDropdown] = useState(false);
   const [dialCodeSearch, setDialCodeSearch] = useState('');
   const [additionalCharges, setAdditionalCharges] = useState<ChargeInput[]>([]);
@@ -179,15 +177,8 @@ export function UpdateLeaseModal({
     setLeaseAgreementFile(file);
 
     try {
-      const extension = file.name.split('.').pop()?.toLowerCase() || 'pdf';
-      const { url, key } = await uploadMutation.mutateAsync({
-        type: 'single',
-        extension
-      });
-
-      await uploadToS3(url, file, key);
-      const fileUrl = `https://lasser-assets.s3.eu-west-1.amazonaws.com/${key}`;
-      setLeaseAgreementUrl(fileUrl);
+      const [fileUrl] = await uploadPropertyImages([file]);
+      if (fileUrl) setLeaseAgreementUrl(fileUrl);
     } catch (error) {
       console.error('Failed to upload file:', error);
       toast.error('Failed to upload file');
@@ -217,14 +208,8 @@ export function UpdateLeaseModal({
     for (let i = 0; i < validFiles.length; i++) {
       const file = validFiles[i];
       try {
-        const extension = file.name.split('.').pop()?.toLowerCase() || 'pdf';
-        const { url, key } = await uploadMutation.mutateAsync({
-          type: 'single',
-          extension
-        });
-
-        await uploadToS3(url, file, key);
-        const fileUrl = `https://lasser-assets.s3.eu-west-1.amazonaws.com/${key}`;
+        const [fileUrl] = await uploadPropertyImages([file]);
+        if (!fileUrl) throw new Error('Upload failed');
         
         // Update document with URL and remove uploading state
         setAdditionalDocuments(prev => prev.map(doc => 

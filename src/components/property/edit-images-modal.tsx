@@ -5,8 +5,7 @@ import { useRef, useState } from 'react';
 
 import { Modal } from '@/components/ui/modal';
 import { toast } from 'react-toastify';
-import { uploadToS3 } from '@/services/api/upload';
-import { useUploadSignedUrl } from '@/services/queries/hooks/useUploadSignedUrl';
+import { useUploadPropertyImages } from '@/services/queries/hooks/useUploadSignedUrl';
 
 const MAX_SIZE_MB = 7;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
@@ -29,7 +28,7 @@ export function EditImagesModal({
   const [images, setImages] = useState<string[]>(currentImages);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>(currentImages);
-  const uploadMutation = useUploadSignedUrl();
+  const uploadMutation = useUploadPropertyImages();
 
   const validateImageSize = (file: File): boolean => {
     if (file.size > MAX_SIZE_BYTES) {
@@ -98,35 +97,9 @@ export function EditImagesModal({
   const handleSave = async () => {
     try {
       setIsSubmitting(true);
-
-      // Group new images by extension
-      const groupedImages = newFiles.reduce((acc, file) => {
-        const extension = file.name.split('.').pop()?.toLowerCase();
-        if (!extension) return acc;
-        
-        if (!acc[extension]) {
-          acc[extension] = [];
-        }
-        acc[extension].push(file);
-        return acc;
-      }, {} as Record<string, File[]>);
-
-      // Upload new images in batches by extension
-      const newImageUrls = await Promise.all(
-        Object.entries(groupedImages).map(async ([extension, files]) => {
-          const { url, key } = await uploadMutation.mutateAsync({
-            type: 'single',
-            extension
-          });
-          
-          return Promise.all(
-            files.map(async (file) => {
-              await uploadToS3(url, file, key);
-              return `https://lasser-assets.s3.eu-west-1.amazonaws.com/${key}`;
-            })
-          );
-        })
-      ).then(urls => urls.flat());
+      const newImageUrls = newFiles.length
+        ? await uploadMutation.mutateAsync(newFiles)
+        : [];
 
       // Combine existing and new image URLs
       const updatedImageUrls = [...images, ...newImageUrls];

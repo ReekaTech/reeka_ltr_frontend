@@ -7,10 +7,9 @@ import { MaintenanceStatus, RequestType } from '@/services/api/schemas';
 import { MAINTENANCE_TYPES } from '@/app/constants';
 import { Modal } from '@/components/ui';
 import { maintenanceValidationSchema } from '@/app/listings/validation';
-import { uploadToS3 } from '@/services/api/upload';
+import { uploadMaintenanceAttachments } from '@/services/api/upload';
 import { useCreateMaintenanceTicket } from '@/services/queries/hooks';
 import { useRef } from 'react';
-import { useUploadSignedUrl } from '@/services/queries/hooks/useUploadSignedUrl';
 
 interface AddTicketModalProps {
   isOpen: boolean;
@@ -40,7 +39,6 @@ export function AddTicketModal({
 }: AddTicketModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createTicketMutation = useCreateMaintenanceTicket();
-  const uploadMutation = useUploadSignedUrl();
 
   const initialValues: TicketFormData = {
     title: '',
@@ -55,36 +53,9 @@ export function AddTicketModal({
 
   const handleSubmit = async (values: TicketFormData) => {
     try {
-      // Group attachments by extension
-      const groupedAttachments = values.attachments.reduce((acc, file) => {
-        const extension = file.name.split('.').pop()?.toLowerCase();
-        if (!extension) return acc;
-
-        if (!acc[extension]) {
-          acc[extension] = [];
-        }
-        acc[extension].push(file);
-        return acc;
-      }, {} as Record<string, File[]>);
-
-      // Upload attachments in batches by extension
-      const attachmentUrls = await Promise.all(
-        Object.entries(groupedAttachments).map(async ([extension, files]) => {
-          // Get signed URL for this extension type
-          const { url, key } = await uploadMutation.mutateAsync({
-            type: 'single',
-            extension
-          });
-
-          // Upload all files of this extension
-          return Promise.all(
-            files.map(async (file) => {
-              await uploadToS3(url, file, key);
-              return `https://lasser-assets.s3.eu-west-1.amazonaws.com/${key}`;
-            })
-          );
-        })
-      ).then(urls => urls.flat());
+      const attachmentUrls = values.attachments.length
+        ? await uploadMaintenanceAttachments(values.attachments)
+        : [];
 
       await createTicketMutation.mutateAsync({
         ...(propertyId && { propertyId }),
