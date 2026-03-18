@@ -15,8 +15,8 @@ export function useUpdatePaymentStatusMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ tenantId, status }: { tenantId: string; status: 'Paid' | 'Unpaid' }) =>
-      updatePaymentStatus(tenantId, status),
+    mutationFn: ({ leaseId, status }: { leaseId: string; status: 'Paid' | 'Unpaid' }) =>
+      updatePaymentStatus(leaseId, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenants'] });
       toast.success('Payment status updated successfully');

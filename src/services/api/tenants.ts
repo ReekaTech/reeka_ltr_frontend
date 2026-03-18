@@ -34,7 +34,7 @@ export async function fetchTenants(
  * Update tenant payment status
  */
 export async function updatePaymentStatus(
-  tenantId: string,
+  leaseId: string,
   status: 'Paid' | 'Unpaid',
 ): Promise<Tenant> {
   const session = await getSession();
@@ -44,8 +44,11 @@ export async function updatePaymentStatus(
     throw new Error('Organization ID is required');
   }
 
-  const response = await api.patch(`/organizations/${organizationId}/tenants/${tenantId}`, {
-    paymentStatus: status,
+  // Backend has no /tenants routes; tenants list is derived from leases.
+  // Update payment status via lease update endpoint.
+  const paymentStatus = status.toLowerCase() as 'paid' | 'unpaid';
+  const response = await api.put(`/organizations/${organizationId}/leases/${leaseId}`, {
+    paymentStatus,
   });
   return response.data;
 } 
